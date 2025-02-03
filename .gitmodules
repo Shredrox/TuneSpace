@@ -1,0 +1,3 @@
+[submodule "TuneSpaceFrontend"]
+	path = TuneSpaceFrontend
+	url = https://github.com/Shredrox/TuneSpaceFrontend
