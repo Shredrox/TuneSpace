@@ -1,3 +1,6 @@
 [submodule "TuneSpaceFrontend"]
 	path = TuneSpaceFrontend
 	url = https://github.com/Shredrox/TuneSpaceFrontend
+[submodule "TuneSpaceBackend"]
+	path = TuneSpaceBackend
+	url = https://github.com/Shredrox/TuneSpaceBackend
