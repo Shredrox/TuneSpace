@@ -5,19 +5,19 @@ using TuneSpace.Core.Interfaces.IRepositories;
 
 namespace TuneSpace.Infrastructure.Repositories;
 
-public class UserRepository(UserManager<User> userManager) : IUserRepository
+internal class UserRepository(UserManager<User> userManager) : IUserRepository
 {
-    public async Task<User?> GetUserByEmail(string email)
+    async Task<User?> IUserRepository.GetUserByEmail(string email)
     {
         return await userManager.FindByEmailAsync(email);
     }
 
-    public async Task<User?> GetUserByName(string name)
+    async Task<User?> IUserRepository.GetUserByName(string name)
     {
         return await userManager.FindByNameAsync(name);
     }
 
-    public async Task<List<string>> SearchByName(string name)
+    async Task<List<string>> IUserRepository.SearchByName(string name)
     {
         return await userManager.Users
             .Where(u => u.UserName.StartsWith(name))
@@ -26,12 +26,12 @@ public class UserRepository(UserManager<User> userManager) : IUserRepository
             .ToListAsync();
     }
 
-    public async Task InsertUser(User user, string password)
+    async Task IUserRepository.InsertUser(User user, string password)
     {
         await userManager.CreateAsync(user, password);
     }
     
-    public async Task UpdateUser(User user)
+    async Task IUserRepository.UpdateUser(User user)
     {
         await userManager.UpdateAsync(user);
     }

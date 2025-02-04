@@ -4,15 +4,15 @@ using TuneSpace.Infrastructure.Data;
 
 namespace TuneSpace.Infrastructure.Repositories;
 
-public class PostRepository(TuneSpaceDbContext context) : IPostRepository
+internal class PostRepository(TuneSpaceDbContext context) : IPostRepository
 {
-    public async Task InsertPost(Post post)
+    async Task IPostRepository.InsertPost(Post post)
     {
         context.Posts.Add(post);
         await context.SaveChangesAsync();
     }
 
-    public async Task<Post?> GetPostById(Guid id)
+    async Task<Post?> IPostRepository.GetPostById(Guid id)
     {
         return await context.Posts.FindAsync(id);
     }

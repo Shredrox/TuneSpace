@@ -5,15 +5,15 @@ using TuneSpace.Infrastructure.Data;
 
 namespace TuneSpace.Infrastructure.Repositories;
 
-public class TagRepository(TuneSpaceDbContext context) : ITagRepository
+internal class TagRepository(TuneSpaceDbContext context) : ITagRepository
 {
-    public async Task InsertTag(Tag tag)
+    async Task ITagRepository.InsertTag(Tag tag)
     {
         context.Tags.Add(tag);
         await context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<Tag>> GetAllTags()
+    async Task<IEnumerable<Tag>> ITagRepository.GetAllTags()
     {
         return await context.Tags.ToListAsync();
     }

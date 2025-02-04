@@ -16,7 +16,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<TuneSpaceDbContext>(options => 
-            options.UseNpgsql(configuration.GetConnectionString("TuneTalkDb")));
+            options.UseNpgsql(configuration.GetConnectionString("TuneSpaceDb")));
         
         services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
         services.AddAuthorizationBuilder();
