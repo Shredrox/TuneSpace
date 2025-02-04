@@ -7,12 +7,12 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Core.Services;
 
-public class AuthService(
+internal class AuthService(
     IUserRepository userRepository, 
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService) : IAuthService
 {
-    public async Task Register(string name, string email, string password)
+    async Task IAuthService.Register(string name, string email, string password)
     {
         if (await userRepository.GetUserByName(name) is not null)
         {
@@ -28,7 +28,7 @@ public class AuthService(
         await userRepository.InsertUser(user, password);
     }
 
-    public async Task<LoginResponse> Login(string email, string password)
+    async Task<LoginResponse> IAuthService.Login(string email, string password)
     {
         var user = await userRepository.GetUserByEmail(email);
 

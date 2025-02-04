@@ -4,9 +4,9 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Core.Services;
 
-public class TagService(ITagRepository tagRepository) : ITagService
+internal class TagService(ITagRepository tagRepository) : ITagService
 {
-    public async Task CreateTag(string name)
+    async Task ITagService.CreateTag(string name)
     {
         var tag = new Tag
         {
@@ -16,7 +16,7 @@ public class TagService(ITagRepository tagRepository) : ITagService
         await tagRepository.InsertTag(tag);
     }
 
-    public async Task<IEnumerable<Tag>> GetAllTags()
+    async Task<IEnumerable<Tag>> ITagService.GetAllTags()
     {
         return await tagRepository.GetAllTags();
     }

@@ -5,9 +5,9 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Core.Services;
 
-public class PostService(IPostRepository postRepository) : IPostService
+internal class PostService(IPostRepository postRepository) : IPostService
 {
-    public async Task CreatePost(CreatePostRequest request)
+    async Task IPostService.CreatePost(CreatePostRequest request)
     {
         var newPost = new Post
         {

@@ -9,11 +9,13 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Core.Services;
 
-public class SpotifyService(ISpotifyClient spotifyClient, IConfiguration configuration) : ISpotifyService
+internal class SpotifyService(
+    ISpotifyClient spotifyClient, 
+    IConfiguration configuration) : ISpotifyService
 {
     private const string SpotifyRedirectUri = "http://localhost:5053/api/Spotify/callback";
 
-    public string GetSpotifyLoginUrl()
+    string ISpotifyService.GetSpotifyLoginUrl()
     {
         var state = GenerateRandomString(16);
         const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public";
@@ -28,7 +30,7 @@ public class SpotifyService(ISpotifyClient spotifyClient, IConfiguration configu
         return redirectUrl;
     }
 
-    public async Task<string> ExchangeCodeForToken(string code)
+    async Task<string> ISpotifyService.ExchangeCodeForToken(string code)
     {
         var parameters = new FormUrlEncodedContent(new[]
         {
@@ -54,7 +56,7 @@ public class SpotifyService(ISpotifyClient spotifyClient, IConfiguration configu
         }
     }
 
-    public async Task<SpotifyProfileDTO> GetUserSpotifyProfile(string token)
+    async Task<SpotifyProfileDTO> ISpotifyService.GetUserSpotifyProfile(string token)
     {
         try
         {
@@ -84,7 +86,7 @@ public class SpotifyService(ISpotifyClient spotifyClient, IConfiguration configu
         }
     }
 
-    public async Task<List<TopArtistDTO>> GetUserTopArtists(string token)
+    async Task<List<TopArtistDTO>> ISpotifyService.GetUserTopArtists(string token)
     {
         try
         {
@@ -114,7 +116,7 @@ public class SpotifyService(ISpotifyClient spotifyClient, IConfiguration configu
         }
     }
     
-    public async Task<List<TopSongDTO>> GetUserTopSongs(string token)
+    async Task<List<TopSongDTO>> ISpotifyService.GetUserTopSongs(string token)
     {
         try
         {
@@ -144,7 +146,7 @@ public class SpotifyService(ISpotifyClient spotifyClient, IConfiguration configu
         }
     }
 
-    public async Task<List<SearchSongDTO>> GetSongsBySearch(string token, string search)
+    async Task<List<SearchSongDTO>> ISpotifyService.GetSongsBySearch(string token, string search)
     {
         try
         {

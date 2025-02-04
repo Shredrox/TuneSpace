@@ -10,11 +10,11 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Core.Services;
 
-public class TokenService(
+internal class TokenService(
     IConfiguration configuration,
     IUserRepository userRepository) : ITokenService
 {
-    public string CreateAccessToken(User user)
+    string ITokenService.CreateAccessToken(User user)
     {
         var claims = new[]
         {
@@ -35,7 +35,7 @@ public class TokenService(
         return jwt;
     }
     
-    public async Task<string> CreateRefreshToken(User user)
+    async Task<string> ITokenService.CreateRefreshToken(User user)
     {
         var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         
