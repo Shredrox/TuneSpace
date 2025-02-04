@@ -30,6 +30,8 @@ public static class ServiceExtensions
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<ISpotifyClient, SpotifyClient>();
 
+        services.AddHttpClient<ISpotifyClient, SpotifyClient>();
+
         services.AddSignalR();
 
         return services;
