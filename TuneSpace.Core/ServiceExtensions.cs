@@ -14,7 +14,8 @@ public static class ServiceExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<ITagService, TagService>();
-        
+        services.AddScoped<IBandService, BandService>();
+
         return services;
     }
 }
