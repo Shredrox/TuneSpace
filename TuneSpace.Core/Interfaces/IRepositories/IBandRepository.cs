@@ -1,11 +1,12 @@
 ﻿using TuneSpace.Core.Entities;
 
-namespace TuneSpace.Core.Interfaces.IRepositories
+namespace TuneSpace.Core.Interfaces.IRepositories;
+
+public interface IBandRepository
 {
-    public interface IBandRepository
-    {
-        Task InsertBand(Band band);
-        Task<Band?> GetBandById(Guid id);
-        Task<Band?> GetBandByName(string name);
-    }
+    Task InsertBand(Band band);
+    Task<Band?> GetBandById(Guid id);
+    Task<Band?> GetBandByName(string name);
+    Task UpdateBand(Band band);
+    Task DeleteBand(Guid id);
 }
