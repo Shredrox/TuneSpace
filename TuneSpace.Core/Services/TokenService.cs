@@ -22,7 +22,7 @@ internal class TokenService(
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            configuration.GetSection("Jwt:Key").Value!));
+            configuration.GetSection("Jwt:Token").Value!));
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
         

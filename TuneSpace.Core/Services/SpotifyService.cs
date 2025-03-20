@@ -171,6 +171,28 @@ internal class SpotifyService(
         }
     }
 
+    async  Task<SpotifyArtistDTO> ISpotifyService.GetArtist(string token, string artistId)
+    {
+      try
+        {
+            var response = await spotifyClient.GetArtist(token, artistId);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new SpotifyApiException("Error retrieving Spotify artist");
+            }
+            
+            var artist = JsonConvert.DeserializeObject<SpotifyArtistDTO>(await response.Content.ReadAsStringAsync());
+            
+            return artist ?? throw new JsonSerializationException();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
     public async void CreatePlaylist(string token, CreatePlaylistRequest request)
     {
         var requestContent = ToLowercaseJsonStringContent(request);

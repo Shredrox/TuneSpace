@@ -7,6 +7,11 @@ namespace TuneSpace.Infrastructure.Repositories;
 
 internal class UserRepository(UserManager<User> userManager) : IUserRepository
 {
+    async Task<User?> IUserRepository.GetUserById(string id)
+    {
+        return await userManager.FindByIdAsync(id);
+    }
+    
     async Task<User?> IUserRepository.GetUserByEmail(string email)
     {
         return await userManager.FindByEmailAsync(email);

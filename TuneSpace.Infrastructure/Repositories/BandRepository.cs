@@ -23,6 +23,11 @@ internal class BandRepository(TuneSpaceDbContext context) : IBandRepository
         return await context.Bands.FindAsync(id);
     }
 
+    async Task<Band?> IBandRepository.GetBandByUserId(string id)
+    {
+        return await context.Bands.FirstOrDefaultAsync((band) => band.UserId == id);
+    }
+
     async Task IBandRepository.UpdateBand(Band band)
     {
         context.Bands.Update(band);

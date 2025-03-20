@@ -9,6 +9,7 @@ public interface ISpotifyService
     Task<string> ExchangeCodeForToken(string code);
     Task<SpotifyProfileDTO> GetUserSpotifyProfile(string token);
     Task<List<TopArtistDTO>> GetUserTopArtists(string token);
+    Task<SpotifyArtistDTO> GetArtist(string token, string artistId);
     Task<List<TopSongDTO>> GetUserTopSongs(string token);
     Task<List<SearchSongDTO>> GetSongsBySearch(string token, string search);
     void CreatePlaylist(string token, CreatePlaylistRequest request);

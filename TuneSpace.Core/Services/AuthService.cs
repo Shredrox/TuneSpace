@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using TuneSpace.Core.DTOs.Responses.Auth;
 using TuneSpace.Core.Entities;
+using TuneSpace.Core.Enums;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
@@ -12,7 +13,7 @@ internal class AuthService(
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService) : IAuthService
 {
-    async Task IAuthService.Register(string name, string email, string password)
+    async Task IAuthService.Register(string name, string email, string password, UserRole role)
     {
         if (await userRepository.GetUserByName(name) is not null)
         {
@@ -22,7 +23,8 @@ internal class AuthService(
         var user = new User
         {
             UserName = name,
-            Email = email
+            Email = email,
+            Role = role
         };
 
         await userRepository.InsertUser(user, password);
@@ -40,7 +42,7 @@ internal class AuthService(
         var accessToken = tokenService.CreateAccessToken(user);
         var refreshToken = await tokenService.CreateRefreshToken(user);
 
-        return new LoginResponse(user.UserName, accessToken, refreshToken);
+        return new LoginResponse(user.Id, user.UserName, user.Role, accessToken, refreshToken);
     }
     
     private bool VerifyPassword(User user, string password)

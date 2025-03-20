@@ -5,9 +5,12 @@ namespace TuneSpace.Core.Interfaces.IServices
 {
     public interface IBandService
     {
-        Task CreateBand(CreateBandRequest request);
+        Task<Band?> CreateBand(CreateBandRequest request);
         Task<Band?> GetBandById(Guid id);
         Task<Band?> GetBandByName(string name);
+        Task<Band?> GetBandByUserId(string id);
         Task<byte[]?> GetBandImage(Guid bandId);
+        Task UpdateBand(UpdateBandRequest request);
+        Task DeleteBand(Guid id);
     }
 }

@@ -4,6 +4,7 @@ namespace TuneSpace.Core.Interfaces.IRepositories;
 
 public interface IUserRepository
 {
+    Task<User?> GetUserById(string id);
     Task<User?> GetUserByEmail(string email);
     Task<User?> GetUserByName(string name);
     Task<List<string>> SearchByName(string name);

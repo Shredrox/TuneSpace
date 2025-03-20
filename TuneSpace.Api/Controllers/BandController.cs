@@ -23,6 +23,21 @@ public class BandController(IBandService bandService) : ControllerBase
         }
     }
 
+    [HttpGet("user/{userId}")]
+    public async Task<IActionResult> GetBandByUserId(string userId)
+    {
+        try
+        {
+            var band = await bandService.GetBandByUserId(userId);
+            return Ok(band);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest();
+        }
+    }
+
     [HttpGet("{bandId}/image")]
     public async Task<IActionResult> GetBandImage(string bandId)
     {
@@ -41,9 +56,14 @@ public class BandController(IBandService bandService) : ControllerBase
     {
         try
         {
-            await bandService.CreateBand(request);
-            var bandId = (await bandService.GetBandByName(request.Name)).Id;
-            return Ok(bandId);
+            var band = await bandService.CreateBand(request);
+
+            if(band == null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(band.Id);
         }
         catch (Exception e)
         {

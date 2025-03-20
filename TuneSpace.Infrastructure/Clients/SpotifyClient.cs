@@ -46,4 +46,11 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         
         return await httpClient.PostAsync($"https://api.spotify.com/v1/users/{userId}/playlists", requestContent);
     }
+
+    async Task<HttpResponseMessage> ISpotifyClient.GetArtist(string token, string artistId)
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await httpClient.GetAsync($"https://api.spotify.com/v1/artists/{artistId}");
+    }
 }
