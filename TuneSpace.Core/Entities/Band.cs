@@ -11,7 +11,6 @@ public class Band
     public string? City { get; set; }
     public string UserId { get; set; }
     public User User { get; set; }
-    // public string? SpotifyId { get; set; }
-    // public int SpotifyFollowers { get; set; }
-    // public int SpotifyPopularity { get; set; }
+    public string? SpotifyId { get; set; }
+    public string? YouTubeEmbedId { get; set; }
 }

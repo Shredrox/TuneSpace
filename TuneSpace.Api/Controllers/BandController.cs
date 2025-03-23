@@ -71,4 +71,34 @@ public class BandController(IBandService bandService) : ControllerBase
             return BadRequest();
         }
     }
+
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateBand([FromBody] UpdateBandRequest request)
+    {
+        try
+        {
+            await bandService.UpdateBand(request);
+            return Ok("Band updated successfully");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest();
+        }
+    }
+
+    [HttpPut("delete/{bandId}")]
+    public async Task<IActionResult> DeleteBand(string bandId)
+    {
+        try
+        {
+            await bandService.DeleteBand(Guid.Parse(bandId));
+            return Ok("Band deleted successfully");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest();
+        }
+    }
 }

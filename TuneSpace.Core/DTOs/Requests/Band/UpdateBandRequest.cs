@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Http;
+
 namespace TuneSpace.Core.DTOs.Requests.Band;
 
-public class UpdateBandRequest
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; }
-    public string Genre { get; set; }
-    public string Description { get; set; }
-}
+public record UpdateBandRequest(
+    Guid Id,
+    string? Name,
+    string? Genre,
+    string? Description,
+    string? SpotifyId,
+    string? YouTubeEmbedId,
+    IFormFile? Picture);
