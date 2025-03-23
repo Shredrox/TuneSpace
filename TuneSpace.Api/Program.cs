@@ -1,9 +1,7 @@
 using Serilog;
 using TuneSpace.Api.Infrastructure;
 using TuneSpace.Core;
-using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Infrastructure;
-using TuneSpace.Infrastructure.Clients;
 using TuneSpace.Infrastructure.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,8 +36,6 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
     
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-
-builder.Services.AddHttpClient<ISpotifyClient, SpotifyClient>();
 
 var app = builder.Build();
 

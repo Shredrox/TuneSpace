@@ -4,8 +4,9 @@ using TuneSpace.Core.Entities;
 
 namespace TuneSpace.Infrastructure.Data;
 
-public class TuneSpaceDbContext(DbContextOptions options) : IdentityDbContext<User>(options)
+public class TuneSpaceDbContext(DbContextOptions<TuneSpaceDbContext> options) : IdentityDbContext<User>(options)
 {
+    public DbSet<Band> Bands { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Like> Likes { get; set; }
     public DbSet<Comment> Comments { get; set; }

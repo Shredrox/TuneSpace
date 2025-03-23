@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using TuneSpace.Core.DTOs.Requests.Auth;
+using TuneSpace.Core.Enums;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -7,15 +9,22 @@ namespace TuneSpace.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService, IUserService userService) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         try
         {
-            await authService.Register(request.Name, request.Email, request.Password);
-            return Created();
+            await authService.Register(request.Name, request.Email, request.Password, Enum.Parse<UserRole>(request.Role));
+            var user = await userService.GetUserByName(request.Name);
+
+            if(user is null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(user.Id);
         }
         catch (ArgumentException e)
         {
@@ -32,7 +41,8 @@ public class AuthController(IAuthService authService) : ControllerBase
             
             var username = response.Username;
             var accessToken = response.AccessToken;
-            var role = "USER";
+            var role = response.Role;
+            var id = response.Id;
             
             Response.Cookies.Append("AccessToken", response.AccessToken, new CookieOptions
             {
@@ -54,7 +64,7 @@ public class AuthController(IAuthService authService) : ControllerBase
                 SameSite = SameSiteMode.None
             });
             
-            return Ok(new { username, accessToken, role });
+            return Ok(new { id ,username, accessToken, role });
         }
         catch (UnauthorizedException e)
         {

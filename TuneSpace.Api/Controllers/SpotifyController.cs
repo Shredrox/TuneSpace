@@ -32,7 +32,8 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             SameSite = SameSiteMode.None
         });
         
-        return Redirect("http://localhost:5173/home");
+        var redirectUrl = $"http://localhost:5173/band/register?token={accessToken}";
+        return Redirect(redirectUrl);
     }
     
     [HttpGet("profile")]
@@ -87,7 +88,21 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         
         return Ok(topSongs);
     }
-    
+
+    [HttpGet("artist/{artistId}")]
+    public async Task<IActionResult> GetArtist(string artistId)
+    {
+        var accessToken = Request.Cookies["SpotifyToken"];
+        
+        if (string.IsNullOrEmpty(accessToken))
+        {
+          return Unauthorized("Access token is required");
+        }   
+
+        var artist = await spotifyService.GetArtist(accessToken, artistId); 
+        return Ok(artist);
+    }
+
     [HttpGet("search/{searchTerm}")]
     public async Task<IActionResult> GetSongsBySearch(string searchTerm)
     {
