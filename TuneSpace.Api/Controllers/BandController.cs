@@ -73,7 +73,7 @@ public class BandController(IBandService bandService) : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateBand([FromBody] UpdateBandRequest request)
+    public async Task<IActionResult> UpdateBand([FromForm] UpdateBandRequest request)
     {
         try
         {
@@ -87,7 +87,7 @@ public class BandController(IBandService bandService) : ControllerBase
         }
     }
 
-    [HttpPut("delete/{bandId}")]
+    [HttpDelete("{bandId}")]
     public async Task<IActionResult> DeleteBand(string bandId)
     {
         try
