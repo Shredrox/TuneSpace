@@ -18,7 +18,7 @@ internal class SpotifyService(
     string ISpotifyService.GetSpotifyLoginUrl()
     {
         var state = GenerateRandomString(16);
-        const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public";
+        const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public user-read-recently-played";
 
         var redirectUrl = $"https://accounts.spotify.com/authorize?" +
                           $"response_type=code" +
@@ -30,7 +30,7 @@ internal class SpotifyService(
         return redirectUrl;
     }
 
-    async Task<string> ISpotifyService.ExchangeCodeForToken(string code)
+    async Task<SpotifyTokenResponse> ISpotifyService.ExchangeCodeForToken(string code)
     {
         var parameters = new FormUrlEncodedContent(new[]
         {
@@ -46,8 +46,16 @@ internal class SpotifyService(
             var response = await spotifyClient.GetToken(parameters);
             var content = await response.Content.ReadAsStringAsync();
 
-            var accessToken = content.Split('"')[3];
-            return accessToken;
+            var values = content.Split('"').ToList();
+
+            var accessToken = values[3];
+            var refreshToken = values[13];
+            
+            return new SpotifyTokenResponse
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
         }
         catch (HttpRequestException e)
         {
@@ -115,7 +123,41 @@ internal class SpotifyService(
             throw;
         }
     }
-    
+
+    async Task<List<RecentlyPlayedTrackDTO>> ISpotifyService.GetUserRecentlyPlayedTracks(string token)
+    {
+        try
+        {
+            var response = await spotifyClient.GetUserRecentlyPlayedTracks(token);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new SpotifyApiException("Error retrieving Spotify user recently played tracks");
+            }
+            
+            var rootObject = JsonConvert.DeserializeObject<UserRecentlyPlayedTracksResponse>(await response.Content.ReadAsStringAsync());
+
+            var trackDtos = rootObject?.Items.Select(item => 
+                new RecentlyPlayedTrackDTO
+                {
+                    TrackName = item.Track.Name,
+                    ArtistName = string.Join(", ", item.Track.Artists.Select(artist => artist.Name)),
+                    ArtistId = item.Track.Artists.First().Id,
+                    AlbumName = item.Track.Album.Name,
+                    AlbumImageUrl = item.Track.Album.Images.OrderByDescending(img => img.Width * img.Height).FirstOrDefault()?.Url,
+                    PlayedAt = DateTime.Parse(item.Played_At)
+                }
+            ).ToList();
+            
+            return trackDtos ?? throw new JsonSerializationException();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
     async Task<List<TopSongDTO>> ISpotifyService.GetUserTopSongs(string token)
     {
         try
@@ -173,7 +215,7 @@ internal class SpotifyService(
 
     async  Task<SpotifyArtistDTO> ISpotifyService.GetArtist(string token, string artistId)
     {
-      try
+        try
         {
             var response = await spotifyClient.GetArtist(token, artistId);
 
@@ -185,6 +227,28 @@ internal class SpotifyService(
             var artist = JsonConvert.DeserializeObject<SpotifyArtistDTO>(await response.Content.ReadAsStringAsync());
             
             return artist ?? throw new JsonSerializationException();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
+    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetSeveralArtists(string token, string artistIds)
+    {
+        try
+        {
+            var response = await spotifyClient.GetSeveralArtists(token, artistIds);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new SpotifyApiException("Error retrieving Spotify artists");
+            }
+            
+            var artists = JsonConvert.DeserializeObject<SpotifySeveralArtistsResponse>(await response.Content.ReadAsStringAsync());
+            
+            return artists?.Artists ?? throw new JsonSerializationException();
         }
         catch (Exception ex)
         {

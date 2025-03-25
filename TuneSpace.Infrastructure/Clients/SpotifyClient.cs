@@ -19,6 +19,13 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         return await httpClient.GetAsync("https://api.spotify.com/v1/me");
     }
 
+    async Task<HttpResponseMessage> ISpotifyClient.GetUserRecentlyPlayedTracks(string token)
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await httpClient.GetAsync("https://api.spotify.com/v1/me/player/recently-played");
+    }
+
     async Task<HttpResponseMessage> ISpotifyClient.GetUserTopArtists(string token)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -52,5 +59,12 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         return await httpClient.GetAsync($"https://api.spotify.com/v1/artists/{artistId}");
+    }
+
+    async Task<HttpResponseMessage> ISpotifyClient.GetSeveralArtists(string token, string artistIds)
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await httpClient.GetAsync($"https://api.spotify.com/v1/artists?ids={artistIds}");
     }
 }
