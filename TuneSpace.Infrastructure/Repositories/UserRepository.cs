@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
+using TuneSpace.Infrastructure.Data;
 
 namespace TuneSpace.Infrastructure.Repositories;
 
-internal class UserRepository(UserManager<User> userManager) : IUserRepository
+internal class UserRepository(UserManager<User> userManager, TuneSpaceDbContext context) : IUserRepository
 {
     async Task<User?> IUserRepository.GetUserById(string id)
     {
@@ -20,6 +21,12 @@ internal class UserRepository(UserManager<User> userManager) : IUserRepository
     async Task<User?> IUserRepository.GetUserByName(string name)
     {
         return await userManager.FindByNameAsync(name);
+    }
+
+    async Task<User?> IUserRepository.GetUserByRefreshToken(string refreshToken)
+    {
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken && u.RefreshTokenValidity > DateTime.Now.ToUniversalTime());
     }
 
     async Task<List<string>> IUserRepository.SearchByName(string name)

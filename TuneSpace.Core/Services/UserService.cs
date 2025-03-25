@@ -12,6 +12,12 @@ internal class UserService(IUserRepository userRepository) : IUserService
         return await userRepository.GetUserByName(name);
     }
 
+    async Task<User?> IUserService.GetUserFromRefreshToken(string refreshToken)
+    {
+        var user = await userRepository.GetUserByRefreshToken(refreshToken);
+        return user ?? null;
+    }
+
     async Task<List<string>> IUserService.SearchByName(string name)
     { 
         var users = await userRepository.SearchByName(name);
