@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using TuneSpace.Core.DTOs.Requests.Auth;
 using TuneSpace.Core.Enums;
 using TuneSpace.Core.Exceptions;
@@ -70,6 +69,31 @@ public class AuthController(IAuthService authService, IUserService userService, 
         {
             return Unauthorized(e.Message);
         }
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var refreshToken = Request.Cookies["RefreshToken"];
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return BadRequest("Refresh token is required");
+        }
+
+        var user = await userService.GetUserFromRefreshToken(refreshToken);
+
+        if (user is not null)
+        {
+            user.RefreshToken = null;
+            user.RefreshTokenValidity = null;
+
+            await userService.UpdateUserRefreshToken(user);
+        }
+
+        Response.Cookies.Delete("AccessToken");
+        Response.Cookies.Delete("RefreshToken");
+
+        return NoContent();
     }
 
     [HttpPost("refresh-token")]

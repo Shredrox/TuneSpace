@@ -29,4 +29,19 @@ internal class UserService(IUserRepository userRepository) : IUserService
 
         return users;
     }
+
+    async Task IUserService.UpdateUserRefreshToken(User user)
+    {
+        var existingUser = await userRepository.GetUserById(user.Id);
+
+        if(existingUser == null)
+        {
+            return;
+        }
+
+        existingUser.RefreshToken = user.RefreshToken;
+        existingUser.RefreshTokenValidity = user.RefreshTokenValidity;
+
+        await userRepository.UpdateUser(user);
+    }
 }
