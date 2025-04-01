@@ -8,6 +8,7 @@ public interface ISpotifyService
     string GetSpotifyLoginUrl();
     Task<SpotifyTokenResponse> ExchangeCodeForToken(string code);
     Task<SpotifyProfileDTO> GetUserSpotifyProfile(string token);
+    Task<List<SpotifyArtistDTO>> GetUserFollowedArtists(string token);
     Task<List<TopArtistDTO>> GetUserTopArtists(string token);
     Task<List<RecentlyPlayedTrackDTO>> GetUserRecentlyPlayedTracks(string token);
     Task<SpotifyArtistDTO> GetArtist(string token, string artistId);

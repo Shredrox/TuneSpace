@@ -124,6 +124,40 @@ internal class SpotifyService(
         }
     }
 
+    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetUserFollowedArtists(string token)
+    {
+        try
+        {
+            var response = await spotifyClient.GetUserFollowedArtists(token);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new SpotifyApiException("Error retrieving Spotify user followed artists");
+            }
+            
+            var rootObject = JsonConvert.DeserializeObject<UserFollowedArtistsResponse>(await response.Content.ReadAsStringAsync());
+
+            var artistDtos = rootObject?.Artists.Items.Select(item => 
+                new SpotifyArtistDTO
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Popularity = item.Popularity,
+                    Images = item.Images.OrderByDescending(img => img.Width * img.Height).FirstOrDefault(),
+                    Genres = item.Genres,
+                    Followers = item.Followers
+                }
+            ).ToList();
+            
+            return artistDtos ?? throw new JsonSerializationException();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
     async Task<List<RecentlyPlayedTrackDTO>> ISpotifyService.GetUserRecentlyPlayedTracks(string token)
     {
         try

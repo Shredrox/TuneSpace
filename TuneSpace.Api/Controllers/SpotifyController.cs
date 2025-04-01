@@ -154,4 +154,24 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         
         return Created();
     }
+
+    [HttpGet("followed-artists")]
+    public async Task<IActionResult> GetUserFollowedArtists()
+    {
+        var accessToken = Request.Cookies["SpotifyAccessToken"];
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return Unauthorized("Access token is required");
+        }
+
+        try
+        {
+            var followedArtists = await spotifyService.GetUserFollowedArtists(accessToken);
+            return Ok(followedArtists);
+        }
+        catch (SpotifyApiException e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }

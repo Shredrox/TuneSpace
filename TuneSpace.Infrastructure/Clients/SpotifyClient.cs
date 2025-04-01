@@ -26,6 +26,13 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         return await httpClient.GetAsync("https://api.spotify.com/v1/me/player/recently-played");
     }
 
+    async Task<HttpResponseMessage> ISpotifyClient.GetUserFollowedArtists(string token)
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await httpClient.GetAsync("https://api.spotify.com/v1/me/following?type=artist&limit=50");
+    }
+
     async Task<HttpResponseMessage> ISpotifyClient.GetUserTopArtists(string token)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
