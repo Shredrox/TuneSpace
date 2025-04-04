@@ -18,7 +18,7 @@ internal class SpotifyService(
     string ISpotifyService.GetSpotifyLoginUrl()
     {
         var state = GenerateRandomString(16);
-        const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public user-read-recently-played";
+        const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public user-read-recently-played user-follow-read";
 
         var redirectUrl = $"https://accounts.spotify.com/authorize?" +
                           $"response_type=code" +
@@ -143,7 +143,7 @@ internal class SpotifyService(
                     Id = item.Id,
                     Name = item.Name,
                     Popularity = item.Popularity,
-                    Images = item.Images.OrderByDescending(img => img.Width * img.Height).FirstOrDefault(),
+                    Images = item.Images.OrderByDescending(img => img.Width * img.Height).ToList(),
                     Genres = item.Genres,
                     Followers = item.Followers
                 }
@@ -291,7 +291,7 @@ internal class SpotifyService(
         }
     }
 
-    public async void CreatePlaylist(string token, CreatePlaylistRequest request)
+    async void ISpotifyService.CreatePlaylist(string token, CreatePlaylistRequest request)
     {
         var requestContent = ToLowercaseJsonStringContent(request);
         

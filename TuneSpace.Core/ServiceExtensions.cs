@@ -15,6 +15,7 @@ public static class ServiceExtensions
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<ITagService, TagService>();
         services.AddScoped<IBandService, BandService>();
+        services.AddScoped<IMusicDiscoveryService, MusicDiscoveryService>();
 
         return services;
     }

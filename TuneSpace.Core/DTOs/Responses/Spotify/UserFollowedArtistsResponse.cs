@@ -47,17 +47,11 @@ public class ArtistItem
     public int Popularity { get; set; }
     
     [JsonProperty("images")]
-    public List<SpotifyImage> Images { get; set; }
+    public List<SpotifyImageDTO> Images { get; set; }
     
     [JsonProperty("genres")]
     public List<string> Genres { get; set; }
     
     [JsonProperty("followers")]
     public Followers Followers { get; set; }
-}
-
-public class Followers
-{
-    [JsonProperty("total")]
-    public int Total { get; set; }
 }

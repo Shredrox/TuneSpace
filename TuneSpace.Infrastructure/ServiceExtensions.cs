@@ -29,8 +29,10 @@ public static class ServiceExtensions
         services.AddScoped<IBandRepository, BandRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
-        services.AddScoped<ISpotifyClient, SpotifyClient>();
 
+        services.AddHttpClient<IOllamaClient, OllamaClient>();
+        services.AddHttpClient<ILastFmClient, LastFmClient>();
+        services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
         services.AddHttpClient<ISpotifyClient, SpotifyClient>();
 
         services.AddSignalR();
