@@ -12,4 +12,5 @@ public interface ISpotifyClient
     Task<HttpResponseMessage> GetSeveralArtists(string token, string artistIds);
     Task<HttpResponseMessage> GetSongsBySearch(string token, string search);
     Task<HttpResponseMessage> CreatePlaylist(string token, string userId, StringContent requestContent);
+    Task<HttpResponseMessage> RefreshAccessToken(FormUrlEncodedContent parameters);
 }

@@ -298,6 +298,54 @@ internal class SpotifyService(
         await spotifyClient.CreatePlaylist(token, request.UserId, requestContent);
     }
     
+    async Task<SpotifyTokenResponse> ISpotifyService.RefreshAccessToken(string refreshToken)
+    {
+        var clientId = configuration["ExternalApis:Spotify:ClientId"] ?? 
+            throw new ArgumentNullException(nameof(configuration), "Spotify client ID is not configured");
+        var clientSecret = configuration["ExternalApis:Spotify:ClientSecret"] ?? 
+            throw new ArgumentNullException(nameof(configuration), "Spotify client secret is not configured");
+
+        var parameters = new Dictionary<string, string>
+        {
+            { "grant_type", "refresh_token" },
+            { "refresh_token", refreshToken },
+            { "client_id", clientId },
+            { "client_secret", clientSecret }
+        };
+
+        var content = new FormUrlEncodedContent(parameters);
+
+        try
+        {
+            var response = await spotifyClient.RefreshAccessToken(content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new SpotifyApiException($"Failed to refresh Spotify token: {response.StatusCode}, {errorContent}");
+            }
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var tokenResponse = JsonConvert.DeserializeObject<SpotifyTokenResponse>(responseString);
+
+            if (tokenResponse == null)
+            {
+                throw new SpotifyApiException("Failed to deserialize Spotify token response");
+            }
+
+            if (string.IsNullOrEmpty(tokenResponse.RefreshToken))
+            {
+                tokenResponse.RefreshToken = refreshToken;
+            }
+
+            return tokenResponse;
+        }
+        catch (Exception ex) when (ex is not SpotifyApiException)
+        {
+            throw new SpotifyApiException($"Error refreshing Spotify token: {ex.Message}");
+        }
+    }
+
     private static StringContent ToLowercaseJsonStringContent(CreatePlaylistRequest request)
     {
         var dictionary = new Dictionary<string, object>

@@ -45,6 +45,50 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         var redirectUrl = $"http://localhost:5173/";
         return Redirect(redirectUrl);
     }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken()
+    {
+        var refreshToken = Request.Cookies["SpotifyRefreshToken"];
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return Unauthorized("Refresh token is required");
+        }
+        
+        try
+        {
+            var newTokens = await spotifyService.RefreshAccessToken(refreshToken);
+            
+            Response.Cookies.Append("SpotifyAccessToken", newTokens.AccessToken, new CookieOptions
+            {
+                Expires = DateTime.Now.AddHours(1),
+                HttpOnly = true,
+                Secure = true,
+                IsEssential = true,
+                Domain = "localhost",
+                SameSite = SameSiteMode.None
+            });
+            
+            if (!string.IsNullOrEmpty(newTokens.RefreshToken) && newTokens.RefreshToken != refreshToken)
+            {
+                Response.Cookies.Append("SpotifyRefreshToken", newTokens.RefreshToken, new CookieOptions
+                {
+                    Expires = DateTime.Now.AddDays(30),
+                    HttpOnly = true,
+                    Secure = true,
+                    IsEssential = true,
+                    Domain = "localhost",
+                    SameSite = SameSiteMode.None
+                });
+            }
+            
+            return Ok(new { AccessToken = newTokens.AccessToken });
+        }
+        catch (SpotifyApiException ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
     
     [HttpGet("profile")]
     public async Task<IActionResult> GetUserSpotifyProfile()

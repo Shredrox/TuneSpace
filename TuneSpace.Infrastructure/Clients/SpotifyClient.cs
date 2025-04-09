@@ -74,4 +74,12 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
 
         return await httpClient.GetAsync($"https://api.spotify.com/v1/artists?ids={artistIds}");
     }
+
+    async Task<HttpResponseMessage> ISpotifyClient.RefreshAccessToken(FormUrlEncodedContent parameters)
+    {
+        httpClient.DefaultRequestHeaders.Accept.Clear();
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        
+        return await httpClient.PostAsync("https://accounts.spotify.com/api/token", parameters);
+    }
 }

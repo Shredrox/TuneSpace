@@ -1,5 +1,6 @@
 using Serilog;
 using TuneSpace.Api.Infrastructure;
+using TuneSpace.Api.Middleware;
 using TuneSpace.Core;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
@@ -49,6 +50,8 @@ if (app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
+
+app.UseSpotifyTokenRefresh();
 
 app.UseExceptionHandler();
 

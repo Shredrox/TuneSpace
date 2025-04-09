@@ -16,4 +16,5 @@ public interface ISpotifyService
     Task<List<TopSongDTO>> GetUserTopSongs(string token);
     Task<List<SearchSongDTO>> GetSongsBySearch(string token, string search);
     void CreatePlaylist(string token, CreatePlaylistRequest request);
+    Task<SpotifyTokenResponse> RefreshAccessToken(string refreshToken);
 }
