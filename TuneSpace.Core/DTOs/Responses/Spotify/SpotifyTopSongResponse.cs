@@ -4,7 +4,7 @@ public class SpotifyTopSongResponse
 {
     public Album Album { get; set; }
     public string Name { get; set; }
-    
+
 }
 
 public class Album

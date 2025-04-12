@@ -16,12 +16,12 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         var redirectUrl = spotifyService.GetSpotifyLoginUrl();
         return Redirect(redirectUrl);
     }
-        
+
     [HttpGet("callback")]
     public async Task<IActionResult> Callback(string code, string state)
     {
         var spotifyTokens = await spotifyService.ExchangeCodeForToken(code);
-        
+
         Response.Cookies.Append("SpotifyAccessToken", spotifyTokens.AccessToken, new CookieOptions
         {
             Expires = DateTime.Now.AddHours(1),
@@ -41,7 +41,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             Domain = "localhost",
             SameSite = SameSiteMode.None
         });
-        
+
         var redirectUrl = $"http://localhost:5173/";
         return Redirect(redirectUrl);
     }
@@ -54,11 +54,11 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         {
             return Unauthorized("Refresh token is required");
         }
-        
+
         try
         {
             var newTokens = await spotifyService.RefreshAccessToken(refreshToken);
-            
+
             Response.Cookies.Append("SpotifyAccessToken", newTokens.AccessToken, new CookieOptions
             {
                 Expires = DateTime.Now.AddHours(1),
@@ -68,7 +68,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
                 Domain = "localhost",
                 SameSite = SameSiteMode.None
             });
-            
+
             if (!string.IsNullOrEmpty(newTokens.RefreshToken) && newTokens.RefreshToken != refreshToken)
             {
                 Response.Cookies.Append("SpotifyRefreshToken", newTokens.RefreshToken, new CookieOptions
@@ -81,7 +81,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
                     SameSite = SameSiteMode.None
                 });
             }
-            
+
             return Ok(new { AccessToken = newTokens.AccessToken });
         }
         catch (SpotifyApiException ex)
@@ -89,7 +89,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
-    
+
     [HttpGet("profile")]
     public async Task<IActionResult> GetUserSpotifyProfile()
     {
@@ -106,7 +106,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             var topSongs = await spotifyService.GetUserTopSongs(accessToken);
 
             var stats = new SpotifyStatsResponse(profile, topArtists, topSongs);
-        
+
             return Ok(stats);
         }
         catch (SpotifyApiException e)
@@ -114,7 +114,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-    
+
     [HttpGet("top-artists")]
     public async Task<IActionResult> GetUserTopArtists()
     {
@@ -125,10 +125,10 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         }
 
         var topArtists = await spotifyService.GetUserTopArtists(accessToken);
-        
+
         return Ok(topArtists);
     }
-    
+
     [HttpGet("top-songs")]
     public async Task<IActionResult> GetUserTopSongs()
     {
@@ -139,7 +139,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         }
 
         var topSongs = await spotifyService.GetUserTopSongs(accessToken);
-        
+
         return Ok(topSongs);
     }
 
@@ -147,27 +147,27 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
     public async Task<IActionResult> GetArtist(string artistId)
     {
         var accessToken = Request.Cookies["SpotifyAccessToken"];
-        
+
         if (string.IsNullOrEmpty(accessToken))
         {
-          return Unauthorized("Access token is required");
-        }   
+            return Unauthorized("Access token is required");
+        }
 
-        var artist = await spotifyService.GetArtist(accessToken, artistId); 
+        var artist = await spotifyService.GetArtist(accessToken, artistId);
         return Ok(artist);
     }
-    
+
     [HttpGet("artists/{artistIds}")]
     public async Task<IActionResult> GetArtists(string artistIds)
     {
         var accessToken = Request.Cookies["SpotifyAccessToken"];
-        
+
         if (string.IsNullOrEmpty(accessToken))
         {
-          return Unauthorized("Access token is required");
-        }   
+            return Unauthorized("Access token is required");
+        }
 
-        var artists = await spotifyService.GetSeveralArtists(accessToken, artistIds); 
+        var artists = await spotifyService.GetSeveralArtists(accessToken, artistIds);
         return Ok(artists);
     }
 
@@ -181,7 +181,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         }
 
         var searchSongs = await spotifyService.GetSongsBySearch(accessToken, searchTerm);
-        
+
         return Ok(searchSongs);
     }
 
@@ -193,9 +193,9 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         {
             return Unauthorized("Access token is required");
         }
-        
+
         spotifyService.CreatePlaylist(accessToken, request);
-        
+
         return Created();
     }
 

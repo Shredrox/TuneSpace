@@ -15,7 +15,7 @@ public class UserController(IUserService userService) : ControllerBase
         try
         {
             var user = await userService.GetUserByName(username);
-            if(user is null)
+            if (user is null)
             {
                 return NotFound("User not found");
             }

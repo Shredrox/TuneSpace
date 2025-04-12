@@ -9,15 +9,15 @@ internal class MusicBrainzClient : IMusicBrainzClient
 {
     private readonly HttpClient _httpClient;
     private const string BaseUrl = "https://musicbrainz.org/ws/2";
-    
+
     public MusicBrainzClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        
+
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "TuneSpace/1.0 (info@tunespace.com)");
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
     }
-    
+
     async Task<BandModel> IMusicBrainzClient.GetBandDataAsync(string bandName)
     {
         var apiUrl = $"{BaseUrl}/artist/?query=artist:{bandName}&fmt=json";
@@ -29,7 +29,7 @@ internal class MusicBrainzClient : IMusicBrainzClient
         {
             return new BandModel { Name = bandName };
         }
-            
+
         var name = artist["name"]?.ToString() ?? bandName;
         var country = artist["country"]?.ToString() ?? "Unknown";
         var tags = artist["tags"]?.ToObject<JArray>();
@@ -47,7 +47,7 @@ internal class MusicBrainzClient : IMusicBrainzClient
     async Task<List<BandModel>> IMusicBrainzClient.GetBandsByLocationAsync(string location, int limit, List<string>? genres = null)
     {
         var query = $"area:{HttpUtility.UrlEncode(location)}";
-        
+
         if (genres != null && genres.Count > 0)
         {
             var genreQuery = string.Join(" OR ", genres.Select(g => $"tag:{HttpUtility.UrlEncode(g)}"));
@@ -57,10 +57,10 @@ internal class MusicBrainzClient : IMusicBrainzClient
         {
             query += " AND tag:rock";
         }
-        
+
         var apiUrl = $"{BaseUrl}/artist/?query={query}&limit={limit}&fmt=json";
         var response = await _httpClient.GetAsync(apiUrl);
-        if(response.StatusCode != System.Net.HttpStatusCode.OK)
+        if (response.StatusCode != System.Net.HttpStatusCode.OK)
         {
             throw new Exception($"Error fetching data from MusicBrainz: {response.StatusCode}");
         }
@@ -73,7 +73,7 @@ internal class MusicBrainzClient : IMusicBrainzClient
         {
             return bands;
         }
-            
+
         foreach (var artist in artists)
         {
             var name = artist["name"]?.ToString();

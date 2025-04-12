@@ -19,7 +19,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
         var bandData = JObject.Parse(response);
 
         var artist = bandData["artist"];
-        
+
         if (artist == null)
         {
             return new BandModel { Name = bandName };
@@ -28,13 +28,13 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
         var name = artist["name"]?.ToString() ?? bandName;
         var listeners = int.TryParse(artist["listeners"]?.ToString(), out var l) ? l : 0;
         var playCount = int.TryParse(artist["stats"]?["playcount"]?.ToString(), out var pc) ? pc : 0;
-        
+
         string imageUrl = "";
         var images = artist["image"]?.ToObject<JArray>();
         if (images != null)
         {
             var sizeOrder = new[] { "extralarge", "large", "medium", "small" };
-            
+
             foreach (var size in sizeOrder)
             {
                 var img = images.FirstOrDefault(i => i["size"]?.ToString() == size);
@@ -44,7 +44,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
                     break;
                 }
             }
-            
+
             if (string.IsNullOrWhiteSpace(imageUrl))
             {
                 imageUrl = images
@@ -52,7 +52,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
                     .FirstOrDefault(url => !string.IsNullOrWhiteSpace(url)) ?? "";
             }
         }
-        
+
         var tags = artist["tags"]?["tag"]?.ToObject<JArray>();
         var genres = tags?.Select(t => t["name"]?.ToString() ?? "")
             .Where(t => !string.IsNullOrEmpty(t))
@@ -79,7 +79,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
         {
             return new List<string>();
         }
-            
+
         return artists
             .Select(artist => artist["name"]?.ToString() ?? "")
             .Where(name => !string.IsNullOrEmpty(name))
@@ -93,11 +93,11 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
             try
             {
                 var bandData = await ((ILastFmClient)this).GetBandDataAsync(band.Name);
-                
+
                 band.Listeners = bandData.Listeners;
                 band.PlayCount = bandData.PlayCount;
                 band.ImageUrl = bandData.ImageUrl;
-                
+
                 if (band.Genres.Count == 0)
                 {
                     band.Genres = bandData.Genres;
@@ -106,7 +106,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
                 {
                     band.Genres.AddRange(bandData.Genres.Except(band.Genres));
                 }
-                    
+
                 band.SimilarArtists = await ((ILastFmClient)this).GetSimilarBandsAsync(band.Name, 5);
             }
             catch (Exception)

@@ -19,7 +19,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
     }
 
     async Task<List<string>> IUserService.SearchByName(string name)
-    { 
+    {
         var users = await userRepository.SearchByName(name);
 
         if (users == null || users.Count == 0)
@@ -34,7 +34,7 @@ internal class UserService(IUserRepository userRepository) : IUserService
     {
         var existingUser = await userRepository.GetUserById(user.Id);
 
-        if(existingUser == null)
+        if (existingUser == null)
         {
             return;
         }

@@ -12,7 +12,7 @@ internal class UserRepository(UserManager<User> userManager, TuneSpaceDbContext 
     {
         return await userManager.FindByIdAsync(id);
     }
-    
+
     async Task<User?> IUserRepository.GetUserByEmail(string email)
     {
         return await userManager.FindByEmailAsync(email);
@@ -42,7 +42,7 @@ internal class UserRepository(UserManager<User> userManager, TuneSpaceDbContext 
     {
         await userManager.CreateAsync(user, password);
     }
-    
+
     async Task IUserRepository.UpdateUser(User user)
     {
         await userManager.UpdateAsync(user);

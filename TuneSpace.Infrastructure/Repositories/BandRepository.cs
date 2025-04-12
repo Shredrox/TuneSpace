@@ -28,7 +28,7 @@ internal class BandRepository(TuneSpaceDbContext context) : IBandRepository
     async Task<List<Band>> IBandRepository.GetBandsByLocation(string location)
     {
         return await context.Bands
-            .Where(b => (b.Country != null && b.Country.Contains(location)) || 
+            .Where(b => (b.Country != null && b.Country.Contains(location)) ||
                         (b.City != null && b.City.Contains(location)))
             .ToListAsync();
     }
@@ -36,9 +36,9 @@ internal class BandRepository(TuneSpaceDbContext context) : IBandRepository
     async Task<List<Band>> IBandRepository.GetBandsByGenreAndLocation(string genre, string location)
     {
         return await context.Bands
-            .Where(b => 
-                b.Genre != null && b.Genre.Contains(genre) && 
-                ((b.Country != null && b.Country.Contains(location)) || 
+            .Where(b =>
+                b.Genre != null && b.Genre.Contains(genre) &&
+                ((b.Country != null && b.Country.Contains(location)) ||
                  (b.City != null && b.City.Contains(location))))
             .ToListAsync();
     }

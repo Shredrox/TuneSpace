@@ -73,7 +73,7 @@ internal class BandService(IBandRepository bandRepository, IUserRepository userR
         {
             band.Name = request.Name;
         }
-        
+
         if (!string.IsNullOrEmpty(request.Description))
         {
             band.Description = request.Description;
@@ -83,13 +83,13 @@ internal class BandService(IBandRepository bandRepository, IUserRepository userR
         {
             band.Genre = request.Genre;
         }
-        
-        if(!string.IsNullOrEmpty(request.SpotifyId))
+
+        if (!string.IsNullOrEmpty(request.SpotifyId))
         {
             band.SpotifyId = request.SpotifyId;
         }
 
-        if(!string.IsNullOrEmpty(request.YouTubeEmbedId))
+        if (!string.IsNullOrEmpty(request.YouTubeEmbedId))
         {
             band.YouTubeEmbedId = request.YouTubeEmbedId;
         }
@@ -114,7 +114,7 @@ internal class BandService(IBandRepository bandRepository, IUserRepository userR
         }
         catch (KeyNotFoundException)
         {
-             
+
         }
     }
 }

@@ -18,7 +18,7 @@ public class AuthController(IAuthService authService, IUserService userService, 
             await authService.Register(request.Name, request.Email, request.Password, Enum.Parse<UserRole>(request.Role));
             var user = await userService.GetUserByName(request.Name);
 
-            if(user is null)
+            if (user is null)
             {
                 return NotFound("User not found");
             }
@@ -30,19 +30,19 @@ public class AuthController(IAuthService authService, IUserService userService, 
             return Conflict(e.Message);
         }
     }
-    
+
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         try
         {
             var response = await authService.Login(request.Email, request.Password);
-            
+
             var username = response.Username;
             var accessToken = response.AccessToken;
             var role = response.Role;
             var id = response.Id;
-            
+
             Response.Cookies.Append("AccessToken", response.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
@@ -52,7 +52,7 @@ public class AuthController(IAuthService authService, IUserService userService, 
                 IsEssential = true,
                 SameSite = SameSiteMode.None
             });
-            
+
             Response.Cookies.Append("RefreshToken", response.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
@@ -62,8 +62,8 @@ public class AuthController(IAuthService authService, IUserService userService, 
                 IsEssential = true,
                 SameSite = SameSiteMode.None
             });
-            
-            return Ok(new { id ,username, accessToken, role });
+
+            return Ok(new { id, username, accessToken, role });
         }
         catch (UnauthorizedException e)
         {
@@ -126,7 +126,7 @@ public class AuthController(IAuthService authService, IUserService userService, 
             IsEssential = true,
             SameSite = SameSiteMode.None
         });
-            
+
         Response.Cookies.Append("RefreshToken", newRefreshToken, new CookieOptions
         {
             HttpOnly = true,
@@ -136,7 +136,7 @@ public class AuthController(IAuthService authService, IUserService userService, 
             IsEssential = true,
             SameSite = SameSiteMode.None
         });
-            
+
         return Ok(new { newAccessToken, username, role });
     }
 }

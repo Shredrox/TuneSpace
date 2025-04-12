@@ -20,30 +20,30 @@ internal class TokenService(
         {
             new Claim(ClaimTypes.Email, user.Email)
         };
-        
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             configuration.GetSection("Jwt:Token").Value!));
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
-        
+
         var token = new JwtSecurityToken(
-            claims: claims, 
+            claims: claims,
             expires: DateTime.Now.AddHours(1),
             signingCredentials: credentials);
-        
+
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
         return jwt;
     }
-    
+
     async Task<string> ITokenService.CreateRefreshToken(User user)
     {
         var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        
+
         user.RefreshToken = refreshToken;
-        user.RefreshTokenValidity = DateTime.Now.AddHours(2).ToUniversalTime(); 
-        
+        user.RefreshTokenValidity = DateTime.Now.AddHours(2).ToUniversalTime();
+
         await userRepository.UpdateUser(user);
-        
+
         return refreshToken;
     }
 }

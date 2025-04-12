@@ -2,6 +2,6 @@
 
 public record SearchSongDTO(
     string Id,
-    string Name, 
+    string Name,
     string Artist,
     string AlbumArt);

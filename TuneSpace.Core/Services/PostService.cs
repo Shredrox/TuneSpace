@@ -14,7 +14,7 @@ internal class PostService(IPostRepository postRepository) : IPostService
             Title = request.Name,
             Content = request.Content
         };
-        
+
         await postRepository.InsertPost(newPost);
     }
 }

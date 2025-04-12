@@ -33,7 +33,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCoreServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
-    
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

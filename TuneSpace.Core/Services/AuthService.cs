@@ -9,7 +9,7 @@ using TuneSpace.Core.Interfaces.IServices;
 namespace TuneSpace.Core.Services;
 
 internal class AuthService(
-    IUserRepository userRepository, 
+    IUserRepository userRepository,
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService) : IAuthService
 {
@@ -19,7 +19,7 @@ internal class AuthService(
         {
             throw new ArgumentException("Username already taken");
         }
-        
+
         var user = new User
         {
             UserName = name,
@@ -44,14 +44,14 @@ internal class AuthService(
 
         return new LoginResponse(user.Id, user.UserName, user.Role, accessToken, refreshToken);
     }
-    
+
     private bool VerifyPassword(User user, string password)
     {
         if (user.PasswordHash is null)
         {
             return false;
         }
-        
+
         return passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) is PasswordVerificationResult.Success;
     }
 }
