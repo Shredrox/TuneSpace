@@ -1,6 +1,6 @@
 using Serilog;
 using TuneSpace.Api.Infrastructure;
-using TuneSpace.Core;
+using TuneSpace.Application;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
 
@@ -31,9 +31,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddCoreServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
-    
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

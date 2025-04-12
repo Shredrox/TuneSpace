@@ -15,9 +15,9 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<TuneSpaceDbContext>(options => 
+        services.AddDbContext<TuneSpaceDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("TuneSpaceDb")));
-        
+
         services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
         services.AddAuthorizationBuilder();
 
@@ -29,8 +29,10 @@ public static class ServiceExtensions
         services.AddScoped<IBandRepository, BandRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
-        services.AddScoped<ISpotifyClient, SpotifyClient>();
 
+        services.AddHttpClient<IOllamaClient, OllamaClient>();
+        services.AddHttpClient<ILastFmClient, LastFmClient>();
+        services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
         services.AddHttpClient<ISpotifyClient, SpotifyClient>();
 
         services.AddSignalR();

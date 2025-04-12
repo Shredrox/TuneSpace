@@ -4,5 +4,5 @@ namespace TuneSpace.Infrastructure.Hubs;
 
 public class NotificationHub : Hub
 {
-    
+
 }

@@ -13,6 +13,36 @@ internal class BandRepository(TuneSpaceDbContext context) : IBandRepository
         await context.SaveChangesAsync();
     }
 
+    async Task<List<Band>> IBandRepository.GetAllBands()
+    {
+        return await context.Bands.ToListAsync();
+    }
+
+    async Task<List<Band>> IBandRepository.GetBandsByGenre(string genre)
+    {
+        return await context.Bands
+            .Where(b => b.Genre != null && b.Genre.Contains(genre))
+            .ToListAsync();
+    }
+
+    async Task<List<Band>> IBandRepository.GetBandsByLocation(string location)
+    {
+        return await context.Bands
+            .Where(b => (b.Country != null && b.Country.Contains(location)) ||
+                        (b.City != null && b.City.Contains(location)))
+            .ToListAsync();
+    }
+
+    async Task<List<Band>> IBandRepository.GetBandsByGenreAndLocation(string genre, string location)
+    {
+        return await context.Bands
+            .Where(b =>
+                b.Genre != null && b.Genre.Contains(genre) &&
+                ((b.Country != null && b.Country.Contains(location)) ||
+                 (b.City != null && b.City.Contains(location))))
+            .ToListAsync();
+    }
+
     async Task<Band?> IBandRepository.GetBandByName(string name)
     {
         return await context.Bands.FirstOrDefaultAsync(b => b.Name == name);

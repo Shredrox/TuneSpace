@@ -1,8 +1,8 @@
-﻿using TuneSpace.Core.Entities;
+using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
 
-namespace TuneSpace.Core.Services;
+namespace TuneSpace.Application.Services;
 
 internal class TagService(ITagRepository tagRepository) : ITagService
 {

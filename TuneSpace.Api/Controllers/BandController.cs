@@ -42,12 +42,12 @@ public class BandController(IBandService bandService) : ControllerBase
     public async Task<IActionResult> GetBandImage(string bandId)
     {
         var imageData = await bandService.GetBandImage(Guid.Parse(bandId));
-            
+
         if (imageData is null)
         {
             return NotFound();
         }
-            
+
         return File(imageData, "image/jpeg");
     }
 
@@ -58,7 +58,7 @@ public class BandController(IBandService bandService) : ControllerBase
         {
             var band = await bandService.CreateBand(request);
 
-            if(band == null)
+            if (band == null)
             {
                 return BadRequest();
             }

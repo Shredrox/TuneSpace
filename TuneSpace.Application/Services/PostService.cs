@@ -1,9 +1,9 @@
-﻿using TuneSpace.Core.DTOs.Requests.Post;
+using TuneSpace.Core.DTOs.Requests.Post;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
 
-namespace TuneSpace.Core.Services;
+namespace TuneSpace.Application.Services;
 
 internal class PostService(IPostRepository postRepository) : IPostService
 {
@@ -14,7 +14,7 @@ internal class PostService(IPostRepository postRepository) : IPostService
             Title = request.Name,
             Content = request.Content
         };
-        
+
         await postRepository.InsertPost(newPost);
     }
 }

@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\TuneSpace.Application\TuneSpace.Application.csproj" />
       <ProjectReference Include="..\TuneSpace.Core\TuneSpace.Core.csproj" />
       <ProjectReference Include="..\TuneSpace.Infrastructure\TuneSpace.Infrastructure.csproj" />
     </ItemGroup>
