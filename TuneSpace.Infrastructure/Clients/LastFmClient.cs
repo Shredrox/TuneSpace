@@ -85,36 +85,4 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
             .Where(name => !string.IsNullOrEmpty(name))
             .ToList();
     }
-
-    async Task<List<BandModel>> ILastFmClient.EnrichBandData(List<BandModel> bands)
-    {
-        foreach (var band in bands)
-        {
-            try
-            {
-                var bandData = await ((ILastFmClient)this).GetBandDataAsync(band.Name);
-
-                band.Listeners = bandData.Listeners;
-                band.PlayCount = bandData.PlayCount;
-                band.ImageUrl = bandData.ImageUrl;
-
-                if (band.Genres.Count == 0)
-                {
-                    band.Genres = bandData.Genres;
-                }
-                else if (bandData.Genres.Count > 0)
-                {
-                    band.Genres.AddRange(bandData.Genres.Except(band.Genres));
-                }
-
-                band.SimilarArtists = await ((ILastFmClient)this).GetSimilarBandsAsync(band.Name, 5);
-            }
-            catch (Exception)
-            {
-                continue;
-            }
-        }
-
-        return bands;
-    }
 }

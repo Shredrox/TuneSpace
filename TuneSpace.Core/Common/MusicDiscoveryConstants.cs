@@ -13,6 +13,14 @@ public static class MusicDiscoveryConstants
     public const double NewRegistrationBonus = 0.2;
     public const double MinRegisteredBandPercentage = 0.35;
     public const int RecommendationCooldownDays = 14;
-    public const int MaxPopularityForUnderground = 40;
+    public const int MaxPopularityForUnderground = 30;
     public const int UndergroundArtistsToFetch = 15;
+
+    public const double GenreMatchScore = 0.3;
+    public const double LocationMatchBonus = 0.3;
+    public const double ListenerScoreFactor = 0.2;
+    public const double SimilarArtistBonus = 0.2;
+    public const double ExtraGenreMatchScore = 0.15;
+    public const double NewReleaseBonus = 0.2;
+    public const double HipsterTagBonus = 0.1;
 }
