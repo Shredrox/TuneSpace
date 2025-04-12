@@ -1,4 +1,4 @@
-namespace TuneSpace.Core.Services;
+namespace TuneSpace.Core.Common;
 
 /// <summary>
 /// Constants used by the MusicDiscoveryService

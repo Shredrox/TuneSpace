@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,7 +8,7 @@ using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
 
-namespace TuneSpace.Core.Services;
+namespace TuneSpace.Application.Services;
 
 internal class TokenService(
     IConfiguration configuration,

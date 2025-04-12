@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using TuneSpace.Core.DTOs.Requests.Spotify;
@@ -7,7 +7,7 @@ using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IServices;
 
-namespace TuneSpace.Core.Services;
+namespace TuneSpace.Application.Services;
 
 internal class SpotifyService(
     ISpotifyClient spotifyClient,

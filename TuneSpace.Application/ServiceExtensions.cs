@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using TuneSpace.Core.Interfaces.IServices;
-using TuneSpace.Core.Services;
+using TuneSpace.Application.Services;
 
-namespace TuneSpace.Core;
+namespace TuneSpace.Application;
 
 public static class ServiceExtensions
 {

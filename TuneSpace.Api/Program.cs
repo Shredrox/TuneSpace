@@ -1,6 +1,6 @@
 using Serilog;
 using TuneSpace.Api.Infrastructure;
-using TuneSpace.Core;
+using TuneSpace.Application;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
 

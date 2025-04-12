@@ -4,8 +4,9 @@ using TuneSpace.Core.Interfaces.IServices;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Models;
 using TuneSpace.Core.Entities;
+using TuneSpace.Core.Common;
 
-namespace TuneSpace.Core.Services;
+namespace TuneSpace.Application.Services;
 
 internal class MusicDiscoveryService(
     IMusicBrainzClient musicBrainzClient,
