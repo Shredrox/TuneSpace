@@ -8,10 +8,10 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
     async Task<HttpResponseMessage> ISpotifyClient.GetToken(FormUrlEncodedContent parameters)
     {
         const string tokenEndpoint = "https://accounts.spotify.com/api/token";
-        
+
         return await httpClient.PostAsync(tokenEndpoint, parameters);
     }
-    
+
     async Task<HttpResponseMessage> ISpotifyClient.GetUserInfo(string token)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -26,11 +26,17 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         return await httpClient.GetAsync("https://api.spotify.com/v1/me/player/recently-played");
     }
 
-    async Task<HttpResponseMessage> ISpotifyClient.GetUserFollowedArtists(string token)
+    async Task<HttpResponseMessage> ISpotifyClient.GetUserFollowedArtists(string token, string? after)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        return await httpClient.GetAsync("https://api.spotify.com/v1/me/following?type=artist&limit=50");
+        string url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
+        if (!string.IsNullOrEmpty(after))
+        {
+            url += $"&after={after}";
+        }
+
+        return await httpClient.GetAsync(url);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserTopArtists(string token)
@@ -39,25 +45,25 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
 
         return await httpClient.GetAsync("https://api.spotify.com/v1/me/top/artists?time_range=short_term&limit=5&offset=0");
     }
-    
+
     async Task<HttpResponseMessage> ISpotifyClient.GetUserTopSongs(string token)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         return await httpClient.GetAsync("https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=5&offset=0");
     }
-    
+
     async Task<HttpResponseMessage> ISpotifyClient.GetSongsBySearch(string token, string search)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        
+
         return await httpClient.GetAsync($"https://api.spotify.com/v1/search?q={search}&type=track&limit=5");
     }
-    
+
     async Task<HttpResponseMessage> ISpotifyClient.CreatePlaylist(string token, string userId, StringContent requestContent)
     {
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        
+
         return await httpClient.PostAsync($"https://api.spotify.com/v1/users/{userId}/playlists", requestContent);
     }
 
@@ -79,7 +85,31 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
     {
         httpClient.DefaultRequestHeaders.Accept.Clear();
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        
+
         return await httpClient.PostAsync("https://accounts.spotify.com/api/token", parameters);
+    }
+
+    async Task<HttpResponseMessage> ISpotifyClient.Search(string token, string query, string types, int limit)
+    {
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var requestUrl = $"https://api.spotify.com/v1/search?q={Uri.EscapeDataString(query)}&type={types}";
+
+        if (limit > 0)
+        {
+            requestUrl += $"&limit={limit}";
+        }
+
+        // if (offset > 0)
+        // {
+        //     requestUrl += $"&offset={offset}";
+        // }
+
+        // if (!string.IsNullOrEmpty(market))
+        // {
+        //     requestUrl += $"&market={market}";
+        // }
+
+        return await httpClient.GetAsync(requestUrl);
     }
 }

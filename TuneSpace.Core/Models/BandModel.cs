@@ -15,13 +15,20 @@ public class BandModel
     public double DiversityScore { get; set; }
     public List<string> SimilarArtists { get; set; } = new();
     public bool IsRegistered { get; set; } = false;
-    
+
     [JsonIgnore]
     public string? SimilarToArtistName { get; set; }
-    
+
     [JsonIgnore]
     public string? SimilarToRegisteredBand { get; set; }
 
     [JsonIgnore]
     public bool IsLesserKnown => Listeners < 100000 || Popularity < 40;
+
+    public bool IsFromSearch { get; set; }
+    public bool IsNewRelease { get; set; }
+    public List<string> SearchTags { get; set; } = new();
+
+    public string? LatestAlbum { get; set; }
+    public string? LatestAlbumReleaseDate { get; set; }
 }
