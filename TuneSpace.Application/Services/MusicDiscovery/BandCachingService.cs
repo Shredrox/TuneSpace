@@ -4,16 +4,10 @@ using TuneSpace.Core.Interfaces.IInfrastructure;
 
 namespace TuneSpace.Application.Services.MusicDiscovery;
 
-internal class BandCachingService : IBandCachingService
+internal class BandCachingService(IMemoryCache cache, ILogger<BandCachingService> logger) : IBandCachingService
 {
-    private readonly IMemoryCache _cache;
-    private readonly ILogger<BandCachingService> _logger;
-
-    public BandCachingService(IMemoryCache cache, ILogger<BandCachingService> logger)
-    {
-        _cache = cache;
-        _logger = logger;
-    }
+    private readonly IMemoryCache _cache = cache;
+    private readonly ILogger<BandCachingService> _logger = logger;
 
     bool IBandCachingService.TryGetCachedItem<T>(string cacheKey, out T? value) where T : class
     {
