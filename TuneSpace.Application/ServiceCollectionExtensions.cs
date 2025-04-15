@@ -6,9 +6,9 @@ using TuneSpace.Application.Services.MusicDiscovery;
 
 namespace TuneSpace.Application;
 
-public static class ServiceExtensions
+public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCoreServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddSingleton<IApiThrottler, ApiThrottler>();
         services.AddSingleton<IBandCachingService, BandCachingService>();

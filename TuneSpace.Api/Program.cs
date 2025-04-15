@@ -31,10 +31,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddMemoryCache();
+builder.Services.AddDatabaseServices(builder.Configuration);
+builder.Services.AddRepositoryServices();
+builder.Services.AddCachingServices();
+builder.Services.AddIdentityServices();
+builder.Services.AddHttpClientServices();
 
-builder.Services.AddCoreServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
