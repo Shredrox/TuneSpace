@@ -82,7 +82,7 @@ public interface ISpotifyService
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <param name="request">Playlist creation details</param>
-    void CreatePlaylist(string token, CreatePlaylistRequest request);
+    Task CreatePlaylist(string token, CreatePlaylistRequest request);
 
     /// <summary>
     /// Refreshes a Spotify access token using a refresh token

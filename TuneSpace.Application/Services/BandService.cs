@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TuneSpace.Core.DTOs.Requests.Band;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
@@ -5,116 +6,211 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Application.Services;
 
-internal class BandService(IBandRepository bandRepository, IUserRepository userRepository) : IBandService
+internal class BandService(
+    IBandRepository bandRepository,
+    IUserRepository userRepository,
+    ILogger<BandService> logger) : IBandService
 {
+    private readonly IBandRepository _bandRepository = bandRepository;
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly ILogger<BandService> _logger = logger;
+
     async Task<Band?> IBandService.CreateBand(CreateBandRequest request)
     {
-        var user = await userRepository.GetUserById(request.UserId);
-        if (user == null)
+        try
         {
-            return null;
+            _logger.LogInformation("Creating new band with name: {BandName}", request.Name);
+
+            var user = await _userRepository.GetUserById(request.UserId);
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found when creating band", request.UserId);
+                return null;
+            }
+
+            var city = request.Location.Split(',')[1].Trim();
+            var country = request.Location.Split(',')[0].Trim();
+
+            byte[] fileBytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await request.Picture.CopyToAsync(memoryStream);
+                fileBytes = memoryStream.ToArray();
+            }
+
+            var band = new Band
+            {
+                Name = request.Name,
+                Genre = request.Genre,
+                Description = request.Description,
+                Country = country,
+                City = city,
+                CoverImage = fileBytes,
+                User = user
+            };
+
+            await _bandRepository.InsertBand(band);
+            _logger.LogInformation("Band {BandName} created successfully with ID {BandId}", band.Name, band.Id);
+            return band;
         }
-
-        var city = request.Location.Split(',')[1].Trim();
-        var country = request.Location.Split(',')[0].Trim();
-
-        byte[] fileBytes;
-        using (var memoryStream = new MemoryStream())
+        catch (Exception ex)
         {
-            await request.Picture.CopyToAsync(memoryStream);
-            fileBytes = memoryStream.ToArray();
+            _logger.LogError(ex, "Error creating band with name {BandName}", request.Name);
+            throw;
         }
-
-        var band = new Band
-        {
-            Name = request.Name,
-            Genre = request.Genre,
-            Description = request.Description,
-            Country = country,
-            City = city,
-            CoverImage = fileBytes,
-            User = user
-        };
-
-        await bandRepository.InsertBand(band);
-        return band;
     }
 
     async Task<Band?> IBandService.GetBandById(Guid id)
     {
-        return await bandRepository.GetBandById(id);
+        try
+        {
+            _logger.LogInformation("Getting band with ID {BandId}", id);
+            var band = await _bandRepository.GetBandById(id);
+            if (band == null)
+            {
+                _logger.LogWarning("Band with ID {BandId} not found", id);
+                return null;
+            }
+            return band;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving band with ID {BandId}", id);
+            throw;
+        }
     }
 
     async Task<Band?> IBandService.GetBandByName(string name)
     {
-        return await bandRepository.GetBandByName(name);
+        try
+        {
+            _logger.LogInformation("Getting band with name {BandName}", name);
+            var band = await _bandRepository.GetBandByName(name);
+            if (band == null)
+            {
+                _logger.LogWarning("Band with name {BandName} not found", name);
+            }
+            return band;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving band with name {BandName}", name);
+            throw;
+        }
     }
 
     async Task<Band?> IBandService.GetBandByUserId(string id)
     {
-        return await bandRepository.GetBandByUserId(id);
+        try
+        {
+            _logger.LogInformation("Getting band for user with ID {UserId}", id);
+            var band = await _bandRepository.GetBandByUserId(id);
+            if (band == null)
+            {
+                _logger.LogWarning("No band found for user with ID {UserId}", id);
+            }
+            return band;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving band for user with ID {UserId}", id);
+            throw;
+        }
     }
 
     async Task<byte[]?> IBandService.GetBandImage(Guid bandId)
     {
-        var band = await bandRepository.GetBandById(bandId);
-        return band?.CoverImage;
+        try
+        {
+            _logger.LogInformation("Getting image for band with ID {BandId}", bandId);
+            var band = await _bandRepository.GetBandById(bandId);
+            if (band == null)
+            {
+                _logger.LogWarning("Band with ID {BandId} not found when retrieving image", bandId);
+                return null;
+            }
+            return band.CoverImage;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving image for band with ID {BandId}", bandId);
+            throw;
+        }
     }
 
     async Task IBandService.UpdateBand(UpdateBandRequest request)
     {
-        var band = await bandRepository.GetBandById(request.Id);
-        if (band == null)
+        try
         {
-            return;
-        }
+            _logger.LogInformation("Updating band with ID {Id}", request.Id);
 
-        if (!string.IsNullOrEmpty(request.Name))
-        {
-            band.Name = request.Name;
-        }
-
-        if (!string.IsNullOrEmpty(request.Description))
-        {
-            band.Description = request.Description;
-        }
-
-        if (!string.IsNullOrEmpty(request.Genre))
-        {
-            band.Genre = request.Genre;
-        }
-
-        if (!string.IsNullOrEmpty(request.SpotifyId))
-        {
-            band.SpotifyId = request.SpotifyId;
-        }
-
-        if (!string.IsNullOrEmpty(request.YouTubeEmbedId))
-        {
-            band.YouTubeEmbedId = request.YouTubeEmbedId;
-        }
-
-        if (request.Picture != null)
-        {
-            using (var memoryStream = new MemoryStream())
+            var band = await _bandRepository.GetBandById(request.Id);
+            if (band == null)
             {
-                await request.Picture.CopyToAsync(memoryStream);
-                band.CoverImage = memoryStream.ToArray();
+                _logger.LogWarning("Band with ID {Id} not found for update", request.Id);
+                return;
             }
-        }
 
-        await bandRepository.UpdateBand(band);
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                band.Name = request.Name;
+            }
+
+            if (!string.IsNullOrEmpty(request.Description))
+            {
+                band.Description = request.Description;
+            }
+
+            if (!string.IsNullOrEmpty(request.Genre))
+            {
+                band.Genre = request.Genre;
+            }
+
+            if (!string.IsNullOrEmpty(request.SpotifyId))
+            {
+                band.SpotifyId = request.SpotifyId;
+            }
+
+            if (!string.IsNullOrEmpty(request.YouTubeEmbedId))
+            {
+                band.YouTubeEmbedId = request.YouTubeEmbedId;
+            }
+
+            if (request.Picture != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await request.Picture.CopyToAsync(memoryStream);
+                    band.CoverImage = memoryStream.ToArray();
+                }
+            }
+
+            await _bandRepository.UpdateBand(band);
+            _logger.LogInformation("Band with ID {Id} updated successfully", request.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating band with ID {Id}", request.Id);
+            throw;
+        }
     }
 
     async Task IBandService.DeleteBand(Guid id)
     {
         try
         {
-            await bandRepository.DeleteBand(id);
+            _logger.LogInformation("Deleting band with ID {Id}", id);
+            await _bandRepository.DeleteBand(id);
+            _logger.LogInformation("Band with ID {Id} deleted successfully", id);
         }
         catch (KeyNotFoundException)
         {
-
+            _logger.LogWarning("Band with ID {Id} not found for deletion", id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting band with ID {Id}", id);
+            throw;
         }
     }
 }

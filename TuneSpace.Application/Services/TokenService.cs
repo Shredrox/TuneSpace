@@ -16,23 +16,29 @@ internal class TokenService(
 {
     string ITokenService.CreateAccessToken(User user)
     {
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Email, user.Email)
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Role, user.Role.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
+        var tokenConfig = configuration.GetSection("Jwt");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            configuration.GetSection("Jwt:Token").Value!));
+            tokenConfig["Token"] ?? throw new InvalidOperationException("JWT Token secret is not configured")));
 
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
+            issuer: tokenConfig["Issuer"],
+            audience: tokenConfig["Audience"],
             claims: claims,
-            expires: DateTime.Now.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(tokenConfig["ExpiryMinutes"] ?? "60")),
             signingCredentials: credentials);
 
-        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-        return jwt;
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     async Task<string> ITokenService.CreateRefreshToken(User user)

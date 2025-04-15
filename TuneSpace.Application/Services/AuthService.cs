@@ -13,9 +13,13 @@ internal class AuthService(
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService) : IAuthService
 {
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
+    private readonly ITokenService _tokenService = tokenService;
+
     async Task IAuthService.Register(string name, string email, string password, UserRole role)
     {
-        if (await userRepository.GetUserByName(name) is not null)
+        if (await _userRepository.GetUserByName(name) is not null)
         {
             throw new ArgumentException("Username already taken");
         }
@@ -27,20 +31,20 @@ internal class AuthService(
             Role = role
         };
 
-        await userRepository.InsertUser(user, password);
+        await _userRepository.InsertUser(user, password);
     }
 
     async Task<LoginResponse> IAuthService.Login(string email, string password)
     {
-        var user = await userRepository.GetUserByEmail(email);
+        var user = await _userRepository.GetUserByEmail(email);
 
         if (user is null || VerifyPassword(user, password) is false)
         {
             throw new UnauthorizedException("Incorrect email or password");
         }
 
-        var accessToken = tokenService.CreateAccessToken(user);
-        var refreshToken = await tokenService.CreateRefreshToken(user);
+        var accessToken = _tokenService.CreateAccessToken(user);
+        var refreshToken = await _tokenService.CreateRefreshToken(user);
 
         return new LoginResponse(user.Id, user.UserName, user.Role, accessToken, refreshToken);
     }
@@ -52,6 +56,6 @@ internal class AuthService(
             return false;
         }
 
-        return passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) is PasswordVerificationResult.Success;
+        return _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) is PasswordVerificationResult.Success;
     }
 }
