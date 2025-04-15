@@ -8,42 +8,68 @@ namespace TuneSpace.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
+public class SpotifyController(
+    ISpotifyService spotifyService,
+    ILogger<SpotifyController> logger) : ControllerBase
 {
+    private readonly ISpotifyService _spotifyService = spotifyService;
+    private readonly ILogger<SpotifyController> _logger = logger;
+
     [HttpGet("login")]
     public IActionResult SpotifyLogin()
     {
-        var redirectUrl = spotifyService.GetSpotifyLoginUrl();
-        return Redirect(redirectUrl);
+        try
+        {
+            var redirectUrl = _spotifyService.GetSpotifyLoginUrl();
+            return Redirect(redirectUrl);
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error generating Spotify login URL");
+            return BadRequest("Error generating Spotify login URL");
+        }
     }
 
     [HttpGet("callback")]
     public async Task<IActionResult> Callback(string code, string state)
     {
-        var spotifyTokens = await spotifyService.ExchangeCodeForToken(code);
-
-        Response.Cookies.Append("SpotifyAccessToken", spotifyTokens.AccessToken, new CookieOptions
+        try
         {
-            Expires = DateTime.Now.AddHours(1),
-            HttpOnly = true,
-            Secure = true,
-            IsEssential = true,
-            Domain = "localhost",
-            SameSite = SameSiteMode.None
-        });
+            var spotifyTokens = await _spotifyService.ExchangeCodeForToken(code);
 
-        Response.Cookies.Append("SpotifyRefreshToken", spotifyTokens.RefreshToken, new CookieOptions
+            var tokenExpiry = DateTime.Now.AddSeconds(spotifyTokens.ExpiresIn);
+
+            Response.Cookies.Append("SpotifyAccessToken", spotifyTokens.AccessToken, new CookieOptions
+            {
+                Expires = tokenExpiry,
+                HttpOnly = true,
+                Secure = true,
+                IsEssential = true,
+                Domain = "localhost",
+                SameSite = SameSiteMode.None
+            });
+
+            Response.Cookies.Append("SpotifyRefreshToken", spotifyTokens.RefreshToken, new CookieOptions
+            {
+                Expires = DateTime.Now.AddDays(30),
+                HttpOnly = true,
+                Secure = true,
+                IsEssential = true,
+                Domain = "localhost",
+                SameSite = SameSiteMode.None
+            });
+
+            var redirectUrl = $"http://localhost:5173/?" +
+                $"&tokenExpiryTime={Uri.EscapeDataString(tokenExpiry.ToString("o"))}";
+
+            return Redirect(redirectUrl);
+        }
+        catch (Exception e)
         {
-            Expires = DateTime.Now.AddHours(1),
-            HttpOnly = true,
-            Secure = true,
-            IsEssential = true,
-            Domain = "localhost",
-            SameSite = SameSiteMode.None
-        });
-
-        var redirectUrl = $"http://localhost:5173/";
-        return Redirect(redirectUrl);
+            _logger.LogError(e, "Error during Spotify callback");
+            return BadRequest("Error during Spotify callback");
+        }
     }
 
     [HttpPost("refresh")]
@@ -57,11 +83,13 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
 
         try
         {
-            var newTokens = await spotifyService.RefreshAccessToken(refreshToken);
+            var newTokens = await _spotifyService.RefreshAccessToken(refreshToken);
+
+            var tokenExpiry = DateTime.Now.AddSeconds(newTokens.ExpiresIn);
 
             Response.Cookies.Append("SpotifyAccessToken", newTokens.AccessToken, new CookieOptions
             {
-                Expires = DateTime.Now.AddHours(1),
+                Expires = tokenExpiry,
                 HttpOnly = true,
                 Secure = true,
                 IsEssential = true,
@@ -82,10 +110,14 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
                 });
             }
 
-            return Ok(new { AccessToken = newTokens.AccessToken });
+            return Ok(new
+            {
+                spotifyTokenExpiry = tokenExpiry,
+            });
         }
         catch (SpotifyApiException ex)
         {
+            _logger.LogError(ex, "Error refreshing Spotify access token");
             return StatusCode(500, ex.Message);
         }
     }
@@ -101,9 +133,9 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
 
         try
         {
-            var profile = await spotifyService.GetUserSpotifyProfile(accessToken);
-            var topArtists = await spotifyService.GetUserTopArtists(accessToken);
-            var topSongs = await spotifyService.GetUserTopSongs(accessToken);
+            var profile = await _spotifyService.GetUserSpotifyProfile(accessToken);
+            var topArtists = await _spotifyService.GetUserTopArtists(accessToken);
+            var topSongs = await _spotifyService.GetUserTopSongs(accessToken);
 
             var stats = new SpotifyStatsResponse(profile, topArtists, topSongs);
 
@@ -111,6 +143,7 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
         }
         catch (SpotifyApiException e)
         {
+            _logger.LogError(e, "Error fetching Spotify profile");
             return StatusCode(500, e.Message);
         }
     }
@@ -118,15 +151,23 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
     [HttpGet("top-artists")]
     public async Task<IActionResult> GetUserTopArtists()
     {
-        var accessToken = Request.Cookies["SpotifyAccessToken"];
-        if (string.IsNullOrEmpty(accessToken))
+        try
         {
-            return Unauthorized("Access token is required");
+            var accessToken = Request.Cookies["SpotifyAccessToken"];
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return Unauthorized("Access token is required");
+            }
+
+            var topArtists = await _spotifyService.GetUserTopArtists(accessToken);
+
+            return Ok(topArtists);
         }
-
-        var topArtists = await spotifyService.GetUserTopArtists(accessToken);
-
-        return Ok(topArtists);
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error fetching user top artists");
+            return BadRequest("Error fetching user top artists");
+        }
     }
 
     [HttpGet("top-songs")]
@@ -138,9 +179,16 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return Unauthorized("Access token is required");
         }
 
-        var topSongs = await spotifyService.GetUserTopSongs(accessToken);
-
-        return Ok(topSongs);
+        try
+        {
+            var topSongs = await _spotifyService.GetUserTopSongs(accessToken);
+            return Ok(topSongs);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error fetching user top songs");
+            return BadRequest("Error fetching user top songs");
+        }
     }
 
     [HttpGet("artist/{artistId}")]
@@ -153,8 +201,16 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return Unauthorized("Access token is required");
         }
 
-        var artist = await spotifyService.GetArtist(accessToken, artistId);
-        return Ok(artist);
+        try
+        {
+            var artist = await _spotifyService.GetArtist(accessToken, artistId);
+            return Ok(artist);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error fetching artist with ID: {ArtistId}", artistId);
+            return BadRequest("Error fetching artist");
+        }
     }
 
     [HttpGet("artists/{artistIds}")]
@@ -167,8 +223,17 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return Unauthorized("Access token is required");
         }
 
-        var artists = await spotifyService.GetSeveralArtists(accessToken, artistIds);
-        return Ok(artists);
+        try
+        {
+            var artists = await _spotifyService.GetSeveralArtists(accessToken, artistIds);
+            return Ok(artists);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error fetching artists with IDs: {ArtistIds}", artistIds);
+            return BadRequest("Error fetching artists");
+        }
+
     }
 
     [HttpGet("search/{searchTerm}")]
@@ -180,13 +245,25 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return Unauthorized("Access token is required");
         }
 
-        var searchSongs = await spotifyService.GetSongsBySearch(accessToken, searchTerm);
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            return BadRequest("Search term cannot be empty");
+        }
 
-        return Ok(searchSongs);
+        try
+        {
+            var searchSongs = await _spotifyService.GetSongsBySearch(accessToken, searchTerm);
+            return Ok(searchSongs);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error fetching songs by search term: {SearchTerm}", searchTerm);
+            return BadRequest("Error fetching songs");
+        }
     }
 
     [HttpPost("create-playlist")]
-    public IActionResult CreatePlaylist([FromBody] CreatePlaylistRequest request)
+    public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistRequest request)
     {
         var accessToken = Request.Cookies["SpotifyAccessToken"];
         if (string.IsNullOrEmpty(accessToken))
@@ -194,7 +271,15 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
             return Unauthorized("Access token is required");
         }
 
-        spotifyService.CreatePlaylist(accessToken, request);
+        try
+        {
+            await _spotifyService.CreatePlaylist(accessToken, request);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error creating playlist");
+            return BadRequest("Error creating playlist");
+        }
 
         return Created();
     }
@@ -210,11 +295,12 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
 
         try
         {
-            var recentlyPlayedTracks = await spotifyService.GetUserRecentlyPlayedTracks(accessToken);
+            var recentlyPlayedTracks = await _spotifyService.GetUserRecentlyPlayedTracks(accessToken);
             return Ok(recentlyPlayedTracks);
         }
         catch (SpotifyApiException e)
         {
+            _logger.LogError(e, "Error fetching recently played tracks");
             return StatusCode(500, e.Message);
         }
     }
@@ -230,11 +316,12 @@ public class SpotifyController(ISpotifyService spotifyService) : ControllerBase
 
         try
         {
-            var followedArtists = await spotifyService.GetUserFollowedArtists(accessToken);
+            var followedArtists = await _spotifyService.GetUserFollowedArtists(accessToken);
             return Ok(followedArtists);
         }
         catch (SpotifyApiException e)
         {
+            _logger.LogError(e, "Error fetching followed artists");
             return StatusCode(500, e.Message);
         }
     }

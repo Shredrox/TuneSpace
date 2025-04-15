@@ -5,8 +5,13 @@ namespace TuneSpace.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class MusicDiscoveryController(IMusicDiscoveryService musicDiscoveryService) : ControllerBase
+public class MusicDiscoveryController(
+    IMusicDiscoveryService musicDiscoveryService,
+    ILogger<MusicDiscoveryController> logger) : ControllerBase
 {
+    private readonly IMusicDiscoveryService _musicDiscoveryService = musicDiscoveryService;
+    private readonly ILogger<MusicDiscoveryController> _logger = logger;
+
     [HttpGet("recommendations")]
     public async Task<IActionResult> GetRecommendations([FromQuery] string? genres, [FromQuery] string? location = null)
     {
@@ -23,7 +28,7 @@ public class MusicDiscoveryController(IMusicDiscoveryService musicDiscoveryServi
                 ? new List<string>()
                 : genres.Split(',').ToList();
 
-            var recommendations = await musicDiscoveryService.GetBandRecommendationsAsync(
+            var recommendations = await _musicDiscoveryService.GetBandRecommendationsAsync(
                 accessToken,
                 genresList,
                 location ?? "");
@@ -32,7 +37,7 @@ public class MusicDiscoveryController(IMusicDiscoveryService musicDiscoveryServi
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, "Error fetching band recommendations");
             return BadRequest(e.Message);
         }
     }
