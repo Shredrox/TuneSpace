@@ -142,6 +142,15 @@ public class AuthController(
 
             if (user is null)
             {
+                return NotFound();
+            }
+
+            var username = user.UserName;
+            var role = user.Role.ToString().ToUpper();
+            var id = user.Id;
+
+            if (user is null)
+            {
                 _logger.LogWarning("Invalid refresh token provided");
                 return BadRequest("Invalid refresh token");
             }
@@ -170,7 +179,7 @@ public class AuthController(
             });
 
             _logger.LogInformation("Token refreshed successfully for user: {UserId}", user.Id);
-            return Ok(new { user.Id, newAccessToken, user.UserName, role = user.Role.ToString().ToUpper() });
+            return Ok(new { id, username, newAccessToken, role });
         }
         catch (Exception e)
         {
