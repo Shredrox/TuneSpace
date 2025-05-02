@@ -11,13 +11,24 @@ using TuneSpace.Core.Interfaces.IRepositories;
 
 namespace TuneSpace.Infrastructure;
 
-public static class ServiceExtensions
+public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<TuneSpaceDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("TuneSpaceDb")));
 
+        return services;
+    }
+
+    public static IServiceCollection AddCachingServices(this IServiceCollection services)
+    {
+        services.AddMemoryCache();
+        return services;
+    }
+
+    public static IServiceCollection AddIdentityServices(this IServiceCollection services)
+    {
         services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
         services.AddAuthorizationBuilder();
 
@@ -25,17 +36,26 @@ public static class ServiceExtensions
             .AddEntityFrameworkStores<TuneSpaceDbContext>()
             .AddDefaultTokenProviders();
 
+        return services;
+    }
+
+    public static IServiceCollection AddRepositoryServices(this IServiceCollection services)
+    {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IBandRepository, BandRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
+        services.AddScoped<IMusicEventRepository, MusicEventRepository>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddHttpClientServices(this IServiceCollection services)
+    {
         services.AddHttpClient<IOllamaClient, OllamaClient>();
         services.AddHttpClient<ILastFmClient, LastFmClient>();
         services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
         services.AddHttpClient<ISpotifyClient, SpotifyClient>();
-
-        services.AddSignalR();
 
         return services;
     }

@@ -6,28 +6,19 @@ using System.Collections.Concurrent;
 
 namespace TuneSpace.Application.Services;
 
-internal class MusicDiscoveryService : IMusicDiscoveryService
+internal class MusicDiscoveryService(
+    IMusicBrainzClient musicBrainzClient,
+    ISpotifyService spotifyService,
+    IArtistDiscoveryService artistDiscoveryService,
+    IDataEnrichmentService dataEnrichmentService,
+    IRecommendationScoringService scoringService) : IMusicDiscoveryService
 {
     private static readonly ConcurrentDictionary<string, DateTime> PreviouslyRecommendedBands = new();
-    private readonly IMusicBrainzClient _musicBrainzClient;
-    private readonly ISpotifyService _spotifyService;
-    private readonly IArtistDiscoveryService _artistDiscoveryService;
-    private readonly IDataEnrichmentService _dataEnrichmentService;
-    private readonly IRecommendationScoringService _scoringService;
-
-    public MusicDiscoveryService(
-        IMusicBrainzClient musicBrainzClient,
-        ISpotifyService spotifyService,
-        IArtistDiscoveryService artistDiscoveryService,
-        IDataEnrichmentService dataEnrichmentService,
-        IRecommendationScoringService scoringService)
-    {
-        _musicBrainzClient = musicBrainzClient;
-        _spotifyService = spotifyService;
-        _artistDiscoveryService = artistDiscoveryService;
-        _dataEnrichmentService = dataEnrichmentService;
-        _scoringService = scoringService;
-    }
+    private readonly IMusicBrainzClient _musicBrainzClient = musicBrainzClient;
+    private readonly ISpotifyService _spotifyService = spotifyService;
+    private readonly IArtistDiscoveryService _artistDiscoveryService = artistDiscoveryService;
+    private readonly IDataEnrichmentService _dataEnrichmentService = dataEnrichmentService;
+    private readonly IRecommendationScoringService _scoringService = scoringService;
 
     async Task<List<BandModel>> IMusicDiscoveryService.GetBandRecommendationsAsync(string spotifyAccessToken, List<string> genres, string location)
     {

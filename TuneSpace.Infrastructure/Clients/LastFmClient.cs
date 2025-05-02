@@ -5,8 +5,12 @@ using TuneSpace.Core.Models;
 
 namespace TuneSpace.Infrastructure.Clients;
 
-internal class LastFmClient(HttpClient httpClient, IConfiguration configuration) : ILastFmClient
+internal class LastFmClient(
+    HttpClient httpClient,
+    IConfiguration configuration) : ILastFmClient
 {
+    private readonly HttpClient _httpClient = httpClient;
+
     private readonly string _apiKey = configuration["ExternalApis:LastFm:ApiKey"]
             ?? throw new ArgumentNullException(nameof(configuration),
                 "LastFm API key is not configured in application settings");
@@ -15,7 +19,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
     async Task<BandModel> ILastFmClient.GetBandDataAsync(string bandName)
     {
         var apiUrl = $"{BaseUrl}?method=artist.getInfo&artist={bandName}&api_key={_apiKey}&format=json";
-        var response = await httpClient.GetStringAsync(apiUrl);
+        var response = await _httpClient.GetStringAsync(apiUrl);
         var bandData = JObject.Parse(response);
 
         var artist = bandData["artist"];
@@ -71,7 +75,7 @@ internal class LastFmClient(HttpClient httpClient, IConfiguration configuration)
     async Task<List<string>> ILastFmClient.GetSimilarBandsAsync(string bandName, int limit)
     {
         var apiUrl = $"{BaseUrl}?method=artist.getSimilar&artist={bandName}&api_key={_apiKey}&limit={limit}&format=json";
-        var response = await httpClient.GetStringAsync(apiUrl);
+        var response = await _httpClient.GetStringAsync(apiUrl);
         var similarBands = JObject.Parse(response);
 
         var artists = similarBands["similarartists"]?["artist"]?.ToObject<JArray>();

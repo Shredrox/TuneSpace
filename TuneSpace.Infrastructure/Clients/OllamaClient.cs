@@ -6,6 +6,8 @@ namespace TuneSpace.Infrastructure.Clients;
 
 internal class OllamaClient(HttpClient httpClient) : IOllamaClient
 {
+    private readonly HttpClient _httpClient = httpClient;
+
     async Task<string> IOllamaClient.Prompt(string location, List<string> genres)
     {
         var requestData = new
@@ -18,7 +20,7 @@ internal class OllamaClient(HttpClient httpClient) : IOllamaClient
         string json = JsonSerializer.Serialize(requestData);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsync("http://localhost:11434/api/generate", content);
+        var response = await _httpClient.PostAsync("http://localhost:11434/api/generate", content);
         response.EnsureSuccessStatusCode();
 
         string result = await response.Content.ReadAsStringAsync();

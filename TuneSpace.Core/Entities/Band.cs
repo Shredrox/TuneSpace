@@ -13,4 +13,5 @@ public class Band
     public User User { get; set; }
     public string? SpotifyId { get; set; }
     public string? YouTubeEmbedId { get; set; }
+    public ICollection<MusicEvent> Events { get; set; } = [];
 }

@@ -6,24 +6,16 @@ using TuneSpace.Core.Models;
 
 namespace TuneSpace.Application.Services.MusicDiscovery;
 
-internal class DataEnrichmentService : IDataEnrichmentService
+internal class DataEnrichmentService(
+    ILastFmClient lastFmClient,
+    IBandCachingService cachingService,
+    ILogger<DataEnrichmentService> logger,
+    IApiThrottler apiThrottler) : IDataEnrichmentService
 {
-    private readonly ILastFmClient _lastFmClient;
-    private readonly IBandCachingService _cachingService;
-    private readonly ILogger<DataEnrichmentService> _logger;
-    private readonly IApiThrottler _apiThrottler;
-
-    public DataEnrichmentService(
-        ILastFmClient lastFmClient,
-        IBandCachingService cachingService,
-        ILogger<DataEnrichmentService> logger,
-        IApiThrottler apiThrottler)
-    {
-        _lastFmClient = lastFmClient;
-        _cachingService = cachingService;
-        _logger = logger;
-        _apiThrottler = apiThrottler;
-    }
+    private readonly ILastFmClient _lastFmClient = lastFmClient;
+    private readonly IBandCachingService _cachingService = cachingService;
+    private readonly ILogger<DataEnrichmentService> _logger = logger;
+    private readonly IApiThrottler _apiThrottler = apiThrottler;
 
     async Task<List<BandModel>> IDataEnrichmentService.EnrichMultipleBands(List<BandModel> bands)
     {

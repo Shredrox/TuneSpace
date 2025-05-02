@@ -10,30 +10,20 @@ using TuneSpace.Core.Interfaces.IInfrastructure;
 
 namespace TuneSpace.Application.Services.MusicDiscovery;
 
-internal class ArtistDiscoveryService : IArtistDiscoveryService
+internal class ArtistDiscoveryService(
+    ISpotifyService spotifyService,
+    ILastFmClient lastFmClient,
+    IBandCachingService cachingService,
+    IBandRepository bandRepository,
+    ILogger<ArtistDiscoveryService> logger,
+    IApiThrottler apiThrottler) : IArtistDiscoveryService
 {
-    private readonly ISpotifyService _spotifyService;
-    private readonly ILastFmClient _lastFmClient;
-    private readonly IBandCachingService _cachingService;
-    private readonly IBandRepository _bandRepository;
-    private readonly ILogger<ArtistDiscoveryService> _logger;
-    private readonly IApiThrottler _apiThrottler;
-
-    public ArtistDiscoveryService(
-        ISpotifyService spotifyService,
-        ILastFmClient lastFmClient,
-        IBandCachingService cachingService,
-        IBandRepository bandRepository,
-        ILogger<ArtistDiscoveryService> logger,
-        IApiThrottler apiThrottler)
-    {
-        _spotifyService = spotifyService;
-        _lastFmClient = lastFmClient;
-        _cachingService = cachingService;
-        _bandRepository = bandRepository;
-        _logger = logger;
-        _apiThrottler = apiThrottler;
-    }
+    private readonly ISpotifyService _spotifyService = spotifyService;
+    private readonly ILastFmClient _lastFmClient = lastFmClient;
+    private readonly IBandCachingService _cachingService = cachingService;
+    private readonly IBandRepository _bandRepository = bandRepository;
+    private readonly ILogger<ArtistDiscoveryService> _logger = logger;
+    private readonly IApiThrottler _apiThrottler = apiThrottler;
 
     public async Task<List<SpotifyArtistDTO>?> GetArtistDetailsInBatches(string token, List<string> artistIds, int batchSize = 50)
     {
