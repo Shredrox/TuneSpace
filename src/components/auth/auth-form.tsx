@@ -4,14 +4,22 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/shadcn/button";
 import { Card, CardContent } from "@/components/shadcn/card";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
 import Register from "./register-form";
 import Login from "./login-form";
 
-export function AuthForm({ className, ...props }: React.ComponentProps<"div">) {
+export function AuthForm({
+  className,
+  defaultTab,
+  ...props
+}: React.ComponentProps<"div"> & { defaultTab?: string | null }) {
   const [formStep, setFormStep] = useState(0);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(defaultTab === "login");
+
+  useEffect(() => {
+    setIsLogin(defaultTab === "login");
+  }, [defaultTab]);
 
   const { setAuth } = useAuth();
 

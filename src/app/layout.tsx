@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TuneSpace",
   description: "The best music platform",
+  icons: {
+    icon: "logo.png",
+  },
 };
 
 export default function RootLayout({

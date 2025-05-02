@@ -1,9 +1,15 @@
-import DiscoveryList from "@/components/home/discovery-list";
+"use client";
 
-export default async function Home() {
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <DiscoveryList />
-    </div>
-  );
+import useAuth from "@/hooks/useAuth";
+import AuthenticatedHomeView from "@/components/home/authenticated-home-view";
+import UnauthenticatedHomeView from "@/components/home/unauthenticated-home-view";
+
+export default function HomePage() {
+  const { auth } = useAuth();
+
+  if (auth.accessToken) {
+    return <AuthenticatedHomeView />;
+  }
+
+  return <UnauthenticatedHomeView />;
 }

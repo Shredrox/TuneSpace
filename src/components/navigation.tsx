@@ -7,7 +7,13 @@ import {
   NavigationMenu,
   NavigationMenuList,
 } from "@/components/shadcn/navigation-menu";
-import { DiscAlbum, House, Newspaper } from "lucide-react";
+import {
+  AudioLines,
+  CalendarDays,
+  DiscAlbum,
+  House,
+  Newspaper,
+} from "lucide-react";
 import { ROUTES } from "@/utils/constants";
 
 const Navigation = () => {
@@ -19,10 +25,16 @@ const Navigation = () => {
 
   const linksData = [
     {
-      id: 1,
+      id: 0,
       to: ROUTES.HOME,
       text: "Home",
       icon: <House className="w-6 h-6" />,
+    },
+    {
+      id: 1,
+      to: ROUTES.DISCOVER,
+      text: "Discover",
+      icon: <AudioLines className="w-6 h-6" />,
     },
     {
       id: 2,
@@ -36,10 +48,16 @@ const Navigation = () => {
       text: "News",
       icon: <Newspaper className="w-6 h-6" />,
     },
+    {
+      id: 4,
+      to: ROUTES.EVENTS,
+      text: "Events",
+      icon: <CalendarDays className="w-6 h-6" />,
+    },
   ];
 
   return (
-    <div className="bg-secondary">
+    <div>
       <NavigationMenu>
         <NavigationMenuList className="flex gap-1 items-center">
           {linksData.map((link) => (

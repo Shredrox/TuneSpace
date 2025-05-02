@@ -2,12 +2,13 @@
 
 import { AppSidebar } from "@/components/app-sidebar";
 import Header from "@/components/header";
-import { AuthForm } from "@/components/auth/auth-form";
 import Loading from "@/components/fallback/loading";
 import { SidebarProvider } from "@/components/shadcn/sidebar";
 import useAuth from "@/hooks/useAuth";
 import useRefreshToken from "@/hooks/useRefreshToken";
 import { useEffect, useState } from "react";
+import LandingLayout from "@/layouts/landing-layout";
+import { useSearchParams } from "next/navigation";
 
 export default function MainClientLayout({
   children,
@@ -15,9 +16,12 @@ export default function MainClientLayout({
   children: React.ReactNode;
 }) {
   const { auth } = useAuth();
-
   const [isLoading, setIsLoading] = useState(true);
-  const refresh = useRefreshToken();
+  const { refresh, refreshSpotifyToken } = useRefreshToken();
+  const searchParams = useSearchParams();
+
+  const showAuthForm = searchParams.get("auth") === "true";
+  const authType = searchParams.get("type");
 
   useEffect(() => {
     const verifyRefreshToken = async () => {
@@ -26,11 +30,37 @@ export default function MainClientLayout({
       } catch (error) {
         console.log(error);
       } finally {
+        if (
+          !auth?.spotifyTokenExpiry ||
+          new Date(auth.spotifyTokenExpiry) <= new Date()
+        ) {
+          verifySpotifyToken();
+        } else {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    const verifySpotifyToken = async () => {
+      try {
+        await refreshSpotifyToken();
+      } catch (error) {
+        console.log(error);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    !auth?.accessToken ? verifyRefreshToken() : setIsLoading(false);
+    if (!auth?.accessToken) {
+      verifyRefreshToken();
+    } else if (
+      !auth?.spotifyTokenExpiry ||
+      new Date(auth.spotifyTokenExpiry) <= new Date()
+    ) {
+      verifySpotifyToken();
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   if (isLoading) {
@@ -52,14 +82,9 @@ export default function MainClientLayout({
   } else {
     return (
       <>
-        <div className="w-full h-screen flex justify-center flex-col items-center gap-12">
-          <h1 className="text-7xl">TuneSpace</h1>
-          <div className="flex justify-center items-center gap-4">
-            <div className="flex flex-col justify-center items-center w-full">
-              <AuthForm className="w-[750px]" />
-            </div>
-          </div>
-        </div>
+        <LandingLayout showAuthForm={showAuthForm} authType={authType}>
+          {children}
+        </LandingLayout>
       </>
     );
   }

@@ -14,6 +14,7 @@ const useBandData = (userId: string) => {
   } = useQuery({
     queryKey: ["band", userId],
     queryFn: () => getBand(userId),
+    enabled: !!userId,
   });
 
   const {

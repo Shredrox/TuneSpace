@@ -60,3 +60,13 @@ export const formatDate = (dateString: string): string => {
 
   return new Intl.DateTimeFormat("en-US", options).format(date);
 };
+
+export const formatDate2 = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+};

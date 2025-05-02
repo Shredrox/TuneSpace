@@ -24,6 +24,20 @@ const Login = ({
   const [error, setError] = useState("");
   const router = useRouter();
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const tokenExpiryTime = searchParams.get("tokenExpiryTime");
+
+    if (tokenExpiryTime) {
+      setAuth((prevAuth) => ({
+        ...prevAuth,
+        spotifyTokenExpiry: tokenExpiryTime,
+      }));
+
+      router.replace(window.location.pathname);
+    }
+  }, [setAuth, router]);
+
   const handleSpotifyLogin = () => {
     router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.LOGIN}`);
   };

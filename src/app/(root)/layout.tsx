@@ -1,4 +1,4 @@
-import MainClientLayout from "./client-layout";
+import MainClientLayout from "@/layouts/client-layout";
 
 export default function MainLayout({
   children,

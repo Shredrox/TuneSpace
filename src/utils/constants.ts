@@ -2,8 +2,10 @@ export const BASE_URL = "http://localhost:5053/api";
 
 export const ROUTES = {
   HOME: "/",
+  DISCOVER: "/discover",
   NEWS: "/news",
   BAND_DASHBOARD: "/band/dashboard",
+  EVENTS: "/events",
 } as const;
 
 export const ENDPOINTS = {
@@ -15,6 +17,7 @@ export const ENDPOINTS = {
   BAND: "Band",
   RECOMMENDATIONS: "MusicDiscovery/recommendations",
   DISCOVER: "MusicDiscovery/discover",
+  EVENTS: "Events",
 } as const;
 
 export const SPOTIFY_ENDPOINTS = {
