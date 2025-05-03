@@ -19,4 +19,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\TuneSpace.Core\TuneSpace.Core.csproj" />
 	</ItemGroup>
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
 </Project>

@@ -21,5 +21,7 @@
       <ProjectReference Include="..\TuneSpace.Core\TuneSpace.Core.csproj" />
       <ProjectReference Include="..\TuneSpace.Infrastructure\TuneSpace.Infrastructure.csproj" />
     </ItemGroup>
-
+    <PropertyGroup>
+      <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    </PropertyGroup>
 </Project>

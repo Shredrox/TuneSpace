@@ -17,5 +17,7 @@
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="System.Net.Http.Json" Version="9.0.3" />
     </ItemGroup>
-
+    <PropertyGroup>
+      <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    </PropertyGroup>
 </Project>
