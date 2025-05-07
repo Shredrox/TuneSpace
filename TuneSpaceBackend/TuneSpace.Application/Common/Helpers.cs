@@ -1,5 +1,7 @@
 using System.Text;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using TuneSpace.Core.DTOs;
 using TuneSpace.Core.DTOs.Requests.Spotify;
 
 namespace TuneSpace.Application.Common;
@@ -18,6 +20,24 @@ public static class Helpers
         var jsonString = JsonConvert.SerializeObject(dictionary);
 
         return new StringContent(jsonString, Encoding.UTF8, "application/json");
+    }
+
+    public static async Task<FileDto> ConvertToFileDto(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return new FileDto();
+        }
+
+        using var memoryStream = new MemoryStream();
+        await file.CopyToAsync(memoryStream);
+
+        return new FileDto
+        {
+            FileName = file.FileName,
+            ContentType = file.ContentType,
+            Content = memoryStream.ToArray()
+        };
     }
 
     public static string GenerateRandomString(int length)
