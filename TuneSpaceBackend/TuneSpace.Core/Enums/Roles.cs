@@ -1,7 +1,6 @@
-
 namespace TuneSpace.Core.Enums;
 
-public enum UserRole
+public enum Roles
 {
     Admin,
     BandAdmin,

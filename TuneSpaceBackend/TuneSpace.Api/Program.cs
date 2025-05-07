@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using TuneSpace.Api.Infrastructure;
 using TuneSpace.Application;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
+using TuneSpace.Infrastructure.Identity;
+using TuneSpace.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +48,14 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+    var roleSeeder = new RoleSeeder(roleManager);
+    await roleSeeder.SeedRolesAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

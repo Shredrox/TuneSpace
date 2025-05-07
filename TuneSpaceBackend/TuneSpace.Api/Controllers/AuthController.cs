@@ -24,7 +24,7 @@ public class AuthController(
     {
         try
         {
-            await _authService.Register(request.Name, request.Email, request.Password, Enum.Parse<UserRole>(request.Role));
+            await _authService.Register(request.Name, request.Email, request.Password, Enum.Parse<Roles>(request.Role));
             var user = await _userService.GetUserByName(request.Name);
 
             if (user is null)

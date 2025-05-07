@@ -8,6 +8,13 @@ namespace TuneSpace.Core.Interfaces.IServices;
 public interface IUserService
 {
     /// <summary>
+    /// Retrieves a user by their unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the user.</param>
+    /// <returns>The user entity if found; otherwise, null.</returns>
+    Task<User?> GetUserById(string id);
+
+    /// <summary>
     /// Retrieves a user by their username.
     /// </summary>
     /// <param name="name">The username to search for.</param>

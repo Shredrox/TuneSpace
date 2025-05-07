@@ -13,6 +13,11 @@ internal class UserService(
     private readonly IUserRepository _userRepository = userRepository;
     private readonly ILogger<UserService> _logger = logger;
 
+    async Task<User?> IUserService.GetUserById(string id)
+    {
+        return await _userRepository.GetUserById(id);
+    }
+
     async Task<User?> IUserService.GetUserByName(string name)
     {
         return await _userRepository.GetUserByName(name);
@@ -39,7 +44,7 @@ internal class UserService(
 
     async Task IUserService.UpdateUserRefreshToken(User user)
     {
-        var existingUser = await _userRepository.GetUserById(user.Id);
+        var existingUser = await _userRepository.GetUserById(user.Id.ToString());
 
         if (existingUser == null)
         {

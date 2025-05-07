@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TuneSpace.Core.Entities;
+using TuneSpace.Infrastructure.Identity;
 
 namespace TuneSpace.Infrastructure.Data;
 
-public class TuneSpaceDbContext(DbContextOptions<TuneSpaceDbContext> options) : IdentityDbContext<User>(options)
+public class TuneSpaceDbContext(DbContextOptions<TuneSpaceDbContext> options) : IdentityDbContext<User, ApplicationRole, Guid>(options)
 {
     public DbSet<Band> Bands { get; set; }
     public DbSet<Post> Posts { get; set; }

@@ -11,6 +11,7 @@ using TuneSpace.Core.Interfaces.IRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using TuneSpace.Infrastructure.Identity;
 
 namespace TuneSpace.Infrastructure;
 
@@ -73,6 +74,7 @@ public static class ServiceCollectionExtensions
         services.AddAuthorizationBuilder();
 
         services.AddIdentityCore<User>()
+            .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<TuneSpaceDbContext>()
             .AddDefaultTokenProviders();
 

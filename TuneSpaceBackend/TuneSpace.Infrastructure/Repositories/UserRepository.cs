@@ -45,7 +45,11 @@ internal class UserRepository(
 
     async Task IUserRepository.InsertUser(User user, string password)
     {
-        await _userManager.CreateAsync(user, password);
+        var result = await _userManager.CreateAsync(user, password);
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(user, user.Role.ToString());
+        }
     }
 
     async Task IUserRepository.UpdateUser(User user)

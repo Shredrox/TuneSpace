@@ -7,7 +7,7 @@ public class Post
     public required string Content { get; set; }
     public ICollection<Tag> Tags { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
     public User User { get; set; }
 
     public Post()
