@@ -34,7 +34,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddRepositoryServices();
 builder.Services.AddCachingServices();
-builder.Services.AddIdentityServices();
+builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddHttpClientServices();
 
 builder.Services.AddApplicationServices();
@@ -60,6 +60,8 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler();
 
 app.UseCors("AllowOrigin");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
