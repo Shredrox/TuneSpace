@@ -1,6 +1,6 @@
 ﻿namespace TuneSpace.Core.Interfaces.IClients;
 
-public interface IChatClient
+public interface ISocketClient
 {
     Task ReceiveMessage(string user, string message);
 }
