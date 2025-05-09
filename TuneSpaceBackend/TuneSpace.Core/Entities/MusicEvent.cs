@@ -6,6 +6,8 @@ public class MusicEvent
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public DateTime EventDate { get; set; }
+    public string? City { get; set; }
+    public string? Country { get; set; }
     public string? Location { get; set; }
     public string? VenueAddress { get; set; }
     public decimal? TicketPrice { get; set; }

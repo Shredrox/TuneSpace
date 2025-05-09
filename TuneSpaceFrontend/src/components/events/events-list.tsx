@@ -1,25 +1,24 @@
-import React from "react";
-import Event from "@/interfaces/Event";
 import EventCard from "./event-card";
 import Loading from "../fallback/loading";
+import MusicEvent from "@/interfaces/MusicEvent";
 
 interface EventsListProps {
-  events: Event[];
+  events: MusicEvent[];
   isLoading: boolean;
   error: any;
-  onEventSelect: (event: Event) => void;
+  onEventSelect: (event: MusicEvent) => void;
   selectedEventId?: string;
   displayMode?: "list" | "grid";
 }
 
-const EventsList: React.FC<EventsListProps> = ({
+const EventsList = ({
   events,
   isLoading,
   error,
   onEventSelect,
   selectedEventId,
   displayMode = "list",
-}) => {
+}: EventsListProps) => {
   if (isLoading) {
     return (
       <div className="w-full flex items-center justify-center p-8">
@@ -28,21 +27,21 @@ const EventsList: React.FC<EventsListProps> = ({
     );
   }
 
-  // if (error) {
-  //   return (
-  //     <div className="p-6 text-destructive bg-destructive/10 rounded-lg text-center my-4">
-  //       Unable to load events. Please try again later.
-  //     </div>
-  //   );
-  // }
+  if (error) {
+    return (
+      <div className="p-6 text-destructive bg-destructive/10 rounded-lg text-center my-4">
+        Unable to load events. Please try again later.
+      </div>
+    );
+  }
 
-  // if (!events || events.length === 0) {
-  //   return (
-  //     <div className="p-6 text-muted-foreground bg-muted/10 rounded-lg text-center my-4">
-  //       No events found.
-  //     </div>
-  //   );
-  // }
+  if (!events || events.length === 0) {
+    return (
+      <div className="p-6 text-muted-foreground bg-muted/10 rounded-lg text-center my-4">
+        No events found.
+      </div>
+    );
+  }
 
   return (
     <div

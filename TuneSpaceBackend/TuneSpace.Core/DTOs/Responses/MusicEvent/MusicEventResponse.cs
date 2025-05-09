@@ -6,11 +6,13 @@ public record MusicEventResponse(
     string BandName,
     string Title,
     string? Description,
-    DateTime EventDate,
+    DateTime Date,
     string? Location,
     string? VenueAddress,
     decimal? TicketPrice,
     string? TicketUrl,
     bool IsCancelled,
     DateTime CreatedAt,
-    DateTime? UpdatedAt);
+    DateTime? UpdatedAt,
+    string? City,
+    string? Country);

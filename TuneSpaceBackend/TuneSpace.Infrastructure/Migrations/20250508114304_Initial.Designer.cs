@@ -12,7 +12,7 @@ using TuneSpace.Infrastructure.Data;
 namespace TuneSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(TuneSpaceDbContext))]
-    [Migration("20250507143713_Initial")]
+    [Migration("20250508114304_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -366,6 +366,12 @@ namespace TuneSpace.Infrastructure.Migrations
 
                     b.Property<Guid>("BandId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("City")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

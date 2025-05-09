@@ -8,6 +8,12 @@ namespace TuneSpace.Core.Interfaces.IRepositories;
 public interface IMusicEventRepository
 {
     /// <summary>
+    /// Retrieves all music events.
+    /// </summary>
+    /// <returns>A list of all music events.</returns>
+    Task<List<MusicEvent>> GetAllMusicEvents();
+
+    /// <summary>
     /// Retrieves all events for a specific band.
     /// </summary>
     /// <param name="bandId">The unique identifier of the band.</param>

@@ -1,6 +1,6 @@
-export default interface Event {
+export default interface MusicEvent {
   id: string;
-  name: string;
+  title: string;
   description: string;
   date: string;
   time: string;
@@ -8,10 +8,7 @@ export default interface Event {
   address: string;
   city: string;
   country: string;
-  coordinates: {
-    latitude: number;
-    longitude: number;
-  };
+  location?: string;
   bandId: string;
   bandName: string;
   imageUrl?: string;

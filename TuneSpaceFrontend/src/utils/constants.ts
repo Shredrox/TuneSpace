@@ -17,7 +17,7 @@ export const ENDPOINTS = {
   BAND: "Band",
   RECOMMENDATIONS: "MusicDiscovery/recommendations",
   DISCOVER: "MusicDiscovery/discover",
-  EVENTS: "Events",
+  MUSIC_EVENTS: "MusicEvent",
 } as const;
 
 export const SPOTIFY_ENDPOINTS = {

@@ -337,6 +337,8 @@ namespace TuneSpace.Infrastructure.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     EventDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    City = table.Column<string>(type: "text", nullable: true),
+                    Country = table.Column<string>(type: "text", nullable: true),
                     Location = table.Column<string>(type: "text", nullable: true),
                     VenueAddress = table.Column<string>(type: "text", nullable: true),
                     TicketPrice = table.Column<decimal>(type: "numeric", nullable: true),
