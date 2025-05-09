@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import useAuth from "@/hooks/useAuth";
 import Register from "./register-form";
 import Login from "./login-form";
+import useToast from "@/hooks/useToast";
 
 export function AuthForm({
   className,
@@ -66,10 +67,17 @@ export function AuthForm({
                   <Button>
                     <Link href="band/register">Yes</Link>
                   </Button>
-                  <Button onClick={() => setAuth({ accessToken: "123" })}>
-                    <Link href="/band/dashboard/019575c8-a8f5-7c71-91a8-6640c87b2b7e">
-                      No
-                    </Link>
+                  <Button
+                    onClick={() => {
+                      setFormStep(0);
+                      setIsLogin(true);
+                      useToast(
+                        "Registered successfully. You can now log in to your account."
+                      );
+                    }}
+                    variant="outline"
+                  >
+                    No
                   </Button>
                 </div>
               </div>

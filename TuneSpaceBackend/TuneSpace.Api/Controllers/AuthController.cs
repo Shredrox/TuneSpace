@@ -32,7 +32,7 @@ public class AuthController(
                 return NotFound("User not found");
             }
 
-            return Ok(user.Id);
+            return Ok(new { user.Id });
         }
         catch (ArgumentException e)
         {
