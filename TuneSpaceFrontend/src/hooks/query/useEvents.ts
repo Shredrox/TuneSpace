@@ -10,9 +10,9 @@ const useEvents = (bandId: string) => {
 
   const {
     data: events,
-    isEventsLoading,
-    isEventsError,
-    eventsError,
+    isLoading: isEventsLoading,
+    isError: isEventsError,
+    error: eventsError,
   } = useQuery({
     queryKey: ["events"],
     queryFn: getEvents,
@@ -20,9 +20,9 @@ const useEvents = (bandId: string) => {
 
   const {
     data: bandEvents,
-    isLoading,
-    isError,
-    error,
+    isLoading: isBandEventsLoading,
+    isError: isBandEventsError,
+    error: bandEventsError,
   } = useQuery({
     queryKey: ["bandEvents", bandId],
     queryFn: () => getEventsByBandId(bandId),
@@ -44,9 +44,9 @@ const useEvents = (bandId: string) => {
   return {
     events,
     bandEvents,
-    isLoading,
-    isError,
-    error,
+    isLoading: isEventsLoading || isBandEventsLoading,
+    isError: isEventsError || isBandEventsError,
+    error: eventsError || bandEventsError,
     addEvent,
     isCreating,
     isCreateError,
