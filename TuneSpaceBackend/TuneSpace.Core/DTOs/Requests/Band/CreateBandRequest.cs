@@ -6,4 +6,4 @@ public record CreateBandRequest(
     string Description,
     string Genre,
     string Location,
-    FileDto Picture);
+    FileDto? Picture);

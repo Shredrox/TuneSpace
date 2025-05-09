@@ -88,7 +88,7 @@ public class BandController(
                 request.Description,
                 request.Genre,
                 request.Location,
-                fileDto);
+                fileDto ?? null);
 
             var band = await _bandService.CreateBand(createBandRequest);
 
@@ -120,7 +120,7 @@ public class BandController(
                 request.Genre,
                 request.SpotifyId,
                 request.YouTubeEmbedId,
-                fileDto);
+                fileDto ?? null);
 
             await _bandService.UpdateBand(updateBandRequest);
             return Ok("Band updated successfully");

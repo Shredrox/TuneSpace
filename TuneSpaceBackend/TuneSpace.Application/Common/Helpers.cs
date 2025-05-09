@@ -22,11 +22,11 @@ public static class Helpers
         return new StringContent(jsonString, Encoding.UTF8, "application/json");
     }
 
-    public static async Task<FileDto> ConvertToFileDto(IFormFile file)
+    public static async Task<FileDto?> ConvertToFileDto(IFormFile? file)
     {
         if (file == null || file.Length == 0)
         {
-            return new FileDto();
+            return null;
         }
 
         using var memoryStream = new MemoryStream();
