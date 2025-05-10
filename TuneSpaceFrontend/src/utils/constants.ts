@@ -20,6 +20,7 @@ export const ENDPOINTS = {
   RECOMMENDATIONS: "MusicDiscovery/recommendations",
   DISCOVER: "MusicDiscovery/discover",
   MUSIC_EVENTS: "MusicEvent",
+  NOTIFICATION: "Notification",
 } as const;
 
 export const SPOTIFY_ENDPOINTS = {
@@ -36,4 +37,12 @@ export enum UserRole {
   BandAdmin = "BandAdmin",
   BandMember = "BandMember",
   Listener = "Listener",
+}
+
+export enum NotificationTypes {
+  Follow = "Follow",
+  Like = "Like",
+  Message = "Message",
+  Event = "Event",
+  Music = "Music",
 }

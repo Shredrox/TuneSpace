@@ -15,19 +15,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { Bell, LogOut, User } from "lucide-react";
 import SpotifySearchBar from "./spotify-search-bar";
 import { useRouter } from "next/navigation";
 import { LuMusic4 } from "react-icons/lu";
 import Navigation from "./navigation";
 import { SidebarTrigger } from "./shadcn/sidebar";
 import useAuth from "@/hooks/useAuth";
+import Link from "next/link";
+import { Button } from "./shadcn/button";
+import { Badge } from "./shadcn/badge";
+import { useEffect } from "react";
+import useNotifications from "@/hooks/query/useNotifications";
+import useSocket from "@/hooks/useSocket";
 
 const Header = () => {
   const { auth } = useAuth();
-
+  const {
+    unreadCount,
+    refetch,
+    notifications: apiNotifications,
+  } = useNotifications();
+  const { notifications: socketNotifications } = useSocket();
   const router = useRouter();
   const logout = useLogout();
+
+  useEffect(() => {
+    if (socketNotifications.length > 0) {
+      refetch();
+    }
+  }, [socketNotifications, refetch]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [refetch]);
 
   const handleLogout = async () => {
     await logout();
@@ -48,9 +73,26 @@ const Header = () => {
             <span>TuneSpace</span>
           </div>
           <Navigation />
-        </div>
+        </div>{" "}
         <div className="flex gap-2">
-          <SpotifySearchBar />
+          <SpotifySearchBar />{" "}
+          <div className="relative">
+            <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+              <Link href="/notifications">
+                <Bell className="h-4 w-4" />
+              </Link>
+            </Button>
+            {unreadCount > 0 && (
+              <div className="absolute -top-1 -right-1">
+                <Badge
+                  className="h-5 w-5 flex items-center justify-center p-0 text-[10px] animate-in fade-in zoom-in duration-300"
+                  variant="destructive"
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </Badge>
+              </div>
+            )}
+          </div>
           <ModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger>

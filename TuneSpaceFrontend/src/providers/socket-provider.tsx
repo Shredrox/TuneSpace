@@ -8,6 +8,7 @@ import httpClient from "@/services/http-client";
 import Message from "@/interfaces/social/chat/Message";
 import ChatInterface from "@/interfaces/social/chat/ChatInterface";
 import { SIGNALR_HUB_URL } from "@/utils/constants";
+import Notification from "@/interfaces/Notification";
 
 interface SocketProviderProps {
   children: ReactNode;

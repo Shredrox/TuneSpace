@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBandService, BandService>();
         services.AddScoped<IMusicDiscoveryService, MusicDiscoveryService>();
         services.AddScoped<IMusicEventService, MusicEventService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         return services;
     }

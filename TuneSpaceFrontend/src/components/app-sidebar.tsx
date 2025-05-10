@@ -27,7 +27,6 @@ import {
   Search,
   ChevronRight,
   Headphones,
-  Bell,
   MoreHorizontal,
 } from "lucide-react";
 import {
@@ -176,16 +175,6 @@ export function AppSidebar() {
                 >
                   <User className="h-4 w-4" />
                   <span>Profile</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Notifications"
-                  isActive={activeItem === "notifications"}
-                  onClick={() => handleNavigation("notifications")}
-                >
-                  <Bell className="h-4 w-4" />
-                  <span>Notifications</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
