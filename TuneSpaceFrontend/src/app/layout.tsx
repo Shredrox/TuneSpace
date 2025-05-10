@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import ReactQueryProvider from "@/providers/query-provider";
 import ThemeProvider from "@/providers/theme-provider";
 import AuthProvider from "@/providers/auth-provider";
+import SocketProvider from "@/providers/socket-provider";
 import { Toaster } from "@/components/shadcn/sonner";
 
 const geistSans = Geist({
@@ -42,8 +43,10 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {children}
-              <Toaster />
+              <SocketProvider>
+                {children}
+                <Toaster />
+              </SocketProvider>
             </ThemeProvider>
           </ReactQueryProvider>
         </AuthProvider>
