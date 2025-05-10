@@ -1,5 +1,7 @@
 export const BASE_URL = "http://localhost:5053/api";
 
+export const SIGNALR_HUB_URL = "http://localhost:5053/socket-hub";
+
 export const ROUTES = {
   HOME: "/",
   DISCOVER: "/discover",
