@@ -85,8 +85,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IBandRepository, BandRepository>();
-        services.AddScoped<IPostRepository, PostRepository>();
-        services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IMusicEventRepository, MusicEventRepository>();
 
         return services;
