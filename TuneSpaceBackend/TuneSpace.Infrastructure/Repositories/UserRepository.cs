@@ -34,11 +34,10 @@ internal class UserRepository(
             .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken && u.RefreshTokenValidity > DateTime.Now.ToUniversalTime());
     }
 
-    async Task<List<string>> IUserRepository.SearchByName(string name)
+    async Task<List<User>> IUserRepository.SearchByName(string name)
     {
         return await _userManager.Users
             .Where(u => u.UserName != null && u.UserName.StartsWith(name))
-            .Select(u => u.UserName!)
             .Take(5)
             .ToListAsync();
     }

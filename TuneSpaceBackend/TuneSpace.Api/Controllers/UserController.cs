@@ -46,7 +46,7 @@ public class UserController(
         {
             var users = await _userService.SearchByName(search);
             var response = users
-                .Select(user => new UserSearchResultResponse(user))
+                .Select(user => new UserSearchResultResponse(user.Id, user.UserName))
                 .ToList();
 
             return Ok(response);

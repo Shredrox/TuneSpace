@@ -29,7 +29,7 @@ internal class UserService(
         return user ?? null;
     }
 
-    async Task<List<string>> IUserService.SearchByName(string name)
+    async Task<List<User>> IUserService.SearchByName(string name)
     {
         var users = await _userRepository.SearchByName(name);
 
