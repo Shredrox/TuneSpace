@@ -4,7 +4,7 @@ using TuneSpace.Core.DTOs.Responses.Spotify;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
 
-namespace TuneSpace.API.Controllers;
+namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

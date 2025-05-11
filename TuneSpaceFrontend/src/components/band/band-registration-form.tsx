@@ -23,6 +23,7 @@ import { Input } from "../shadcn/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/avatar";
 import { registerBand } from "@/actions/band";
 import useAuth from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const BandRegistrationForm = ({ locationData }: { locationData: any }) => {
   const [imagePreview, setImagePreview] = useState("");
@@ -61,7 +62,8 @@ const BandRegistrationForm = ({ locationData }: { locationData: any }) => {
 
     try {
       await registerBand(combinedRequest);
-      router.push("/band/dashboard");
+      router.push("/?auth=true&type=login");
+      toast.success("Band registered successfully. Please log in.");
     } catch (error: any) {
       handleRequestError(error);
     }

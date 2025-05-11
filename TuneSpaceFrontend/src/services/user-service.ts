@@ -1,6 +1,6 @@
-import UserSearchResult from "@/interfaces/user/UserSearchResult";
-import UserProfile from "../interfaces/UserProfile";
+import UserProfile from "../interfaces/user/UserProfile";
 import httpClient from "./http-client";
+import UserType from "@/interfaces/user/User";
 
 interface FollowData {
   loggedInUser: string;
@@ -21,8 +21,8 @@ export const getUserByName = async (username: string) => {
 
 export const getUsersByNameSearch = async (
   username: string
-): Promise<UserSearchResult[]> => {
-  const response = await httpClient.get(`/User/${username}`);
+): Promise<UserType[]> => {
+  const response = await httpClient.get(`/User/search/${username}`);
   return response.data;
 };
 

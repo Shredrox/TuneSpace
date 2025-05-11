@@ -4,7 +4,7 @@ using TuneSpace.Core.Enums;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
 
-namespace TuneSpace.API.Controllers;
+namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -24,7 +24,7 @@ public class AuthController(
     {
         try
         {
-            await _authService.Register(request.Name, request.Email, request.Password, Enum.Parse<UserRole>(request.Role));
+            await _authService.Register(request.Name, request.Email, request.Password, Enum.Parse<Roles>(request.Role));
             var user = await _userService.GetUserByName(request.Name);
 
             if (user is null)
@@ -32,7 +32,7 @@ public class AuthController(
                 return NotFound("User not found");
             }
 
-            return Ok(user.Id);
+            return Ok(new { user.Id });
         }
         catch (ArgumentException e)
         {

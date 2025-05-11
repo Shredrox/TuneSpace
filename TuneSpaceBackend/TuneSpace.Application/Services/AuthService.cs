@@ -17,7 +17,7 @@ internal class AuthService(
     private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
     private readonly ITokenService _tokenService = tokenService;
 
-    async Task IAuthService.Register(string name, string email, string password, UserRole role)
+    async Task IAuthService.Register(string name, string email, string password, Roles role)
     {
         if (await _userRepository.GetUserByName(name) is not null)
         {
@@ -46,7 +46,7 @@ internal class AuthService(
         var accessToken = _tokenService.CreateAccessToken(user);
         var refreshToken = await _tokenService.CreateRefreshToken(user);
 
-        return new LoginResponse(user.Id, user.UserName, user.Role, accessToken, refreshToken);
+        return new LoginResponse(user.Id.ToString(), user.UserName, user.Role, accessToken, refreshToken);
     }
 
     private bool VerifyPassword(User user, string password)

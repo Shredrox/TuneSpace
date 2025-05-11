@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using TuneSpace.Api.Infrastructure;
 using TuneSpace.Application;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
+using TuneSpace.Infrastructure.Identity;
+using TuneSpace.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +37,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDatabaseServices(builder.Configuration);
 builder.Services.AddRepositoryServices();
 builder.Services.AddCachingServices();
-builder.Services.AddIdentityServices();
+builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddHttpClientServices();
 
 builder.Services.AddApplicationServices();
@@ -45,6 +48,14 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+    var roleSeeder = new RoleSeeder(roleManager);
+    await roleSeeder.SeedRolesAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -61,12 +72,12 @@ app.UseExceptionHandler();
 
 app.UseCors("AllowOrigin");
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chats");
-
-app.MapHub<NotificationHub>("/notifications");
+app.MapHub<SocketHub>("/socket-hub");
 
 app.Run();

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TuneSpace.Api.DTOs;
+using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Band;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -74,11 +76,21 @@ public class BandController(
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> CreateBand([FromForm] CreateBandRequest request)
+    public async Task<IActionResult> CreateBand([FromForm] BandCreateRequest request)
     {
         try
         {
-            var band = await _bandService.CreateBand(request);
+            var fileDto = await Helpers.ConvertToFileDto(request.Picture);
+
+            var createBandRequest = new CreateBandRequest(
+                request.UserId,
+                request.Name,
+                request.Description,
+                request.Genre,
+                request.Location,
+                fileDto ?? null);
+
+            var band = await _bandService.CreateBand(createBandRequest);
 
             if (band == null)
             {
@@ -95,11 +107,22 @@ public class BandController(
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateBand([FromForm] UpdateBandRequest request)
+    public async Task<IActionResult> UpdateBand([FromForm] BandUpdateRequest request)
     {
         try
         {
-            await _bandService.UpdateBand(request);
+            var fileDto = await Helpers.ConvertToFileDto(request.Picture);
+
+            var updateBandRequest = new UpdateBandRequest(
+                request.Id,
+                request.Name,
+                request.Description,
+                request.Genre,
+                request.SpotifyId,
+                request.YouTubeEmbedId,
+                fileDto ?? null);
+
+            await _bandService.UpdateBand(updateBandRequest);
             return Ok("Band updated successfully");
         }
         catch (Exception e)

@@ -31,13 +31,6 @@ internal class BandService(
             var city = request.Location.Split(',')[1].Trim();
             var country = request.Location.Split(',')[0].Trim();
 
-            byte[] fileBytes;
-            using (var memoryStream = new MemoryStream())
-            {
-                await request.Picture.CopyToAsync(memoryStream);
-                fileBytes = memoryStream.ToArray();
-            }
-
             var band = new Band
             {
                 Name = request.Name,
@@ -45,7 +38,7 @@ internal class BandService(
                 Description = request.Description,
                 Country = country,
                 City = city,
-                CoverImage = fileBytes,
+                CoverImage = request.Picture.Content,
                 User = user
             };
 
@@ -178,11 +171,7 @@ internal class BandService(
 
             if (request.Picture != null)
             {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await request.Picture.CopyToAsync(memoryStream);
-                    band.CoverImage = memoryStream.ToArray();
-                }
+                band.CoverImage = request.Picture.Content;
             }
 
             await _bandRepository.UpdateBand(band);

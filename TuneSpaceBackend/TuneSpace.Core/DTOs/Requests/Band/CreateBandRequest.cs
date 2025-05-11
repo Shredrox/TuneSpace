@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace TuneSpace.Core.DTOs.Requests.Band;
+﻿namespace TuneSpace.Core.DTOs.Requests.Band;
 
 public record CreateBandRequest(
     string UserId,
@@ -8,4 +6,4 @@ public record CreateBandRequest(
     string Description,
     string Genre,
     string Location,
-    IFormFile Picture);
+    FileDto? Picture);

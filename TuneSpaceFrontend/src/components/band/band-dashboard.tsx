@@ -2,14 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/avatar";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "../shadcn/card";
-import { Separator } from "../shadcn/separator";
+import { Card, CardHeader, CardTitle, CardContent } from "../shadcn/card";
 import { FaSpotify, FaYoutube } from "react-icons/fa";
 import { SiTidal, SiApplemusic } from "react-icons/si";
 import YouTubeEmbedDialog from "./youtube-embed-dialog";
@@ -26,12 +19,19 @@ import Loading from "../fallback/loading";
 import useToast from "@/hooks/useToast";
 import ConnectSpotifyDialog from "./connect-spotify-dialog";
 import EditBandDialog from "./edit-band-dialog";
+import { MessageSquare, Users, CalendarDays } from "lucide-react";
+import Link from "next/link";
+import CreateDiscussionDialog from "../social/create-discussion-dialog";
+import AddEventDialog from "../events/add-event-dialog";
+import useEvents from "@/hooks/query/useEvents";
 
 const BandDashboard = () => {
   const { auth } = useAuth();
 
   const { bandData, mutations, isBandLoading, isBandError, bandError } =
     useBandData(auth?.id || "");
+
+  const { bandEvents } = useEvents(bandData?.band?.id || "");
 
   const [mounted, setMounted] = useState(false);
 
@@ -119,205 +119,500 @@ const BandDashboard = () => {
     return <Loading />;
   }
 
+  // Mock fan engagement data for now
+  const fanMessages = [
+    {
+      id: 1,
+      name: "JazzLover42",
+      message: "When are you coming to NYC?",
+      time: "2 hours ago",
+    },
+    {
+      id: 2,
+      name: "MusicFan",
+      message: "Loved your latest album!",
+      time: "1 day ago",
+    },
+    {
+      id: 3,
+      name: "ConcertGoer",
+      message: "Will there be VIP tickets?",
+      time: "2 days ago",
+    },
+  ];
+
+  const forumThreads = [
+    {
+      id: 1,
+      title: "AMA with the band",
+      replies: 34,
+      category: "general",
+      time: "1 day ago",
+    },
+    {
+      id: 2,
+      title: "Upcoming tour discussion",
+      replies: 28,
+      category: "events",
+      time: "3 days ago",
+    },
+    {
+      id: 3,
+      title: "Gear talk with our guitarist",
+      replies: 19,
+      category: "gear",
+      time: "5 days ago",
+    },
+  ];
+
   return (
-    <div className="flex flex-col items-start gap-4 px-4 pb-4">
-      <h1 className="text-4xl font-medium ml-4">Dashboard</h1>
-      <Card className="w-full p-4 flex flex-col gap-4">
-        <CardHeader className="flex flex-row justify-left items-center h-[300px] gap-4">
-          <Avatar className="w-[200px] h-[200px]">
-            <AvatarImage
-              src={`data:image/jpeg;base64,${bandData.band?.coverImage}`}
-            />
-            <AvatarFallback>BandPicture</AvatarFallback>
-          </Avatar>
-          <Separator orientation="vertical" />
-          <div className="h-full flex flex-col gap-4 justify-left">
-            <CardTitle></CardTitle>
-            <CardDescription className="flex gap-6 items-start justify-center">
-              <div className="flex flex-col gap-2">
-                <span
-                  className="text-2xl
-                  font-semibold
-                  leading-none
-                  tracking-tight text-white"
-                >
-                  {bandData.band?.name}
-                </span>
-                <span className="text-lg">{bandData.band?.description}</span>
-                <span className="text-lg">{bandData.band?.genre}</span>
-                <span className="text-lg">
-                  {bandData.band?.country}, {bandData.band?.city}
-                </span>
-                <EditBandDialog
-                  band={bandData?.band}
-                  handleBandUpdate={handleBandUpdate}
+    <div className="flex flex-col items-start gap-6 px-6 py-8 max-w-[1400px] mx-auto w-full">
+      <div className="flex flex-wrap justify-between items-center w-full mb-2">
+        <h1 className="text-4xl font-bold">Band Dashboard</h1>
+        <EditBandDialog
+          band={bandData?.band}
+          handleBandUpdate={handleBandUpdate}
+        />
+      </div>
+
+      <Card className="w-full shadow-md border-2 border-muted/20">
+        <CardHeader className="pb-0">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col items-center">
+              <Avatar className="w-[220px] h-[220px] rounded-lg shadow-md border border-muted">
+                <AvatarImage
+                  src={`data:image/jpeg;base64,${bandData.band?.coverImage}`}
+                  className="object-cover"
                 />
+                <AvatarFallback className="text-3xl font-semibold bg-secondary/30">
+                  {bandData.band?.name?.substring(0, 2) || "BP"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+
+            <div className="flex flex-col gap-4 flex-1">
+              <div>
+                <h2 className="text-3xl font-bold mb-1">
+                  {bandData.band?.name}
+                </h2>
+                <p className="text-xl font-medium text-muted-foreground">
+                  {bandData.band?.genre}
+                </p>
+                <p className="text-muted-foreground mt-1">
+                  {bandData.band?.country}, {bandData.band?.city}
+                </p>
+                <p className="mt-4 text-lg">{bandData.band?.description}</p>
               </div>
-              {bandData.band?.youTubeEmbedId ? (
-                <iframe
-                  className="w-[420px] aspect-video rounded-lg"
-                  src={`https://www.youtube.com/embed/${bandData.band?.youTubeEmbedId}`}
-                  title="YouTube video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                ></iframe>
-              ) : (
-                <Card className="p-2 flex-1 flex flex-col items-center justify-center gap-2">
-                  <FaYoutube className="text-[#FF0000]" size={50} />
-                  <YouTubeEmbedDialog
-                    handleYouTubeEmbedIdUpdate={handleYouTubeEmbedIdUpdate}
-                  />
-                </Card>
-              )}
-              <Carousel className="ml-11 w-full max-w-sm">
-                <CarouselContent className="-ml-1">
+
+              <div className="mt-auto">
+                {bandData.band?.youTubeEmbedId ? (
+                  <div className="mt-4">
+                    <h3 className="text-lg font-medium flex items-center gap-2 mb-2">
+                      <FaYoutube className="text-red-600" />
+                      Featured Video
+                    </h3>
+                    <iframe
+                      className="w-full max-w-[560px] aspect-video rounded-md shadow-sm"
+                      src={`https://www.youtube.com/embed/${bandData.band?.youTubeEmbedId}`}
+                      title="YouTube video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 mt-4">
+                    <FaYoutube className="text-red-600" size={24} />
+                    <YouTubeEmbedDialog
+                      handleYouTubeEmbedIdUpdate={handleYouTubeEmbedIdUpdate}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:max-w-[320px] w-full">
+              <h3 className="text-lg font-medium mb-3">Band Gallery</h3>
+              <Carousel className="w-full">
+                <CarouselContent>
                   {Array.from({ length: 5 }).map((_, index) => (
-                    <CarouselItem
-                      key={index}
-                      className="pl-1 md:basis-1/2 lg:basis-1/3"
-                    >
-                      <div className="p-1 flex flex-col">
-                        <Card>
-                          <CardContent className="flex aspect-square items-center justify-center p-6">
-                            Image
-                          </CardContent>
-                        </Card>
-                      </div>
+                    <CarouselItem key={index} className="basis-full">
+                      <Card>
+                        <CardContent className="flex aspect-square items-center justify-center p-2 bg-muted/20">
+                          Image {index + 1}
+                        </CardContent>
+                      </Card>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
+                <div className="flex justify-center gap-2 mt-2">
+                  <CarouselPrevious className="relative transform-none w-8 h-8" />
+                  <CarouselNext className="relative transform-none w-8 h-8" />
+                </div>
               </Carousel>
-            </CardDescription>
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex w-full gap-4">
-            <Card className="p-2 flex-1 flex flex-col items-center justify-center">
-              <CardHeader className="w-full flex justify-left items-center gap-4">
-                <div className="flex gap-4 items-center justify-center w-full">
-                  <FaSpotify className="text-[#1DB954]" size={50} />
-                  <h3>Spotify Stats</h3>
-                </div>
-                {bandData.spotifyProfile ? (
-                  <>
-                    <Avatar className="w-[200px] h-[200px]">
-                      <AvatarImage
-                        src={bandData.spotifyProfile?.images[0].url}
+
+        <CardContent className="pt-8">
+          {/* Music Stats Section */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6">Music Stats</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="overflow-hidden h-full">
+                <CardHeader className="bg-gradient-to-r from-green-900/20 to-transparent">
+                  <div className="flex items-center gap-3">
+                    <FaSpotify className="text-[#1DB954]" size={28} />
+                    <h3 className="font-semibold text-2xl">Spotify Stats</h3>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {bandData.spotifyProfile ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="flex gap-4 items-center">
+                        <Avatar className="w-[100px] h-[100px]">
+                          <AvatarImage
+                            src={bandData.spotifyProfile?.images[0].url}
+                          />
+                          <AvatarFallback>SP</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">
+                            Followers:{" "}
+                            <span className="font-bold">
+                              {bandData.spotifyProfile?.followers.total.toLocaleString()}
+                            </span>
+                          </p>
+                          <p className="font-medium">
+                            Popularity:{" "}
+                            <span className="font-bold">
+                              {bandData.spotifyProfile?.popularity}%
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <iframe
+                        className="rounded-xl mt-2"
+                        src={`https://open.spotify.com/embed/artist/${bandData.band?.spotifyId}?utm_source=generator&theme=0`}
+                        width="100%"
+                        height="152"
+                        allowFullScreen
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                      ></iframe>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
+                      <p className="mb-4 text-muted-foreground">
+                        Connect your band's Spotify profile
+                      </p>
+                      <ConnectSpotifyDialog
+                        handleSpotifyIdUpdate={handleSpotifyIdUpdate}
                       />
-                      <AvatarFallback>BandPicture</AvatarFallback>
-                    </Avatar>
-                    <span>
-                      Followers: {bandData.spotifyProfile?.followers.total}
-                    </span>
-                    <span>
-                      Popularity: {bandData.spotifyProfile?.popularity}
-                    </span>
-                    <iframe
-                      className="rounded-3xl"
-                      src={`https://open.spotify.com/embed/artist/${bandData.band?.spotifyId}?utm_source=generator&theme=0`}
-                      width="100%"
-                      height="152"
-                      allowFullScreen
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                      loading="lazy"
-                    ></iframe>
-                  </>
-                ) : (
-                  <ConnectSpotifyDialog
-                    handleSpotifyIdUpdate={handleSpotifyIdUpdate}
-                  />
-                )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="overflow-hidden h-full">
+                <CardHeader className="bg-gradient-to-r from-pink-900/20 to-transparent">
+                  <div className="flex items-center gap-3">
+                    <SiApplemusic size={28} />
+                    <h3 className="font-semibold text-2xl">
+                      Apple Music Stats
+                    </h3>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
+                    <p className="mb-4 text-muted-foreground">
+                      Connect your Apple Music account
+                    </p>
+                    <button className="bg-black text-white px-4 py-2 rounded-full hover:bg-black/80">
+                      Connect Apple Music
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="overflow-hidden h-full">
+                <CardHeader className="bg-gradient-to-r from-blue-900/20 to-transparent">
+                  <div className="flex items-center gap-3">
+                    <SiTidal size={28} />
+                    <h3 className="font-semibold text-2xl">Tidal Stats</h3>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
+                    <p className="mb-4 text-muted-foreground">
+                      Connect your Tidal account
+                    </p>
+                    <button className="bg-black text-white px-4 py-2 rounded-full hover:bg-black/80">
+                      Connect Tidal
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6">Fan Community</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-blue-900/20 to-transparent">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5" />
+                      <span>Fan Messages</span>
+                    </CardTitle>
+                    <Link href="/messages">
+                      <span className="text-sm text-primary hover:text-primary/80">
+                        View All
+                      </span>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {fanMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className="flex items-center gap-3 p-3 border-b last:border-0"
+                    >
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>
+                          {message.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between">
+                          <h4 className="font-medium truncate">
+                            {message.name}
+                          </h4>
+                          <span className="text-xs text-muted-foreground">
+                            {message.time}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {message.message}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-4 flex justify-center">
+                    <Link href="/messages">
+                      <span className="text-primary hover:text-primary/80">
+                        Respond to Messages
+                      </span>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-purple-900/20 to-transparent">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      <span>Band Forum</span>
+                    </CardTitle>
+                    <CreateDiscussionDialog
+                      buttonText="New Discussion"
+                      buttonVariant="outline"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {forumThreads.map((thread) => (
+                    <Link
+                      key={thread.id}
+                      href={`/forums/${thread.category}/${thread.id}`}
+                      className="block"
+                    >
+                      <div className="flex items-center p-3 border-b last:border-0 hover:bg-accent/40 rounded-md">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium">{thread.title}</h4>
+                          <div className="flex justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              {thread.replies} replies
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {thread.time}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  <div className="mt-4 flex justify-center">
+                    <Link href="/forums">
+                      <span className="text-primary hover:text-primary/80">
+                        View All Forums
+                      </span>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-6">
+              <Card className="overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-amber-900/20 to-transparent">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    <span>Fan Engagement</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="bg-accent/30">
+                      <CardContent className="p-4 text-center">
+                        <h4 className="text-2xl font-bold">2.4K</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Total Followers
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-accent/30">
+                      <CardContent className="p-4 text-center">
+                        <h4 className="text-2xl font-bold">156</h4>
+                        <p className="text-sm text-muted-foreground">
+                          New Messages
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-accent/30">
+                      <CardContent className="p-4 text-center">
+                        <h4 className="text-2xl font-bold">87%</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Response Rate
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6">Events</h2>
+            <Card className="mb-6 overflow-hidden border-muted/20">
+              <CardHeader className="bg-muted/10 pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5" />
+                  <span>Upcoming Concerts</span>
+                  <AddEventDialog bandId={bandData.band?.id} />
+                </CardTitle>
               </CardHeader>
-            </Card>
-            <Card className="p-2 flex-1 flex flex-col items-center justify-center">
-              <CardHeader className="w-full flex justify-left items-center gap-4">
-                <div className="flex gap-4 items-center justify-center w-full">
-                  <SiApplemusic size={50} /> <h3>Apple Music Stats</h3>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {bandEvents?.map((event, index) => (
+                    <Card key={index} className="flex overflow-hidden">
+                      <div className="bg-muted/20 w-[100px] flex items-center justify-center">
+                        <div className="text-center">
+                          {event.date ? (
+                            <>
+                              <div className="font-bold text-xl">
+                                {new Date(event.date).getDate()}
+                              </div>
+                              <div className="text-sm">
+                                {new Date(event.date)
+                                  .toLocaleString("default", { month: "short" })
+                                  .toUpperCase()}
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              No date
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-3 flex-1">
+                        <h4 className="font-semibold">{event.venue}</h4>
+                        <p className="text-sm">
+                          {event.city}, {event.country}
+                        </p>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-sm text-muted-foreground">
+                            {event.date
+                              ? new Date(event.date).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                })
+                              : "Time TBA"}
+                          </span>
+                          <button className="text-xs px-2 py-1 bg-primary/80 text-primary-foreground rounded">
+                            Details
+                          </button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
-              </CardHeader>
+              </CardContent>
             </Card>
-            <Card className="p-2 flex-1 flex flex-col items-center justify-center">
-              <CardHeader className="w-full flex justify-left items-center gap-4">
-                <div className="flex gap-4 items-center justify-center w-full">
-                  <SiTidal size={50} /> <h3>Tidal Stats</h3>
-                </div>
+
+            <Card className="overflow-hidden border-muted/20">
+              <CardHeader className="bg-muted/10 pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <span>Merchandise</span>
+                  <button className="ml-auto text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
+                    Add Item
+                  </button>
+                </CardTitle>
               </CardHeader>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map((index) => (
+                    <Card key={index} className="overflow-hidden">
+                      <div className="aspect-square bg-muted/20 flex items-center justify-center">
+                        Item Image
+                      </div>
+                      <div className="p-3">
+                        <div className="flex justify-between">
+                          <h4 className="font-semibold">Merch Item</h4>
+                          <span className="font-bold">$19.99</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Item description goes here
+                        </p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
             </Card>
           </div>
-          <Carousel></Carousel>
+
+          <Card className="mb-6 overflow-hidden border-muted/20">
+            <CardHeader className="bg-muted/10 pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <span>Band Members</span>
+                <button className="ml-auto text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
+                  Add Member
+                </button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((index) => (
+                  <Card key={index} className="flex flex-col overflow-hidden">
+                    <div className="bg-muted/20 aspect-square flex items-center justify-center">
+                      Member Photo
+                    </div>
+                    <div className="p-3">
+                      <h4 className="font-semibold">Member Name</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Role/Instrument
+                      </p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </CardContent>
-        <Card>
-          <CardHeader>
-            <CardTitle>Band Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4">
-              {/* {bandData.band?.members?.map((member: any, index: number) => (
-                <Card key={index} className="flex flex-row items-center gap-4">
-                  <Avatar className="w-[100px] h-[100px]">
-                    <AvatarImage
-                      src={`data:image/jpeg;base64,${member.picture}`}
-                    />
-                    <AvatarFallback>BandMember</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-lg font-semibold">{member.name}</span>
-                    <span className="text-lg">{member.role}</span>
-                  </div>
-                </Card>
-              ))} */}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Concerts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4">
-              {/* {bandData.band?.members?.map((member: any, index: number) => (
-                <Card key={index} className="flex flex-row items-center gap-4">
-                  <Avatar className="w-[100px] h-[100px]">
-                    <AvatarImage
-                      src={`data:image/jpeg;base64,${member.picture}`}
-                    />
-                    <AvatarFallback>BandMember</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-lg font-semibold">{member.name}</span>
-                    <span className="text-lg">{member.role}</span>
-                  </div>
-                </Card>
-              ))} */}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Merchandise</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4">
-              {/* {bandData.band?.members?.map((member: any, index: number) => (
-                <Card key={index} className="flex flex-row items-center gap-4">
-                  <Avatar className="w-[100px] h-[100px]">
-                    <AvatarImage
-                      src={`data:image/jpeg;base64,${member.picture}`}
-                    />
-                    <AvatarFallback>BandMember</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-lg font-semibold">{member.name}</span>
-                    <span className="text-lg">{member.role}</span>
-                  </div>
-                </Card>
-              ))} */}
-            </div>
-          </CardContent>
-        </Card>
       </Card>
     </div>
   );

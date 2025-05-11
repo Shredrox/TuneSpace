@@ -8,6 +8,13 @@ namespace TuneSpace.Core.Interfaces.IServices;
 public interface IUserService
 {
     /// <summary>
+    /// Retrieves a user by their unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the user.</param>
+    /// <returns>The user entity if found; otherwise, null.</returns>
+    Task<User?> GetUserById(string id);
+
+    /// <summary>
     /// Retrieves a user by their username.
     /// </summary>
     /// <param name="name">The username to search for.</param>
@@ -25,8 +32,8 @@ public interface IUserService
     /// Searches for users whose names contain the specified search term.
     /// </summary>
     /// <param name="search">The search term to match against user names.</param>
-    /// <returns>A list of matching usernames.</returns>
-    Task<List<string>> SearchByName(string search);
+    /// <returns>A task representing the asynchronous operation, containing a list of user entities whose names match the search criteria.</returns>
+    Task<List<User>> SearchByName(string search);
 
     /// <summary>
     /// Updates the refresh token for a specified user.

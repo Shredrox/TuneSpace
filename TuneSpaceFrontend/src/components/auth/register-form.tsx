@@ -64,8 +64,8 @@ const Register = ({
         }
       );
 
+      setAuth({ id: response?.data?.id });
       setFormStep(1);
-      setAuth({ id: response?.data });
     } catch (error: any) {
       handleRequestError(error);
     }

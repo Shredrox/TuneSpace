@@ -34,18 +34,21 @@ internal class UserRepository(
             .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken && u.RefreshTokenValidity > DateTime.Now.ToUniversalTime());
     }
 
-    async Task<List<string>> IUserRepository.SearchByName(string name)
+    async Task<List<User>> IUserRepository.SearchByName(string name)
     {
         return await _userManager.Users
             .Where(u => u.UserName != null && u.UserName.StartsWith(name))
-            .Select(u => u.UserName!)
             .Take(5)
             .ToListAsync();
     }
 
     async Task IUserRepository.InsertUser(User user, string password)
     {
-        await _userManager.CreateAsync(user, password);
+        var result = await _userManager.CreateAsync(user, password);
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(user, user.Role.ToString());
+        }
     }
 
     async Task IUserRepository.UpdateUser(User user)

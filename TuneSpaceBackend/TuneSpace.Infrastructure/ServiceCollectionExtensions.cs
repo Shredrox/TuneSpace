@@ -8,6 +8,10 @@ using TuneSpace.Infrastructure.Repositories;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IRepositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using TuneSpace.Infrastructure.Identity;
 
 namespace TuneSpace.Infrastructure;
 
@@ -27,12 +31,50 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddIdentityServices(this IServiceCollection services)
+    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+        var jwtSettings = configuration.GetSection("Jwt");
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.SaveToken = true;
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwtSettings["Token"] ?? throw new InvalidOperationException("JWT Token secret is not configured"))
+                ),
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    if (context.Request.Cookies.ContainsKey("AccessToken"))
+                    {
+                        context.Token = context.Request.Cookies["AccessToken"];
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
+        }).AddCookie(IdentityConstants.ApplicationScheme);
+
         services.AddAuthorizationBuilder();
 
         services.AddIdentityCore<User>()
+            .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<TuneSpaceDbContext>()
             .AddDefaultTokenProviders();
 
@@ -43,9 +85,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IBandRepository, BandRepository>();
-        services.AddScoped<IPostRepository, PostRepository>();
-        services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IMusicEventRepository, MusicEventRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IChatRepository, ChatRepository>();
 
         return services;
     }

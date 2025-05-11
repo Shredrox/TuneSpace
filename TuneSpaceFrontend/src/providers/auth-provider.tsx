@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, createContext, useState } from "react";
-import AuthContextType from "@/interfaces/AuthContextType";
+import AuthContextType from "@/interfaces/context/AuthContextType";
 import Auth from "@/interfaces/Auth";
 
 interface AuthProviderProps {

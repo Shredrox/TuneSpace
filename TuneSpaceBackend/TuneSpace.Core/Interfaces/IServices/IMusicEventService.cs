@@ -10,6 +10,12 @@ namespace TuneSpace.Core.Interfaces.IServices;
 public interface IMusicEventService
 {
     /// <summary>
+    /// Retrieves all music events.
+    /// </summary>
+    /// <returns>A list of all music event responses.</returns>
+    Task<List<MusicEventResponse>> GetAllMusicEvents();
+
+    /// <summary>
     /// Retrieves all events for a specific band.
     /// </summary>
     /// <param name="bandId">The unique identifier of the band.</param>

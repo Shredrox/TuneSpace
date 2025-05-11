@@ -70,3 +70,19 @@ export const formatDate2 = (dateStr: string): string => {
     year: "numeric",
   }).format(date);
 };
+
+export const extractTimeFromDate = (dateStr: string): string => {
+  if (!dateStr) return "";
+
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch (error) {
+    console.error("Error extracting time from date:", error);
+    return "";
+  }
+};

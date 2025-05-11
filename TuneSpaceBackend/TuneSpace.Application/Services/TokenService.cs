@@ -20,7 +20,7 @@ internal class TokenService(
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Role, user.Role.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

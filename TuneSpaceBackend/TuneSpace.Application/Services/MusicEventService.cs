@@ -16,6 +16,38 @@ internal class MusicEventService(
     private readonly IBandRepository _bandRepository = bandRepository;
     private readonly ILogger<MusicEventService> _logger = logger;
 
+    async Task<List<MusicEventResponse>> IMusicEventService.GetAllMusicEvents()
+    {
+        try
+        {
+            _logger.LogInformation("Getting all music events");
+            var events = await _musicEventRepository.GetAllMusicEvents();
+
+            return events.Select(e => new MusicEventResponse(
+                e.Id,
+                e.BandId,
+                e.Band?.Name ?? "Unknown Band",
+                e.Title,
+                e.Description,
+                e.EventDate,
+                e.Location,
+                e.VenueAddress,
+                e.TicketPrice,
+                e.TicketUrl,
+                e.IsCancelled,
+                e.CreatedAt,
+                e.UpdatedAt,
+                e.City,
+                e.Country
+            )).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all music events");
+            throw;
+        }
+    }
+
     async Task<List<MusicEventResponse>> IMusicEventService.GetMusicEventsByBandId(Guid bandId)
     {
         try
@@ -43,7 +75,9 @@ internal class MusicEventService(
                 e.TicketUrl,
                 e.IsCancelled,
                 e.CreatedAt,
-                e.UpdatedAt
+                e.UpdatedAt,
+                e.City,
+                e.Country
             )).ToList();
         }
         catch (Exception ex)
@@ -79,7 +113,9 @@ internal class MusicEventService(
                 musicEvent.TicketUrl,
                 musicEvent.IsCancelled,
                 musicEvent.CreatedAt,
-                musicEvent.UpdatedAt
+                musicEvent.UpdatedAt,
+                musicEvent.City,
+                musicEvent.Country
             );
         }
         catch (Exception ex)
@@ -116,7 +152,9 @@ internal class MusicEventService(
                 e.TicketUrl,
                 e.IsCancelled,
                 e.CreatedAt,
-                e.UpdatedAt
+                e.UpdatedAt,
+                e.City,
+                e.Country
             )).ToList();
         }
         catch (Exception ex)
@@ -150,7 +188,9 @@ internal class MusicEventService(
                 TicketPrice = request.TicketPrice,
                 TicketUrl = request.TicketUrl,
                 IsCancelled = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                City = request.City,
+                Country = request.Country
             };
 
             await _musicEventRepository.InsertMusicEvent(musicEvent);

@@ -9,6 +9,14 @@ internal class MusicEventRepository(TuneSpaceDbContext context) : IMusicEventRep
 {
     private readonly TuneSpaceDbContext _context = context;
 
+    async Task<List<MusicEvent>> IMusicEventRepository.GetAllMusicEvents()
+    {
+        return await _context.MusicEvents
+            .Include(e => e.Band)
+            .OrderBy(e => e.EventDate)
+            .ToListAsync();
+    }
+
     async Task<List<MusicEvent>> IMusicEventRepository.GetMusicEventsByBandId(Guid bandId)
     {
         return await _context.MusicEvents

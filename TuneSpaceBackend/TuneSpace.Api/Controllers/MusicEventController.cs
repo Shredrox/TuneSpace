@@ -13,6 +13,21 @@ public class MusicEventController(
     private readonly IMusicEventService _musicEventService = musicEventService;
     private readonly ILogger<MusicEventController> _logger = logger;
 
+    [HttpGet]
+    public async Task<IActionResult> GetAllEvents()
+    {
+        try
+        {
+            var events = await _musicEventService.GetAllMusicEvents();
+            return Ok(events);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error fetching all events");
+            return BadRequest();
+        }
+    }
+
     [HttpGet("band/{bandId}")]
     public async Task<IActionResult> GetBandEvents(string bandId)
     {

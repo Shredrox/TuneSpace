@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -8,21 +7,17 @@ import {
   CardTitle,
 } from "../shadcn/card";
 import { Button } from "../shadcn/button";
-import Event from "@/interfaces/Event";
 import { CalendarIcon, MapPinIcon, ClockIcon, TicketIcon } from "lucide-react";
-import { formatDate2 } from "@/utils/helpers";
+import { formatDate2, extractTimeFromDate } from "@/utils/helpers";
+import MusicEvent from "@/interfaces/MusicEvent";
 
 interface EventCardProps {
-  event: Event;
+  event: MusicEvent;
   isSelected?: boolean;
   variant?: "full" | "compact";
 }
 
-const EventCard: React.FC<EventCardProps> = ({
-  event,
-  isSelected,
-  variant = "full",
-}) => {
+const EventCard = ({ event, isSelected, variant = "full" }: EventCardProps) => {
   return (
     <Card
       className={`w-full transition-all duration-300 hover:shadow-md 
@@ -35,7 +30,7 @@ const EventCard: React.FC<EventCardProps> = ({
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg font-bold line-clamp-1">
-            {event.name}
+            {event.title}
           </CardTitle>
           {event.bandName && (
             <span className="text-xs bg-secondary px-2 py-1 rounded-full">
@@ -54,10 +49,10 @@ const EventCard: React.FC<EventCardProps> = ({
           <div className="flex items-center gap-2">
             <CalendarIcon size={16} className="text-primary" />
             <span>{formatDate2(event.date)}</span>
-          </div>
+          </div>{" "}
           <div className="flex items-center gap-2">
             <ClockIcon size={16} className="text-primary" />
-            <span>{event.time}</span>
+            <span>{extractTimeFromDate(event.date)}</span>
           </div>
           <div className="flex items-center gap-2">
             <MapPinIcon size={16} className="text-primary" />

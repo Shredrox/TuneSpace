@@ -1,5 +1,7 @@
 export const BASE_URL = "http://localhost:5053/api";
 
+export const SIGNALR_HUB_URL = "http://localhost:5053/socket-hub";
+
 export const ROUTES = {
   HOME: "/",
   DISCOVER: "/discover",
@@ -17,7 +19,8 @@ export const ENDPOINTS = {
   BAND: "Band",
   RECOMMENDATIONS: "MusicDiscovery/recommendations",
   DISCOVER: "MusicDiscovery/discover",
-  EVENTS: "Events",
+  MUSIC_EVENTS: "MusicEvent",
+  NOTIFICATION: "Notification",
 } as const;
 
 export const SPOTIFY_ENDPOINTS = {
@@ -34,4 +37,12 @@ export enum UserRole {
   BandAdmin = "BandAdmin",
   BandMember = "BandMember",
   Listener = "Listener",
+}
+
+export enum NotificationTypes {
+  Follow = "Follow",
+  Like = "Like",
+  Message = "Message",
+  Event = "Event",
+  Music = "Music",
 }

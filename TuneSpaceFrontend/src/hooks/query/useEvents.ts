@@ -1,26 +1,56 @@
-import { useQuery } from "@tanstack/react-query";
-import { getEvents } from "@/services/events-service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getEvents,
+  createEvent,
+  getEventsByBandId,
+} from "@/services/events-service";
 
-const useEvents = () => {
+const useEvents = (bandId: string) => {
+  const queryClient = useQueryClient();
+
   const {
     data: events,
-    isLoading,
-    isError,
-    error,
-    refetch,
+    isLoading: isEventsLoading,
+    isError: isEventsError,
+    error: eventsError,
   } = useQuery({
     queryKey: ["events"],
     queryFn: getEvents,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
+  });
+
+  const {
+    data: bandEvents,
+    isLoading: isBandEventsLoading,
+    isError: isBandEventsError,
+    error: bandEventsError,
+  } = useQuery({
+    queryKey: ["bandEvents", bandId],
+    queryFn: () => getEventsByBandId(bandId),
+    enabled: !!bandId,
+  });
+
+  const {
+    mutateAsync: addEvent,
+    isPending: isCreating,
+    isError: isCreateError,
+    error: createError,
+  } = useMutation({
+    mutationFn: createEvent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bandEvents", bandId] });
+    },
   });
 
   return {
     events,
-    isLoading,
-    isError,
-    error,
-    refetch,
+    bandEvents,
+    isLoading: isEventsLoading || isBandEventsLoading,
+    isError: isEventsError || isBandEventsError,
+    error: eventsError || bandEventsError,
+    addEvent,
+    isCreating,
+    isCreateError,
+    createError,
   };
 };
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneSpace.Infrastructure", "TuneSpace.Infrastructure\TuneSpace.Infrastructure.csproj", "{029191B5-DEF4-46A9-84FE-B89F18D72CD1}"
 EndProject
@@ -10,6 +10,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneSpace.Api", "TuneSpace.Api\TuneSpace.Api.csproj", "{C0197282-3FBE-436A-8B74-510948578DA7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuneSpace.Application", "TuneSpace.Application\TuneSpace.Application.csproj", "{0A1DE36F-883E-4778-A1A0-E0C201874240}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A5920619-2FB5-4648-83BE-7ABB23A7EEEA}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -16,16 +16,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDataEnrichmentService, DataEnrichmentService>();
         services.AddScoped<IArtistDiscoveryService, ArtistDiscoveryService>();
         services.AddScoped<IRecommendationScoringService, RecommendationScoringService>();
-
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISpotifyService, SpotifyService>();
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IPostService, PostService>();
-        services.AddScoped<ITagService, TagService>();
         services.AddScoped<IBandService, BandService>();
         services.AddScoped<IMusicDiscoveryService, MusicDiscoveryService>();
         services.AddScoped<IMusicEventService, MusicEventService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IChatService, ChatService>();
 
         return services;
     }

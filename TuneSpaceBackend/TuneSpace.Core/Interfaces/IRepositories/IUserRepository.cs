@@ -39,8 +39,8 @@ public interface IUserRepository
     /// Searches for users whose names match the specified search term.
     /// </summary>
     /// <param name="name">The search term to match against usernames.</param>
-    /// <returns>A list of usernames matching the search criteria.</returns>
-    Task<List<string>> SearchByName(string name);
+    /// <returns>A task representing the asynchronous operation, containing a list of user entities whose names match the search criteria.</returns>
+    Task<List<User>> SearchByName(string name);
 
     /// <summary>
     /// Creates a new user in the database with the specified password.

@@ -8,4 +8,6 @@ public record CreateMusicEventRequest(
     string? Location,
     string? VenueAddress,
     decimal? TicketPrice,
-    string? TicketUrl);
+    string? TicketUrl,
+    string? City,
+    string? Country);
