@@ -6,9 +6,10 @@ import useAuth from "@/hooks/useAuth";
 import SocketContextType from "@/interfaces/context/SocketContextType";
 import httpClient from "@/services/http-client";
 import Message from "@/interfaces/social/chat/Message";
-import ChatInterface from "@/interfaces/social/chat/ChatInterface";
 import { SIGNALR_HUB_URL } from "@/utils/constants";
 import Notification from "@/interfaces/Notification";
+import Chat from "@/interfaces/social/chat/Chat";
+import ChatPreview from "@/interfaces/social/chat/ChatPreview";
 
 interface SocketProviderProps {
   children: ReactNode;
@@ -23,7 +24,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [chats, setChats] = useState<ChatInterface[]>([]);
+  const [chats, setChats] = useState<ChatPreview[]>([]);
 
   const createHubConnection = () => {
     const newConnection = new HubConnectionBuilder()
@@ -92,11 +93,11 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     setMessages(newMessages);
   };
 
-  const onChatCreated = (chat: ChatInterface) => {
+  const onChatCreated = (chat: ChatPreview) => {
     setChats((prevChats) => [...prevChats, chat]);
   };
 
-  const createChat = async (chat: ChatInterface) => {
+  const createChat = async (chat: Chat) => {
     try {
       const newChat = {
         user1Name: chat.user1,
@@ -108,7 +109,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     }
   };
 
-  const setUserChats = (newUserChats: ChatInterface[]) => {
+  const setUserChats = (newUserChats: ChatPreview[]) => {
     setChats(newUserChats);
   };
 

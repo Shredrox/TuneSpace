@@ -1,5 +1,6 @@
 import Notification from "../Notification";
-import ChatInterface from "../social/chat/ChatInterface";
+import Chat from "../social/chat/Chat";
+import ChatPreview from "../social/chat/ChatPreview";
 import Message from "../social/chat/Message";
 
 export default interface SocketContextType {
@@ -17,7 +18,7 @@ export default interface SocketContextType {
     recipientName: string;
   }) => Promise<void>;
   setUserNotifications: (notifications: Notification[]) => void;
-  setUserChats: (newUserChats: ChatInterface[]) => void;
+  setUserChats: (newUserChats: ChatPreview[]) => void;
   createHubConnection: () => void;
   disconnectFromHub: () => void;
   setChatMessages: (newMessages: Message[]) => void;
@@ -30,6 +31,6 @@ export default interface SocketContextType {
     sender: string;
     receiver: string;
   }) => Promise<void>;
-  createChat: (chat: ChatInterface) => Promise<void>;
-  chats: ChatInterface[];
+  createChat: (chat: Chat) => Promise<void>;
+  chats: ChatPreview[];
 }

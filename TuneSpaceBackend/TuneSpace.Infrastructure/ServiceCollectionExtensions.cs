@@ -87,6 +87,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBandRepository, BandRepository>();
         services.AddScoped<IMusicEventRepository, MusicEventRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IChatRepository, ChatRepository>();
 
         return services;
     }
