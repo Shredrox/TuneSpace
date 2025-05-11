@@ -39,7 +39,7 @@ const Navigation = () => {
     {
       id: 2,
       to: ROUTES.BAND_DASHBOARD,
-      text: "Dashboard",
+      text: "Band Dashboard",
       icon: <DiscAlbum className="w-6 h-6" />,
     },
     {
