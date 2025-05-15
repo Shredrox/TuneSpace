@@ -12,7 +12,9 @@ import {
   CalendarDays,
   DiscAlbum,
   House,
+  MessageSquare,
   Newspaper,
+  Users,
 } from "lucide-react";
 import { ROUTES } from "@/utils/constants";
 
@@ -53,6 +55,18 @@ const Navigation = () => {
       to: ROUTES.EVENTS,
       text: "Events",
       icon: <CalendarDays className="w-6 h-6" />,
+    },
+    {
+      id: 5,
+      to: "/forums",
+      text: "Forums",
+      icon: <Users className="h-4 w-4 mr-1" />,
+    },
+    {
+      id: 6,
+      to: "/messages",
+      text: "Messages",
+      icon: <MessageSquare className="h-4 w-4 mr-1" />,
     },
   ];
 
