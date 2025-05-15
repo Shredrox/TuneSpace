@@ -13,4 +13,8 @@ public class TuneSpaceDbContext(DbContextOptions<TuneSpaceDbContext> options) : 
     public DbSet<Chat> Chats { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<MusicEvent> MusicEvents { get; set; }
+    public DbSet<ForumCategory> ForumCategories { get; set; }
+    public DbSet<ForumThread> ForumThreads { get; set; }
+    public DbSet<ForumPost> ForumPosts { get; set; }
+    public DbSet<ForumPostLike> ForumPostLikes { get; set; }
 }

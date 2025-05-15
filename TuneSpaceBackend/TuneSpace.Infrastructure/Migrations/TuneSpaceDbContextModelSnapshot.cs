@@ -125,36 +125,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PlaylistSong", b =>
-                {
-                    b.Property<Guid>("PlaylistsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SongsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("PlaylistsId", "SongsId");
-
-                    b.HasIndex("SongsId");
-
-                    b.ToTable("PlaylistSong");
-                });
-
-            modelBuilder.Entity("PostTag", b =>
-                {
-                    b.Property<Guid>("PostsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TagsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("PostsId", "TagsId");
-
-                    b.HasIndex("TagsId");
-
-                    b.ToTable("PostTag");
-                });
-
             modelBuilder.Entity("TuneSpace.Core.Entities.Band", b =>
                 {
                     b.Property<Guid>("Id")
@@ -219,58 +189,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("Chats");
                 });
 
-            modelBuilder.Entity("TuneSpace.Core.Entities.Comment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Favorite", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId1")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId1");
-
-                    b.ToTable("Favorite");
-                });
-
             modelBuilder.Entity("TuneSpace.Core.Entities.Follow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -295,17 +213,79 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("Follows");
                 });
 
-            modelBuilder.Entity("TuneSpace.Core.Entities.Like", b =>
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumCategory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PostId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("IconName")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ForumCategories");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumPost", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Timestamp")
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ThreadId");
+
+                    b.ToTable("ForumPosts");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumPostLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -316,7 +296,47 @@ namespace TuneSpace.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Likes");
+                    b.ToTable("ForumPostLikes");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumThread", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastActivityAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Views")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("ForumThreads");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Message", b =>
@@ -414,12 +434,27 @@ namespace TuneSpace.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Text")
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecipientName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Source")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -429,84 +464,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Playlist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Playlists");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Post", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Song", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("FavoriteId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FavoriteId");
-
-                    b.ToTable("Songs");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Tag", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.User", b =>
@@ -662,36 +619,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlaylistSong", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.Playlist", null)
-                        .WithMany()
-                        .HasForeignKey("PlaylistsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TuneSpace.Core.Entities.Song", null)
-                        .WithMany()
-                        .HasForeignKey("SongsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("PostTag", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.Post", null)
-                        .WithMany()
-                        .HasForeignKey("PostsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TuneSpace.Core.Entities.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TuneSpace.Core.Entities.Band", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "User")
@@ -722,36 +649,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("User2");
                 });
 
-            modelBuilder.Entity("TuneSpace.Core.Entities.Comment", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.Post", "Post")
-                        .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TuneSpace.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Favorite", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TuneSpace.Core.Entities.Follow", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "Follower")
@@ -771,10 +668,29 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TuneSpace.Core.Entities.Like", b =>
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumPost", b =>
                 {
-                    b.HasOne("TuneSpace.Core.Entities.Post", "Post")
+                    b.HasOne("TuneSpace.Core.Entities.User", "Author")
                         .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuneSpace.Core.Entities.ForumThread", "Thread")
+                        .WithMany("Posts")
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Thread");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumPostLike", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.ForumPost", "Post")
+                        .WithMany("Likes")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -788,6 +704,25 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("Post");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumThread", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuneSpace.Core.Entities.ForumCategory", "Category")
+                        .WithMany("Threads")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Message", b =>
@@ -839,42 +774,24 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TuneSpace.Core.Entities.Playlist", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Post", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TuneSpace.Core.Entities.Song", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.Favorite", "Favorite")
-                        .WithMany()
-                        .HasForeignKey("FavoriteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Favorite");
-                });
-
             modelBuilder.Entity("TuneSpace.Core.Entities.Band", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumCategory", b =>
+                {
+                    b.Navigation("Threads");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumPost", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.ForumThread", b =>
+                {
+                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }
