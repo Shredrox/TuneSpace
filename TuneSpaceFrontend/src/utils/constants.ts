@@ -21,6 +21,7 @@ export const ENDPOINTS = {
   DISCOVER: "MusicDiscovery/discover",
   MUSIC_EVENTS: "MusicEvent",
   NOTIFICATION: "Notification",
+  FORUM: "Forum",
 } as const;
 
 export const SPOTIFY_ENDPOINTS = {
