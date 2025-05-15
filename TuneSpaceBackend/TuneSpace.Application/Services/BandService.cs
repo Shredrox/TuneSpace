@@ -38,7 +38,7 @@ internal class BandService(
                 Description = request.Description,
                 Country = country,
                 City = city,
-                CoverImage = request.Picture.Content,
+                CoverImage = request.Picture?.Content,
                 User = user
             };
 
