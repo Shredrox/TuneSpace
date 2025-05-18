@@ -1,4 +1,5 @@
 ﻿using TuneSpace.Core.DTOs.Requests.Band;
+using TuneSpace.Core.DTOs.Responses.Band;
 using TuneSpace.Core.Entities;
 
 namespace TuneSpace.Core.Interfaces.IServices;
@@ -34,7 +35,7 @@ public interface IBandService
     /// </summary>
     /// <param name="id">The unique identifier of the user who owns the band.</param>
     /// <returns>The band if found; otherwise, null.</returns>
-    Task<Band?> GetBandByUserId(string id);
+    Task<BandResponse?> GetBandByUserId(string id);
 
     /// <summary>
     /// Retrieves the image data for a specific band.
@@ -49,6 +50,14 @@ public interface IBandService
     /// <param name="request">The data containing updates to the band, which may include name, description, genre, and image.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateBand(UpdateBandRequest request);
+
+    /// <summary>
+    /// Adds a user as a member to a specific band.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user to add as a member.</param>
+    /// <param name="bandId">The unique identifier of the band to which the user will be added.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task AddMemberToBand(Guid userId, Guid bandId);
 
     /// <summary>
     /// Deletes a band from the system.

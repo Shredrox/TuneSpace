@@ -1,3 +1,5 @@
+import UserType from "./user/User";
+
 export default interface Band {
   id?: string;
   name: string;
@@ -9,4 +11,5 @@ export default interface Band {
   userId: string;
   spotifyId?: string;
   youTubeEmbedId?: string;
+  members?: UserType[];
 }

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using TuneSpace.Core.DTOs.Requests.Band;
+using TuneSpace.Core.DTOs.Responses.Band;
 using TuneSpace.Core.Entities;
+using TuneSpace.Core.Enums;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -31,6 +33,10 @@ internal class BandService(
             var city = request.Location.Split(',')[1].Trim();
             var country = request.Location.Split(',')[0].Trim();
 
+            user.Role = Roles.BandAdmin;
+            await _userRepository.UpdateUser(user);
+            _logger.LogInformation("User {UserName} updated to BandAdmin role", user.UserName);
+
             var band = new Band
             {
                 Name = request.Name,
@@ -39,7 +45,7 @@ internal class BandService(
                 Country = country,
                 City = city,
                 CoverImage = request.Picture?.Content,
-                User = user
+                Members = [user],
             };
 
             await _bandRepository.InsertBand(band);
@@ -92,7 +98,7 @@ internal class BandService(
         }
     }
 
-    async Task<Band?> IBandService.GetBandByUserId(string id)
+    async Task<BandResponse?> IBandService.GetBandByUserId(string id)
     {
         try
         {
@@ -101,8 +107,26 @@ internal class BandService(
             if (band == null)
             {
                 _logger.LogWarning("No band found for user with ID {UserId}", id);
+                return null;
             }
-            return band;
+
+            return new BandResponse(
+                band.Id.ToString(),
+                band.Name,
+                band.Description ?? string.Empty,
+                band.Genre,
+                band.Country ?? string.Empty,
+                band.City ?? string.Empty,
+                band.CoverImage ?? [],
+                band.SpotifyId,
+                band.YouTubeEmbedId,
+                band.Members?.Select(m => new MemberResponse(
+                    m.Id.ToString(),
+                    m.UserName ?? string.Empty,
+                    "",
+                    m.ProfilePicture
+                )).ToList()
+            );
         }
         catch (Exception ex)
         {
@@ -180,6 +204,36 @@ internal class BandService(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating band with ID {Id}", request.Id);
+            throw;
+        }
+    }
+
+    async Task IBandService.AddMemberToBand(Guid userId, Guid bandId)
+    {
+        try
+        {
+            _logger.LogInformation("Adding user with ID {UserId} to band with ID {BandId}", userId, bandId);
+            var band = await _bandRepository.GetBandById(bandId);
+            if (band == null)
+            {
+                _logger.LogWarning("Band with ID {BandId} not found when adding member", bandId);
+                return;
+            }
+
+            var user = await _userRepository.GetUserById(userId.ToString());
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found when adding to band", userId);
+                return;
+            }
+
+            band.Members.Add(user);
+            await _bandRepository.UpdateBand(band);
+            _logger.LogInformation("User with ID {UserId} added to band with ID {BandId} successfully", userId, bandId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding user with ID {UserId} to band with ID {BandId}", userId, bandId);
             throw;
         }
     }

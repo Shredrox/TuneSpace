@@ -52,12 +52,16 @@ internal class BandRepository(TuneSpaceDbContext context) : IBandRepository
 
     async Task<Band?> IBandRepository.GetBandById(Guid id)
     {
-        return await _context.Bands.FindAsync(id);
+        return await _context.Bands.Include(b => b.Members).FirstOrDefaultAsync(b => b.Id == id);
     }
 
     async Task<Band?> IBandRepository.GetBandByUserId(string id)
     {
-        return await _context.Bands.FirstOrDefaultAsync((band) => band.UserId == Guid.Parse(id));
+        return await _context.Bands
+            .Include(b => b.Members)
+            .FirstOrDefaultAsync((band) => band.Members
+                .Select(m => m.Id)
+                .Contains(Guid.Parse(id)));
     }
 
     async Task IBandRepository.UpdateBand(Band band)

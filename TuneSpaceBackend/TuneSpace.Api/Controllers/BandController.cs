@@ -106,6 +106,34 @@ public class BandController(
         }
     }
 
+    [HttpPost("add-member")]
+    public async Task<IActionResult> AddMemberToBand([FromBody] AddMemberRequest request)
+    {
+        var userId = request.UserId;
+        var bandId = request.BandId;
+
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("User ID and Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(userId, out var parsedUserId) || !Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid User ID or Band ID format");
+        }
+
+        try
+        {
+            await _bandService.AddMemberToBand(Guid.Parse(userId), Guid.Parse(bandId));
+            return Ok("Member added successfully");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error adding member to band with ID: {BandId}", bandId);
+            return BadRequest();
+        }
+    }
+
     [HttpPut("update")]
     public async Task<IActionResult> UpdateBand([FromForm] BandUpdateRequest request)
     {
