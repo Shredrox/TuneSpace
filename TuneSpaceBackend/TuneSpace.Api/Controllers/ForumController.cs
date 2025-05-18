@@ -122,6 +122,21 @@ public class ForumController(
         }
     }
 
+    [HttpGet("threads/band/{bandId}")]
+    public async Task<ActionResult<List<ThreadResponse>>> GetBandThreads(Guid bandId)
+    {
+        try
+        {
+            var threads = await _forumService.GetBandThreads(bandId);
+            return Ok(threads);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving threads for band {bandId}", bandId);
+            return StatusCode(500, "An error occurred while retrieving threads");
+        }
+    }
+
     [Authorize]
     [HttpPost("categories")]
     public async Task<ActionResult<CategoryResponse>> CreateCategory([FromBody] CreateCategoryRequest request)

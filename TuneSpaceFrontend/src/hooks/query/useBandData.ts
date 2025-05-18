@@ -1,4 +1,5 @@
-import { getBand, updateBand } from "@/services/band-service";
+import { addMemberToBand, getBand, updateBand } from "@/services/band-service";
+import { fetchBandThreads } from "@/services/forum-service";
 import { getSpotifyArtist } from "@/services/spotify-service";
 import { isNullOrEmpty } from "@/utils/helpers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +16,17 @@ const useBandData = (userId: string) => {
     queryKey: ["band", userId],
     queryFn: () => getBand(userId),
     enabled: !!userId,
+  });
+
+  const {
+    data: forumThreads,
+    isLoading: isBandForumThreadsLoading,
+    isError: isBandForumThreadsError,
+    error: bandForumThreadsError,
+  } = useQuery({
+    queryKey: ["bandForumThreads", band?.id],
+    queryFn: () => fetchBandThreads(band?.id!),
+    enabled: !!band && !!band?.id,
   });
 
   const {
@@ -40,13 +52,26 @@ const useBandData = (userId: string) => {
     },
   });
 
-  const isBandLoading = isBandDataLoading || isSpotifyProfileLoading;
-  const isBandError = isBandDataError || isSpotifyProfileError;
-  const bandError = bandDataError || spotifyProfileError;
+  const { mutateAsync: addMemberMutation } = useMutation({
+    mutationFn: ({ bandId, userId }: { bandId: string; userId: string }) =>
+      addMemberToBand(bandId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["band", userId],
+      });
+    },
+  });
+
+  const isBandLoading =
+    isBandDataLoading || isSpotifyProfileLoading || isBandForumThreadsLoading;
+  const isBandError =
+    isBandDataError || isSpotifyProfileError || isBandForumThreadsError;
+  const bandError =
+    bandDataError || spotifyProfileError || bandForumThreadsError;
 
   return {
-    bandData: { band, spotifyProfile },
-    mutations: { updateBandMutation },
+    bandData: { band, spotifyProfile, forumThreads },
+    mutations: { updateBandMutation, addMemberMutation },
     isBandLoading,
     isBandError,
     bandError,

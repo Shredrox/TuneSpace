@@ -52,6 +52,15 @@ export const fetchThreads = async (
   return response.data;
 };
 
+export const fetchBandThreads = async (
+  bandId: string
+): Promise<ForumThread[]> => {
+  const response = await httpClient.get(
+    `${ENDPOINTS.FORUM}/threads/band/${bandId}`
+  );
+  return response.data;
+};
+
 export const fetchThread = async (threadId: string): Promise<ThreadData> => {
   const response = await httpClient.get(
     `${ENDPOINTS.FORUM}/threads/${threadId}`

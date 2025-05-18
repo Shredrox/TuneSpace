@@ -3,6 +3,7 @@ namespace TuneSpace.Core.DTOs.Responses.Forum;
 public record ThreadResponse(
     Guid Id,
     string Title,
+    string CategoryName,
     Guid AuthorId,
     string AuthorName,
     string AuthorAvatar,

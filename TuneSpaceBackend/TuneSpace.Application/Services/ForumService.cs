@@ -1,6 +1,7 @@
 using TuneSpace.Core.DTOs.Requests.Forum;
 using TuneSpace.Core.DTOs.Responses.Forum;
 using TuneSpace.Core.Entities;
+using TuneSpace.Core.Enums;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -8,10 +9,12 @@ namespace TuneSpace.Application.Services;
 
 internal class ForumService(
     IForumRepository forumRepository,
-    IUserRepository userRepository) : IForumService
+    IUserRepository userRepository,
+    IBandRepository bandRepository) : IForumService
 {
     private readonly IForumRepository _forumRepository = forumRepository;
     private readonly IUserRepository _userRepository = userRepository;
+    private readonly IBandRepository _bandRepository = bandRepository;
 
     async Task<CategoryResponse> IForumService.CreateCategoryAsync(CreateCategoryRequest request)
     {
@@ -30,7 +33,7 @@ internal class ForumService(
         return new CategoryResponse(
             createdCategory.Id,
             createdCategory.Name,
-            createdCategory.Description,
+            createdCategory.Description ?? string.Empty,
             createdCategory.IconName,
             0,
             0
@@ -69,6 +72,7 @@ internal class ForumService(
         return new ThreadResponse(
             createdThread.Id,
             createdThread.Title,
+            "",
             user.Id,
             user.UserName ?? "Unknown",
             "",
@@ -120,7 +124,7 @@ internal class ForumService(
         return [.. categories.Select(c => new CategoryResponse(
             c.Id,
             c.Name,
-            c.Description,
+            c.Description ?? string.Empty,
             c.IconName,
             c.Threads.Count,
             c.Threads.SelectMany(t => t.Posts).Count()
@@ -138,7 +142,7 @@ internal class ForumService(
         return new CategoryResponse(
             category.Id,
             category.Name,
-            category.Description,
+            category.Description ?? string.Empty,
             category.IconName,
             category.Threads.Count,
             category.Threads.SelectMany(t => t.Posts).Count()
@@ -152,6 +156,7 @@ internal class ForumService(
         return [.. threads.Select(t => new ThreadResponse(
             t.Id,
             t.Title,
+            t.Category.Name,
             t.Author.Id,
             t.Author.UserName ?? "Unknown",
             "",
@@ -192,7 +197,7 @@ internal class ForumService(
             new CategorySummaryResponse(
                 thread.Category.Id,
                 thread.Category.Name,
-                thread.Category.Description
+                thread.Category.Description ?? string.Empty
             ),
             thread.CategoryId,
             thread.Category.Name,
@@ -201,6 +206,44 @@ internal class ForumService(
             thread.IsLocked,
             postResponses
         );
+    }
+
+    async Task<List<ThreadResponse>?> IForumService.GetBandThreads(Guid bandId)
+    {
+        var band = await _bandRepository.GetBandById(bandId);
+
+        if (band == null)
+        {
+            return null;
+        }
+
+        var bandAdmin = band.Members.FirstOrDefault(m => m.Role == Roles.BandAdmin);
+
+        if (bandAdmin == null)
+        {
+            return null;
+        }
+
+        var threads = await _forumRepository.GetThreadsByAuthorId(bandAdmin?.Id ?? Guid.Empty);
+        if (threads == null)
+        {
+            return null;
+        }
+
+        return [.. threads.Select(t => new ThreadResponse(
+            t.Id,
+            t.Title,
+            t.Category.Name,
+            t.Author.Id,
+            t.Author.UserName ?? "Unknown",
+            "",
+            t.CreatedAt,
+            t.LastActivityAt,
+            t.Posts.Count - 1,
+            t.Views,
+            t.IsPinned,
+            t.IsLocked
+        ))];
     }
 
     async Task<ForumPostResponse?> IForumService.GetPostByIdAsync(Guid postId, Guid userId)

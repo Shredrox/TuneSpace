@@ -1,6 +1,7 @@
 export interface ForumThread {
   id: string;
   title: string;
+  categoryName: string;
   authorId: string;
   authorName: string;
   authorAvatar?: string;

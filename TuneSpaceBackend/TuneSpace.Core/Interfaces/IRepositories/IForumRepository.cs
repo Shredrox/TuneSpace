@@ -63,6 +63,13 @@ public interface IForumRepository
     Task<ForumThread?> GetThreadByIdAsync(Guid threadId);
 
     /// <summary>
+    /// Retrieves all forum threads created by a specific user
+    /// </summary>
+    /// <param name="authorId">The ID of the thread author</param>
+    /// <returns>A list of threads created by the specified user</returns>
+    Task<List<ForumThread>?> GetThreadsByAuthorId(Guid authorId);
+
+    /// <summary>
     /// Retrieves a thread with all its associated posts
     /// </summary>
     /// <param name="threadId">The ID of the thread</param>

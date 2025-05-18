@@ -57,6 +57,7 @@ internal class ForumRepository(TuneSpaceDbContext context) : IForumRepository
         return await _context.ForumThreads
             .Include(t => t.Author)
             .Include(t => t.Posts)
+            .Include(t => t.Category)
             .Where(t => t.CategoryId == categoryId)
             .OrderByDescending(t => t.IsPinned)
             .ThenByDescending(t => t.LastActivityAt)
@@ -69,6 +70,17 @@ internal class ForumRepository(TuneSpaceDbContext context) : IForumRepository
             .Include(t => t.Category)
             .Include(t => t.Author)
             .FirstOrDefaultAsync(t => t.Id == threadId);
+    }
+
+    async Task<List<ForumThread>?> IForumRepository.GetThreadsByAuthorId(Guid authorId)
+    {
+        return await _context.ForumThreads
+            .Include(t => t.Category)
+            .Include(t => t.Author)
+            .Include(t => t.Posts)
+                .ThenInclude(p => p.Author)
+            .Where(t => t.AuthorId == authorId)
+            .ToListAsync();
     }
 
     async Task<ForumThread?> IForumRepository.GetThreadDetailWithPostsAsync(Guid threadId)

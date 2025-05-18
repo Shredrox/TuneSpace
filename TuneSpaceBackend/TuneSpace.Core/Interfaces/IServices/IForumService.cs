@@ -60,6 +60,13 @@ public interface IForumService
     Task<ThreadDetailResponse?> GetThreadDetailAsync(Guid threadId, Guid userId);
 
     /// <summary>
+    /// Retrieves all forum threads associated with a specific band
+    /// </summary>
+    /// <param name="bandId">The ID of the band whose threads to retrieve</param>
+    /// <returns>A list of threads associated with the specified band</returns>
+    Task<List<ThreadResponse>?> GetBandThreads(Guid bandId);
+
+    /// <summary>
     /// Retrieves a specific forum post with like information for the requesting user
     /// </summary>
     /// <param name="postId">The ID of the post to retrieve</param>
