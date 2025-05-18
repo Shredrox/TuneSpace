@@ -26,6 +26,11 @@ export const getUsersByNameSearch = async (
   return response.data;
 };
 
+export const getProfilePicture = async (username: string): Promise<string> => {
+  const response = await httpClient.get(`/User/${username}/profile-picture`);
+  return response.data;
+};
+
 export const checkFollowing = async (
   followerUsername?: string,
   followedUsername?: string
@@ -57,6 +62,24 @@ export const unfollowUser = async ({
     loggedInUser,
     profileUser,
   });
+
+  return response.data;
+};
+
+export const uploadProfilePicture = async (file: File, username: string) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("username", username);
+
+  const response = await httpClient.post(
+    "/User/upload-profile-picture",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
   return response.data;
 };

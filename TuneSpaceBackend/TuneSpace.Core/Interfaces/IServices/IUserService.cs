@@ -29,6 +29,13 @@ public interface IUserService
     Task<User?> GetUserFromRefreshToken(string refreshToken);
 
     /// <summary>
+    /// Retrieves the profile picture for a specified user.
+    /// </summary>
+    /// <param name="username">The username of the user whose profile picture should be retrieved.</param>
+    /// <returns>The binary data of the profile picture if found; otherwise, null.</returns>
+    Task<byte[]?> GetProfilePicture(string username);
+
+    /// <summary>
     /// Searches for users whose names contain the specified search term.
     /// </summary>
     /// <param name="search">The search term to match against user names.</param>
@@ -41,4 +48,12 @@ public interface IUserService
     /// <param name="user">The user entity whose refresh token should be updated.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateUserRefreshToken(User user);
+
+    /// <summary>
+    /// Updates the profile picture for a specified user.
+    /// </summary>
+    /// <param name="username">The username of the user whose profile picture should be updated.</param>
+    /// <param name="profilePicture">The binary data of the profile picture.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task UpdateProfilePicture(string username, byte[] profilePicture);
 }

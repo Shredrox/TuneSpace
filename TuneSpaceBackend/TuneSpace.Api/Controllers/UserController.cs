@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using TuneSpace.Core.DTOs.Responses.User;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
+using Microsoft.AspNetCore.Authorization;
+using TuneSpace.Api.DTOs;
 
 namespace TuneSpace.Api.Controllers;
 
@@ -46,7 +48,7 @@ public class UserController(
         {
             var users = await _userService.SearchByName(search);
             var response = users
-                .Select(user => new UserSearchResultResponse(user.Id, user.UserName))
+                .Select(user => new UserSearchResultResponse(user.Id, user.UserName ?? string.Empty))
                 .ToList();
 
             return Ok(response);
@@ -55,6 +57,102 @@ public class UserController(
         {
             _logger.LogWarning(e, "No users found for search: {Search}", search);
             return NotFound(new List<UserSearchResultResponse>());
+        }
+    }
+
+    [HttpGet("{username}/profile-picture")]
+    public async Task<IActionResult> GetProfilePicture(string username)
+    {
+        try
+        {
+            var profilePicture = await _userService.GetProfilePicture(username);
+
+            if (profilePicture == null)
+            {
+                return NotFound("Profile picture not found");
+            }
+
+            return File(profilePicture, "image/jpeg");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching profile picture for user {Username}", username);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("{username}/profile")]
+    public async Task<IActionResult> GetUserProfile(string username)
+    {
+        try
+        {
+            var user = await _userService.GetUserByName(username);
+            if (user is null)
+            {
+                return NotFound("User not found");
+            }
+
+            var profilePictureBase64 = user.ProfilePicture != null ?
+                Convert.ToBase64String(user.ProfilePicture) : null;
+
+            //TODO: Update
+            var profile = new UserProfileResponse(
+                Username: user.UserName ?? string.Empty,
+                FollowerCount: 0,
+                FollowingCount: 0,
+                PostsCount: 0,
+                PlaylistsCount: 0,
+                FavoriteSong: "Unknown",
+                FavoriteBand: "Unknown",
+                ProfilePicture: profilePictureBase64
+            );
+
+            return Ok(profile);
+        }
+        catch (NotFoundException e)
+        {
+            _logger.LogWarning(e, "User not found: {Username}", username);
+            return NotFound();
+        }
+    }
+
+    [HttpPost("upload-profile-picture")]
+    [Authorize]
+    public async Task<IActionResult> UploadProfilePicture([FromForm] ProfileUpdateRequest request)
+    {
+        try
+        {
+            var file = request.File;
+            var username = request.Username;
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded");
+            }
+
+            string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+            if (!allowedFileTypes.Contains(file.ContentType.ToLower()))
+            {
+                return BadRequest("Invalid file type. Only JPEG, PNG, JPG and GIF are allowed.");
+            }
+
+            if (file.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest("File size cannot exceed 5MB");
+            }
+
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            byte[] fileBytes = memoryStream.ToArray();
+
+            await _userService.UpdateProfilePicture(username, fileBytes);
+
+            return Ok(new { message = "Profile picture updated successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading profile picture");
+            return StatusCode(500, "Internal server error");
         }
     }
 }

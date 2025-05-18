@@ -6,7 +6,7 @@ public record ThreadResponse(
     string CategoryName,
     Guid AuthorId,
     string AuthorName,
-    string AuthorAvatar,
+    byte[] AuthorAvatar,
     DateTime CreatedAt,
     DateTime LastActivityAt,
     int RepliesCount,

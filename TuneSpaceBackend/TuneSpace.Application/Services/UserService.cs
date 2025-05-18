@@ -29,6 +29,19 @@ internal class UserService(
         return user ?? null;
     }
 
+    async Task<byte[]?> IUserService.GetProfilePicture(string username)
+    {
+        var user = await _userRepository.GetUserByName(username);
+
+        if (user == null)
+        {
+            _logger.LogWarning("User not found for profile picture retrieval: {Username}", username);
+            throw new NotFoundException($"User not found: {username}");
+        }
+
+        return user.ProfilePicture;
+    }
+
     async Task<List<User>> IUserService.SearchByName(string name)
     {
         var users = await _userRepository.SearchByName(name);
@@ -36,7 +49,7 @@ internal class UserService(
         if (users == null || users.Count == 0)
         {
             _logger.LogWarning("No users found for search: {Search}", name);
-            throw new NotFoundException("No users found");
+            return [];
         }
 
         return users;
@@ -55,5 +68,21 @@ internal class UserService(
         existingUser.RefreshTokenValidity = user.RefreshTokenValidity;
 
         await _userRepository.UpdateUser(user);
+    }
+
+    async Task IUserService.UpdateProfilePicture(string username, byte[] profilePicture)
+    {
+        var user = await _userRepository.GetUserByName(username);
+
+        if (user == null)
+        {
+            _logger.LogWarning("User not found for profile picture update: {Username}", username);
+            throw new NotFoundException($"User not found: {username}");
+        }
+
+        user.ProfilePicture = profilePicture;
+        await _userRepository.UpdateUser(user);
+
+        _logger.LogInformation("Profile picture updated for user: {Username}", username);
     }
 }

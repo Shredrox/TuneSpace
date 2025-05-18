@@ -28,6 +28,7 @@ import { Badge } from "./shadcn/badge";
 import { useEffect } from "react";
 import useNotifications from "@/hooks/query/useNotifications";
 import useSocket from "@/hooks/useSocket";
+import useProfileData from "@/hooks/query/useProfileData";
 
 const Header = () => {
   const { auth } = useAuth();
@@ -39,6 +40,8 @@ const Header = () => {
   const { notifications: socketNotifications } = useSocket();
   const router = useRouter();
   const logout = useLogout();
+
+  const { profile } = useProfileData(auth.username!, auth.username!);
 
   useEffect(() => {
     if (socketNotifications.length > 0) {
@@ -97,8 +100,10 @@ const Header = () => {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
+                <AvatarImage
+                  src={`data:image/png;base64,${profile?.profilePicture}`}
+                />
+                <AvatarFallback>{profile?.username.charAt(0)}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent onCloseAutoFocus={(e) => e.preventDefault()}>

@@ -6,4 +6,5 @@ export default interface UserProfile {
   playlistsCount: number;
   favoriteSong: string;
   favoriteBand: string;
+  profilePicture?: string;
 }

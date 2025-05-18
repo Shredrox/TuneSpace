@@ -5,7 +5,7 @@ public record ForumPostResponse(
     string Content,
     Guid AuthorId,
     string AuthorName,
-    string AuthorAvatar,
+    byte[] AuthorAvatar,
     string AuthorRole,
     DateTime CreatedAt,
     DateTime? UpdatedAt,

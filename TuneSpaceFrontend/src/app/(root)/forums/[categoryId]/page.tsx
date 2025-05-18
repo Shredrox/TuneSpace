@@ -109,7 +109,9 @@ export default function CategoryPage() {
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={thread.authorAvatar} />
+                      <AvatarImage
+                        src={`data:image/png;base64,${thread.authorAvatar}`}
+                      />
                       <AvatarFallback>
                         {thread.authorName?.charAt(0)}
                       </AvatarFallback>

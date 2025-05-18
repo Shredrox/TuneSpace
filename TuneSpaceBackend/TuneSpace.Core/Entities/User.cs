@@ -10,4 +10,5 @@ public class User : IdentityUser<Guid>
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenValidity { get; set; }
     public Roles Role { get; set; }
+    public byte[]? ProfilePicture { get; set; }
 }

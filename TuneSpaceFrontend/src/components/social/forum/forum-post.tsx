@@ -56,7 +56,7 @@ const ForumPost = ({
       <CardHeader className="flex flex-row gap-4 pb-2">
         <div>
           <Avatar className="h-10 w-10">
-            <AvatarImage src={authorAvatar} />
+            <AvatarImage src={`data:image/png;base64,${authorAvatar}`} />
             <AvatarFallback>{authorName?.charAt(0)}</AvatarFallback>
           </Avatar>
         </div>
