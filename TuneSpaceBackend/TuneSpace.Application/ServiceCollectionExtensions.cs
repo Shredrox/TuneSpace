@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IForumService, ForumService>();
+        services.AddScoped<IMerchandiseService, MerchandiseService>();
 
         return services;
     }
