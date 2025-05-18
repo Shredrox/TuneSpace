@@ -24,6 +24,11 @@ import Link from "next/link";
 import CreateDiscussionDialog from "../social/create-discussion-dialog";
 import AddEventDialog from "../events/add-event-dialog";
 import useEvents from "@/hooks/query/useEvents";
+import UserSearchDialog from "../social/user-search-dialog";
+import UserType from "@/interfaces/user/User";
+import { toast } from "sonner";
+import AddMerchandiseDialog from "./add-merchandise-dialog";
+import useMerchandise from "@/hooks/query/useMerchandise";
 
 const BandDashboard = () => {
   const { auth } = useAuth();
@@ -32,6 +37,11 @@ const BandDashboard = () => {
     useBandData(auth?.id || "");
 
   const { bandEvents } = useEvents(bandData?.band?.id || "");
+  const {
+    merchandise,
+    isLoading: isMerchandiseLoading,
+    refetch: refetchMerchandise,
+  } = useMerchandise(bandData?.band?.id || "");
 
   const [mounted, setMounted] = useState(false);
 
@@ -115,6 +125,19 @@ const BandDashboard = () => {
     }
   };
 
+  const handleAddMember = async (user: UserType) => {
+    try {
+      await mutations.addMemberMutation({
+        bandId: bandData.band?.id || "",
+        userId: user.id,
+      });
+      toast(`Added ${user.name} as a band member!`);
+    } catch (error) {
+      console.error("Error adding band member:", error);
+      toast("Failed to add member. Please try again.");
+    }
+  };
+
   if (isBandLoading) {
     return <Loading />;
   }
@@ -138,30 +161,6 @@ const BandDashboard = () => {
       name: "ConcertGoer",
       message: "Will there be VIP tickets?",
       time: "2 days ago",
-    },
-  ];
-
-  const forumThreads = [
-    {
-      id: 1,
-      title: "AMA with the band",
-      replies: 34,
-      category: "general",
-      time: "1 day ago",
-    },
-    {
-      id: 2,
-      title: "Upcoming tour discussion",
-      replies: 28,
-      category: "events",
-      time: "3 days ago",
-    },
-    {
-      id: 3,
-      title: "Gear talk with our guitarist",
-      replies: 19,
-      category: "gear",
-      time: "5 days ago",
     },
   ];
 
@@ -421,10 +420,10 @@ const BandDashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  {forumThreads.map((thread) => (
+                  {bandData?.forumThreads?.map((thread) => (
                     <Link
                       key={thread.id}
-                      href={`/forums/${thread.category}/${thread.id}`}
+                      href={`/forums/${thread.categoryName}/${thread.id}`}
                       className="block"
                     >
                       <div className="flex items-center p-3 border-b last:border-0 hover:bg-accent/40 rounded-md">
@@ -432,10 +431,20 @@ const BandDashboard = () => {
                           <h4 className="font-medium">{thread.title}</h4>
                           <div className="flex justify-between">
                             <span className="text-xs text-muted-foreground">
-                              {thread.replies} replies
+                              {thread.repliesCount} replies
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {thread.time}
+                              {new Date(thread.createdAt).toLocaleString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                }
+                              )}
                             </span>
                           </div>
                         </div>
@@ -505,77 +514,99 @@ const BandDashboard = () => {
               </CardHeader>
               <CardContent className="p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {bandEvents?.map((event, index) => (
-                    <Card key={index} className="flex overflow-hidden">
-                      <div className="bg-muted/20 w-[100px] flex items-center justify-center">
-                        <div className="text-center">
-                          {event.date ? (
-                            <>
-                              <div className="font-bold text-xl">
-                                {new Date(event.date).getDate()}
+                  {bandEvents && bandEvents.length > 0 ? (
+                    bandEvents.map((event, index) => (
+                      <Card key={index} className="flex overflow-hidden">
+                        <div className="bg-muted/20 w-[100px] flex items-center justify-center">
+                          <div className="text-center">
+                            {event.date ? (
+                              <>
+                                <div className="font-bold text-xl">
+                                  {new Date(event.date).getDate()}
+                                </div>
+                                <div className="text-sm">
+                                  {new Date(event.date)
+                                    .toLocaleString("default", {
+                                      month: "short",
+                                    })
+                                    .toUpperCase()}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-sm text-muted-foreground">
+                                No date
                               </div>
-                              <div className="text-sm">
-                                {new Date(event.date)
-                                  .toLocaleString("default", { month: "short" })
-                                  .toUpperCase()}
-                              </div>
-                            </>
-                          ) : (
-                            <div className="text-sm text-muted-foreground">
-                              No date
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="p-3 flex-1">
-                        <h4 className="font-semibold">{event.venue}</h4>
-                        <p className="text-sm">
-                          {event.city}, {event.country}
-                        </p>
-                        <div className="flex justify-between items-center mt-2">
-                          <span className="text-sm text-muted-foreground">
-                            {event.date
-                              ? new Date(event.date).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: false,
-                                })
-                              : "Time TBA"}
-                          </span>
-                          <button className="text-xs px-2 py-1 bg-primary/80 text-primary-foreground rounded">
-                            Details
-                          </button>
+                        <div className="p-3 flex-1">
+                          <h4 className="font-semibold">{event.venue}</h4>
+                          <p className="text-sm">
+                            {event.city}, {event.country}
+                          </p>
+                          <div className="flex justify-between items-center mt-2">
+                            <span className="text-sm text-muted-foreground">
+                              {event.date
+                                ? new Date(event.date).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: false,
+                                  })
+                                : "Time TBA"}
+                            </span>
+                            <button className="text-xs px-2 py-1 bg-primary/80 text-primary-foreground rounded">
+                              Details
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="col-span-full flex flex-col items-center justify-center p-8 text-center">
+                      <p className="text-muted-foreground mb-4">
+                        No events scheduled yet
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden border-muted/20">
+            <Card className="mb-6 overflow-hidden border-muted/20">
               <CardHeader className="bg-muted/10 pb-2">
                 <CardTitle className="flex items-center gap-2">
-                  <span>Merchandise</span>
-                  <button className="ml-auto text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
-                    Add Item
-                  </button>
+                  <span>Band Members</span>
+                  <UserSearchDialog
+                    trigger={
+                      <button className="ml-auto text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
+                        Add Member
+                      </button>
+                    }
+                    title="Add Band Member"
+                    onSelectUser={handleAddMember}
+                    buttonText="Add to Band"
+                  />
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {[1, 2, 3, 4].map((index) => (
-                    <Card key={index} className="overflow-hidden">
-                      <div className="aspect-square bg-muted/20 flex items-center justify-center">
-                        Item Image
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {bandData.band?.members?.map((member, index) => (
+                    <Card key={index} className="flex flex-col overflow-hidden">
+                      <div className="bg-muted/20 aspect-square flex items-center justify-center">
+                        <Avatar className="w-[220px] h-[220px] rounded-lg shadow-md border border-muted">
+                          <AvatarImage
+                            src={`data:image/jpeg;base64,${member.profilePicture}`}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="text-3xl font-semibold bg-secondary/30">
+                            {member.name?.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
                       <div className="p-3">
-                        <div className="flex justify-between">
-                          <h4 className="font-semibold">Merch Item</h4>
-                          <span className="font-bold">$19.99</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Item description goes here
+                        <h4 className="font-semibold">{member.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Role/Instrument
                         </p>
                       </div>
                     </Card>
@@ -583,35 +614,64 @@ const BandDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+            <Card className="overflow-hidden border-muted/20">
+              {" "}
+              <CardHeader className="bg-muted/10 pb-2">
+                <CardTitle className="flex items-center gap-2">
+                  <span>Merchandise</span>
+                  <AddMerchandiseDialog
+                    bandId={bandData?.band?.id || ""}
+                    onMerchandiseAdded={refetchMerchandise}
+                    trigger={
+                      <button className="ml-auto text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
+                        Add Item
+                      </button>
+                    }
+                  />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {isMerchandiseLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loading />
+                  </div>
+                ) : merchandise && merchandise.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {merchandise.map((item) => (
+                      <Card key={item.id} className="overflow-hidden">
+                        <div className="aspect-square bg-muted/20 flex items-center justify-center">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            "No Image"
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <div className="flex justify-between">
+                            <h4 className="font-semibold">{item.name}</h4>
+                            <span className="font-bold">
+                              ${item.price.toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {item.description || "No description"}
+                          </p>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No merchandise items yet. Add your first item!
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-
-          <Card className="mb-6 overflow-hidden border-muted/20">
-            <CardHeader className="bg-muted/10 pb-2">
-              <CardTitle className="flex items-center gap-2">
-                <span>Band Members</span>
-                <button className="ml-auto text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
-                  Add Member
-                </button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((index) => (
-                  <Card key={index} className="flex flex-col overflow-hidden">
-                    <div className="bg-muted/20 aspect-square flex items-center justify-center">
-                      Member Photo
-                    </div>
-                    <div className="p-3">
-                      <h4 className="font-semibold">Member Name</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Role/Instrument
-                      </p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </CardContent>
       </Card>
     </div>
