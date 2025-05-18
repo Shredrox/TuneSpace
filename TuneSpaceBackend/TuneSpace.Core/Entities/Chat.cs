@@ -3,9 +3,10 @@
 public class Chat
 {
     public Guid Id { get; set; }
-    public Guid User1Id { get; set; }
-    public User User1 { get; set; }
-    public Guid User2Id { get; set; }
-    public User User2 { get; set; }
+    public Guid ParticipantAId { get; set; }
+    public Guid ParticipantBId { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public User ParticipantA { get; set; } = null!;
+    public User ParticipantB { get; set; } = null!;
 }

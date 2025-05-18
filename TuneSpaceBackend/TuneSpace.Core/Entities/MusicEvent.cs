@@ -3,7 +3,8 @@ namespace TuneSpace.Core.Entities;
 public class MusicEvent
 {
     public Guid Id { get; set; }
-    public string Title { get; set; } = string.Empty;
+    public Guid BandId { get; set; }
+    public required string Title { get; set; }
     public string? Description { get; set; }
     public DateTime EventDate { get; set; }
     public string? City { get; set; }
@@ -16,7 +17,5 @@ public class MusicEvent
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
-    // Foreign keys
-    public Guid BandId { get; set; }
     public Band Band { get; set; } = null!;
 }

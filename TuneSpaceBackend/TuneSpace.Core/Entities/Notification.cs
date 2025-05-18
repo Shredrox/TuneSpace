@@ -3,12 +3,13 @@
 public class Notification
 {
     public Guid Id { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public string Source { get; set; } = string.Empty;
-    public string RecipientName { get; set; } = string.Empty;
-    public bool IsRead { get; set; }
     public Guid UserId { get; set; }
-    public User User { get; set; }
+    public string? Message { get; set; }
+    public string? Type { get; set; }
+    public string? Source { get; set; }
+    public required string RecipientName { get; set; }
+    public bool IsRead { get; set; }
     public DateTime Timestamp { get; set; }
+
+    public User User { get; set; } = null!;
 }

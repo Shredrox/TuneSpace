@@ -22,9 +22,9 @@ internal class ChatService(
                 m.Id,
                 m.Content,
                 m.Sender.Id,
-                m.Sender.UserName,
+                m.Sender.UserName ?? string.Empty,
                 m.Recipient.Id,
-                m.Recipient.UserName,
+                m.Recipient.UserName ?? string.Empty,
                 m.IsRead,
                 m.Timestamp
                 )
@@ -37,25 +37,25 @@ internal class ChatService(
     async Task<ChatResponse> IChatService.GetChatById(Guid chatId)
     {
         var chat = await chatRepository.GetChatById(chatId) ?? throw new NotFoundException("Chat not found");
-        var otherUser = chat.User1.Id == chat.User2.Id ? chat.User2.Id : chat.User1.Id;
-        var otherUsername = chat.User1.UserName == chat.User2.UserName ? chat.User2.UserName : chat.User1.UserName;
+        var otherUser = chat.ParticipantA.Id == chat.ParticipantB.Id ? chat.ParticipantB.Id : chat.ParticipantA.Id;
+        var otherUsername = chat.ParticipantA.UserName == chat.ParticipantB.UserName ? chat.ParticipantB.UserName : chat.ParticipantA.UserName;
 
         var latestMessage = await messageRepository.GetLatestMessageBetweenUsersAsync(
-                chat.User1.Id,
-                chat.User2.Id);
+                chat.ParticipantA.Id,
+                chat.ParticipantB.Id);
 
         var unreadCount = await messageRepository.GetUnreadMessageCountFromUserAsync(
-            chat.User1.Id,
-            chat.User2.Id,
+            chat.ParticipantA.Id,
+            chat.ParticipantB.Id,
             chat.Id);
 
         return new ChatResponse(
             chat.Id,
-            chat.User1.Id,
-            chat.User1.UserName,
-            chat.User2.Id,
-            chat.User2.UserName,
-            latestMessage?.Content,
+            chat.ParticipantA.Id,
+            chat.ParticipantA.UserName ?? string.Empty,
+            chat.ParticipantB.Id,
+            chat.ParticipantB.UserName ?? string.Empty,
+            latestMessage?.Content ?? string.Empty,
             latestMessage?.Timestamp,
             unreadCount
         );
@@ -70,12 +70,12 @@ internal class ChatService(
 
         foreach (var chat in chats)
         {
-            var otherUser = chat.User1.UserName == username ? chat.User2.Id : chat.User1.Id;
-            var otherUsername = chat.User1.UserName == username ? chat.User2.UserName : chat.User1.UserName;
+            var otherUser = chat.ParticipantA.UserName == username ? chat.ParticipantB.Id : chat.ParticipantA.Id;
+            var otherUsername = chat.ParticipantA.UserName == username ? chat.ParticipantB.UserName : chat.ParticipantA.UserName;
 
             var latestMessage = await messageRepository.GetLatestMessageBetweenUsersAsync(
-                chat.User1.Id,
-                chat.User2.Id);
+                chat.ParticipantA.Id,
+                chat.ParticipantB.Id);
 
             var unreadCount = await messageRepository.GetUnreadMessageCountFromUserAsync(
                 otherUser,
@@ -85,10 +85,10 @@ internal class ChatService(
             response.Add(new ChatResponse(
                 chat.Id,
                 user.Id,
-                user.UserName,
+                user.UserName ?? string.Empty,
                 otherUser,
-                otherUsername,
-                latestMessage?.Content,
+                otherUsername ?? string.Empty,
+                latestMessage?.Content ?? string.Empty,
                 latestMessage?.Timestamp,
                 unreadCount
             ));
@@ -109,8 +109,8 @@ internal class ChatService(
 
         var chat = new Chat
         {
-            User1 = user1,
-            User2 = user2,
+            ParticipantA = user1,
+            ParticipantB = user2,
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
 
@@ -119,9 +119,9 @@ internal class ChatService(
         return new ChatResponse(
             chat.Id,
             user1.Id,
-            user1.UserName,
+            user1.UserName ?? string.Empty,
             user2.Id,
-            user2.UserName,
+            user2.UserName ?? string.Empty,
             "",
             null,
             0
@@ -154,9 +154,9 @@ internal class ChatService(
             message.Id,
             message.Content,
             message.Sender.Id,
-            message.Sender.UserName,
+            message.Sender.UserName ?? string.Empty,
             message.Recipient.Id,
-            message.Recipient.UserName,
+            message.Recipient.UserName ?? string.Empty,
             false,
             message.Timestamp
         );
