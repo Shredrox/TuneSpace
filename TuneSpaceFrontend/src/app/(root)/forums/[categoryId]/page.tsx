@@ -38,7 +38,10 @@ export default function CategoryPage() {
       return 1;
     }
 
-    return b.lastActivityAt.getTime() - a.lastActivityAt.getTime();
+    return (
+      new Date(b.lastActivityAt).getTime() -
+      new Date(a.lastActivityAt).getTime()
+    );
   });
 
   if (isLoading) {
