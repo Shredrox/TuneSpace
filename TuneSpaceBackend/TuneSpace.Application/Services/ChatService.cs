@@ -161,4 +161,14 @@ internal class ChatService(
             message.Timestamp
         );
     }
+
+    async Task IChatService.MarkMessagesAsRead(Guid chatId, string username)
+    {
+        var user = await userRepository.GetUserByName(username) ?? throw new NotFoundException("User not found");
+        var chat = await chatRepository.GetChatById(chatId) ?? throw new NotFoundException("Chat not found");
+
+        var otherUser = chat.ParticipantA.UserName == username ? chat.ParticipantB : chat.ParticipantA;
+
+        await messageRepository.MarkMessagesAsReadAsync(chatId, otherUser.Id.ToString(), user.Id.ToString());
+    }
 }

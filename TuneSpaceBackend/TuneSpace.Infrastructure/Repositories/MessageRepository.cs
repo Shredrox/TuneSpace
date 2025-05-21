@@ -82,4 +82,23 @@ internal class MessageRepository(TuneSpaceDbContext context) : IMessageRepositor
         var saved = await _context.SaveChangesAsync();
         return saved > 0;
     }
+
+    async Task IMessageRepository.MarkMessagesAsReadAsync(Guid chatId, string senderId, string recipientId)
+    {
+        var messages = await _context.Messages
+            .Where(m => m.ChatId == chatId &&
+                       m.SenderId.ToString() == senderId &&
+                       m.RecipientId.ToString() == recipientId &&
+                       !m.IsRead)
+            .ToListAsync();
+
+
+        foreach (var message in messages)
+        {
+            message.IsRead = true;
+        }
+
+        _context.Messages.UpdateRange(messages);
+        var saved = await _context.SaveChangesAsync();
+    }
 }

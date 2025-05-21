@@ -50,4 +50,11 @@ public class ChatController(
 
         return Ok();
     }
+
+    [HttpPost("mark-as-read")]
+    public async Task<IActionResult> MarkMessagesAsRead([FromBody] MarkMessagesReadRequest request)
+    {
+        await chatService.MarkMessagesAsRead(request.ChatId, request.Username);
+        return Ok();
+    }
 }

@@ -24,3 +24,15 @@ export const getMessages = async (
   const response = await httpClient.get(`Chat/get-messages/${chatId}`);
   return response.data;
 };
+
+export const markMessagesAsRead = async (
+  chatId: string | undefined,
+  username: string | undefined
+): Promise<void> => {
+  if (!chatId || !username) return;
+
+  await httpClient.post("Chat/mark-as-read", {
+    chatId,
+    username,
+  });
+};

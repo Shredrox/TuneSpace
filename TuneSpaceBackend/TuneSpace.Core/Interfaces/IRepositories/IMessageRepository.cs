@@ -74,4 +74,13 @@ public interface IMessageRepository
     /// <param name="messages">The collection of messages to update.</param>
     /// <returns>A task representing the asynchronous operation, containing a boolean indicating success or failure.</returns>
     Task<bool> UpdateMessagesAsync(IEnumerable<Message> messages);
+
+    /// <summary>
+    /// Marks messages as read in the repository.
+    /// </summary>
+    /// <param name="chatId">The ID of the chat containing the messages to mark as read.</param>
+    /// <param name="senderId">The ID of the sender of the messages.</param>
+    /// <param name="recipientId">The ID of the recipient of the messages.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task MarkMessagesAsReadAsync(Guid chatId, string senderId, string recipientId);
 }

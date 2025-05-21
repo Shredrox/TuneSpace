@@ -42,4 +42,12 @@ public interface IChatService
     /// <param name="username">The username of the user whose chats to retrieve.</param>
     /// <returns>A task representing the asynchronous operation, containing a list of chats the user is participating in.</returns>
     Task<List<ChatResponse>> GetUserChats(string username);
+
+    /// <summary>
+    /// Marks messages in a chat as read by the user.
+    /// </summary>
+    /// <param name="chatId">The unique identifier of the chat.</param>
+    /// <param name="username">The username of the user marking the messages as read.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task MarkMessagesAsRead(Guid chatId, string username);
 }

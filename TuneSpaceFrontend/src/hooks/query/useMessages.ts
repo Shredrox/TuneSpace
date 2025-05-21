@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import useSocket from "../useSocket";
-import { getMessages } from "@/services/chat-service";
+import { getMessages, markMessagesAsRead } from "@/services/chat-service";
+import useAuth from "../useAuth";
 
 const useMessages = (chatId: string | undefined) => {
   const queryClient = useQueryClient();
-
+  const { auth } = useAuth();
   const { sendMessage, setChatMessages, messages } = useSocket();
 
   const {
@@ -18,6 +19,16 @@ const useMessages = (chatId: string | undefined) => {
     queryFn: () => getMessages(chatId),
     enabled: !!chatId,
   });
+
+  useEffect(() => {
+    if (chatId && auth?.username) {
+      markMessagesAsRead(chatId, auth.username).then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["chats"],
+        });
+      });
+    }
+  }, [chatId, auth?.username]);
 
   const { mutateAsync: sendMessageMutation } = useMutation({
     mutationFn: sendMessage,
