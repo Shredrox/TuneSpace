@@ -73,10 +73,16 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorizationBuilder();
 
-        services.AddIdentityCore<User>()
-            .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<TuneSpaceDbContext>()
-            .AddDefaultTokenProviders();
+        services.AddIdentityCore<User>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 6;
+        }).AddRoles<ApplicationRole>()
+        .AddEntityFrameworkStores<TuneSpaceDbContext>()
+        .AddDefaultTokenProviders();
 
         return services;
     }
