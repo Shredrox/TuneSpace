@@ -91,7 +91,13 @@ const ChatList = () => {
                   }`}
                 >
                   <Avatar className="h-12 w-12">
-                    <AvatarImage />
+                    <AvatarImage
+                      src={`data:image/png;base64,${
+                        auth?.username === chat.user1Name
+                          ? chat.user2Avatar
+                          : chat.user1Avatar
+                      }`}
+                    />
                     <AvatarFallback>{chat.user2Name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
@@ -100,7 +106,7 @@ const ChatList = () => {
                         {chat.user2Name}
                       </h4>
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(chat.lastMessageTime), "h:mm a")}
+                        {format(new Date(chat.lastMessageTime), "HH:mm")}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">

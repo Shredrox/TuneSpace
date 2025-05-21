@@ -24,12 +24,10 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           isCurrentUser ? "flex-row-reverse" : ""
         }`}
       >
-        {!isCurrentUser && (
-          <Avatar className="h-8 w-8">
-            <AvatarImage />
-            <AvatarFallback>{senderName.charAt(0)}</AvatarFallback>
-          </Avatar>
-        )}
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={`data:image/png;base64,${message.senderAvatar}`} />
+          <AvatarFallback>{senderName.charAt(0)}</AvatarFallback>
+        </Avatar>
         <div>
           <div
             className={`px-4 py-2 rounded-lg text-sm ${
@@ -41,7 +39,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             {content}
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {format(new Date(timestamp), "hh:mm")}
+            {format(new Date(timestamp), "HH:mm")}
           </div>
         </div>
       </div>

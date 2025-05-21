@@ -23,6 +23,7 @@ internal class ChatService(
                 m.Content,
                 m.Sender.Id,
                 m.Sender.UserName ?? string.Empty,
+                m.Sender.ProfilePicture ?? [],
                 m.Recipient.Id,
                 m.Recipient.UserName ?? string.Empty,
                 m.IsRead,
@@ -37,8 +38,6 @@ internal class ChatService(
     async Task<ChatResponse> IChatService.GetChatById(Guid chatId)
     {
         var chat = await chatRepository.GetChatById(chatId) ?? throw new NotFoundException("Chat not found");
-        var otherUser = chat.ParticipantA.Id == chat.ParticipantB.Id ? chat.ParticipantB.Id : chat.ParticipantA.Id;
-        var otherUsername = chat.ParticipantA.UserName == chat.ParticipantB.UserName ? chat.ParticipantB.UserName : chat.ParticipantA.UserName;
 
         var latestMessage = await messageRepository.GetLatestMessageBetweenUsersAsync(
                 chat.ParticipantA.Id,
@@ -53,8 +52,10 @@ internal class ChatService(
             chat.Id,
             chat.ParticipantA.Id,
             chat.ParticipantA.UserName ?? string.Empty,
+            chat.ParticipantA.ProfilePicture ?? [],
             chat.ParticipantB.Id,
             chat.ParticipantB.UserName ?? string.Empty,
+            chat.ParticipantB.ProfilePicture ?? [],
             latestMessage?.Content ?? string.Empty,
             latestMessage?.Timestamp,
             unreadCount
@@ -70,15 +71,17 @@ internal class ChatService(
 
         foreach (var chat in chats)
         {
-            var otherUser = chat.ParticipantA.UserName == username ? chat.ParticipantB.Id : chat.ParticipantA.Id;
+            var otherUserId = chat.ParticipantA.UserName == username ? chat.ParticipantB.Id : chat.ParticipantA.Id;
             var otherUsername = chat.ParticipantA.UserName == username ? chat.ParticipantB.UserName : chat.ParticipantA.UserName;
+
+            var otherUser = await userRepository.GetUserById(otherUserId.ToString()) ?? throw new NotFoundException("User not found");
 
             var latestMessage = await messageRepository.GetLatestMessageBetweenUsersAsync(
                 chat.ParticipantA.Id,
                 chat.ParticipantB.Id);
 
             var unreadCount = await messageRepository.GetUnreadMessageCountFromUserAsync(
-                otherUser,
+                otherUserId,
                 user.Id,
                 chat.Id);
 
@@ -86,8 +89,10 @@ internal class ChatService(
                 chat.Id,
                 user.Id,
                 user.UserName ?? string.Empty,
-                otherUser,
+                user.ProfilePicture ?? [],
+                otherUserId,
                 otherUsername ?? string.Empty,
+                otherUser.ProfilePicture ?? [],
                 latestMessage?.Content ?? string.Empty,
                 latestMessage?.Timestamp,
                 unreadCount
@@ -120,8 +125,10 @@ internal class ChatService(
             chat.Id,
             user1.Id,
             user1.UserName ?? string.Empty,
+            user1.ProfilePicture ?? [],
             user2.Id,
             user2.UserName ?? string.Empty,
+            user2.ProfilePicture ?? [],
             "",
             null,
             0
@@ -155,6 +162,7 @@ internal class ChatService(
             message.Content,
             message.Sender.Id,
             message.Sender.UserName ?? string.Empty,
+            message.Sender.ProfilePicture ?? [],
             message.Recipient.Id,
             message.Recipient.UserName ?? string.Empty,
             false,

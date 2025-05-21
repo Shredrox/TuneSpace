@@ -5,6 +5,7 @@ public record MessageResponse(
     string Content,
     Guid SenderId,
     string SenderName,
+    byte[] SenderAvatar,
     Guid RecipientId,
     string RecipientName,
     bool IsRead,

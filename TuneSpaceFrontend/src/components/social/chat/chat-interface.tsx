@@ -19,13 +19,16 @@ import ChatMessage from "./chat-message";
 import ChatPreview from "@/interfaces/social/chat/ChatPreview";
 import useMessages from "@/hooks/query/useMessages";
 import useAuth from "@/hooks/useAuth";
+import { Skeleton } from "@/components/shadcn/skeleton";
 
 interface ChatInterfaceProps {
   chat: ChatPreview | undefined;
 }
 
 const ChatInterface = ({ chat }: ChatInterfaceProps) => {
-  const { messages, sendMessageMutation } = useMessages(chat?.id);
+  const { messages, sendMessageMutation, isMessagesLoading } = useMessages(
+    chat?.id
+  );
 
   const { auth } = useAuth();
 
@@ -35,6 +38,9 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
   const chatUser =
     auth.username == chat?.user1Name ? chat?.user2Name : chat?.user1Name!;
   const chatUserInitial = chatUser?.charAt(0).toUpperCase();
+
+  const chatUserAvatar =
+    auth.username == chat?.user1Name ? chat?.user2Avatar : chat?.user1Avatar;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,12 +63,46 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
     setNewMessage("");
   };
 
+  if (isMessagesLoading || !chat) {
+    return (
+      <Card className="flex flex-col h-[calc(100vh-14rem)] min-h-[500px] shadow-md">
+        <CardHeader className="border-b py-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <Skeleton className="h-6 w-28" />
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 overflow-auto p-4 flex flex-col gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className={`flex ${
+                i % 2 === 0 ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-[70%] ${i % 2 === 0 ? "ml-auto" : "mr-auto"}`}
+              >
+                <Skeleton className="h-16 w-full rounded-md" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+        <div className="border-t p-3 flex gap-2">
+          <Skeleton className="h-10 w-10" />
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-20" />
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex flex-col h-[calc(100vh-14rem)] min-h-[500px] shadow-md">
       <CardHeader className="border-b py-3">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage />
+            <AvatarImage src={`data:image/png;base64,${chatUserAvatar}`} />
             <AvatarFallback>{chatUserInitial}</AvatarFallback>
           </Avatar>
           <CardTitle>{chatUser}</CardTitle>
