@@ -8,7 +8,7 @@
       "name": "Launch TuneSpace Server",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/TuneSpaceBackend/TuneSpace.Api/TuneSpace.Api.csproj"
+      "projectPath": "${workspaceFolder}/backend/TuneSpace.Api/TuneSpace.Api.csproj"
     }
   ]
 }
