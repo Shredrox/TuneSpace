@@ -144,23 +144,20 @@ namespace TuneSpace.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Genre")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SpotifyId")
                         .HasColumnType("text");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("YouTubeEmbedId")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Bands");
                 });
@@ -174,17 +171,17 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("User1Id")
+                    b.Property<Guid>("ParticipantAId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("User2Id")
+                    b.Property<Guid>("ParticipantBId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("User1Id");
+                    b.HasIndex("ParticipantAId");
 
-                    b.HasIndex("User2Id");
+                    b.HasIndex("ParticipantBId");
 
                     b.ToTable("Chats");
                 });
@@ -223,7 +220,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("IconName")
@@ -339,6 +335,41 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("ForumThreads");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.Merchandise", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BandId");
+
+                    b.ToTable("Merchandises");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -438,7 +469,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RecipientName")
@@ -446,14 +476,12 @@ namespace TuneSpace.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Source")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
@@ -474,6 +502,9 @@ namespace TuneSpace.Infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
+
+                    b.Property<Guid?>("BandId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -509,6 +540,9 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<byte[]>("ProfilePicture")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -530,6 +564,8 @@ namespace TuneSpace.Infrastructure.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BandId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -619,34 +655,23 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TuneSpace.Core.Entities.Band", b =>
-                {
-                    b.HasOne("TuneSpace.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TuneSpace.Core.Entities.Chat", b =>
                 {
-                    b.HasOne("TuneSpace.Core.Entities.User", "User1")
+                    b.HasOne("TuneSpace.Core.Entities.User", "ParticipantA")
                         .WithMany()
-                        .HasForeignKey("User1Id")
+                        .HasForeignKey("ParticipantAId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TuneSpace.Core.Entities.User", "User2")
+                    b.HasOne("TuneSpace.Core.Entities.User", "ParticipantB")
                         .WithMany()
-                        .HasForeignKey("User2Id")
+                        .HasForeignKey("ParticipantBId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User1");
+                    b.Navigation("ParticipantA");
 
-                    b.Navigation("User2");
+                    b.Navigation("ParticipantB");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Follow", b =>
@@ -725,6 +750,17 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.Merchandise", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.Band", "Band")
+                        .WithMany("Merchandise")
+                        .HasForeignKey("BandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Band");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Message", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.Chat", "Chat")
@@ -774,9 +810,20 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.User", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.Band", null)
+                        .WithMany("Members")
+                        .HasForeignKey("BandId");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Band", b =>
                 {
                     b.Navigation("Events");
+
+                    b.Navigation("Members");
+
+                    b.Navigation("Merchandise");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumCategory", b =>
