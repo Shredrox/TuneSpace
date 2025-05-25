@@ -14,6 +14,7 @@ public class FollowController(
     ILogger<FollowController> logger) : ControllerBase
 {
     private readonly IFollowService _followService = followService;
+    private readonly IUserService _userService = userService;
     private readonly ILogger<FollowController> _logger = logger;
 
     [HttpPost("{username}")]
@@ -22,7 +23,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -61,7 +62,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -94,7 +95,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -121,7 +122,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -148,7 +149,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -175,7 +176,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
@@ -203,7 +204,7 @@ public class FollowController(
     {
         try
         {
-            var user = await userService.GetUserByName(username);
+            var user = await _userService.GetUserByName(username);
             if (user == null)
             {
                 return NotFound("User not found");
