@@ -16,16 +16,21 @@ import {
   Newspaper,
   Users,
 } from "lucide-react";
-import { ROUTES } from "@/utils/constants";
+import { ROUTES, UserRole } from "@/utils/constants";
+import useAuth from "@/hooks/useAuth";
 
 const Navigation = () => {
   const location = usePathname();
+  const { auth } = useAuth();
+
+  const isBandAdmin =
+    auth?.role?.toLowerCase() === UserRole.BandAdmin.toLowerCase();
 
   const isActive = (path: string) => {
     return location === path;
   };
 
-  const linksData = [
+  const baseLinks = [
     {
       id: 0,
       to: ROUTES.HOME,
@@ -38,12 +43,16 @@ const Navigation = () => {
       text: "Discover",
       icon: <AudioLines className="w-6 h-6" />,
     },
-    {
-      id: 2,
-      to: ROUTES.BAND_DASHBOARD,
-      text: "Band Dashboard",
-      icon: <DiscAlbum className="w-6 h-6" />,
-    },
+  ];
+
+  const bandDashboardLink = {
+    id: 2,
+    to: ROUTES.BAND_DASHBOARD,
+    text: "Band Dashboard",
+    icon: <DiscAlbum className="w-6 h-6" />,
+  };
+
+  const otherLinks = [
     {
       id: 3,
       to: ROUTES.NEWS,
@@ -69,6 +78,10 @@ const Navigation = () => {
       icon: <MessageSquare className="h-4 w-4 mr-1" />,
     },
   ];
+
+  const linksData = isBandAdmin
+    ? [...baseLinks, bandDashboardLink, ...otherLinks]
+    : [...baseLinks, ...otherLinks];
 
   return (
     <div>
