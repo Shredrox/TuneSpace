@@ -8,6 +8,8 @@ export const ROUTES = {
   NEWS: "/news",
   BAND_DASHBOARD: "/band/dashboard",
   EVENTS: "/events",
+  PROFILE: "/profile",
+  SETTINGS: "/settings",
 } as const;
 
 export const ENDPOINTS = {
