@@ -46,7 +46,7 @@ internal class AuthService(
         var accessToken = _tokenService.CreateAccessToken(user);
         var refreshToken = await _tokenService.CreateRefreshToken(user);
 
-        return new LoginResponse(user.Id.ToString(), user.UserName, user.Role, accessToken, refreshToken);
+        return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
     }
 
     private bool VerifyPassword(User user, string password)

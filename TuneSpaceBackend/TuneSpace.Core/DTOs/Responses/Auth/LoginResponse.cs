@@ -5,6 +5,6 @@ namespace TuneSpace.Core.DTOs.Responses.Auth;
 public record LoginResponse(
     string Id,
     string? Username,
-    Roles Role,
+    string Role,
     string AccessToken,
     string RefreshToken);
