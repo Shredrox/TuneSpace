@@ -78,7 +78,7 @@ const SpotifySearchBar = () => {
   }, [selectedIndex]);
 
   return (
-    <div className="w-[32rem] relative">
+    <div className="w-[26rem] relative">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
