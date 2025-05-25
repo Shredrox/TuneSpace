@@ -48,7 +48,7 @@ public class UserController(
         {
             var users = await _userService.SearchByName(search);
             var response = users
-                .Select(user => new UserSearchResultResponse(user.Id, user.UserName ?? string.Empty))
+                .Select(user => new UserSearchResultResponse(user.Id, user.UserName ?? string.Empty, user.ProfilePicture ?? []))
                 .ToList();
 
             return Ok(response);

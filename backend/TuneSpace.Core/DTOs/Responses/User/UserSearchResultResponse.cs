@@ -2,4 +2,5 @@
 
 public record UserSearchResultResponse(
     Guid Id,
-    string Name);
+    string Name,
+    byte[] ProfilePicture);

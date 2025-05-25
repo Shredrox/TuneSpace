@@ -97,6 +97,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChatRepository, ChatRepository>();
         services.AddScoped<IForumRepository, ForumRepository>();
         services.AddScoped<IMerchandiseRepository, MerchandiseRepository>();
+        services.AddScoped<IFollowRepository, FollowRepository>();
 
         return services;
     }
