@@ -24,7 +24,7 @@ public static class Helpers
 
     public static async Task<FileDto?> ConvertToFileDto(IFormFile? file)
     {
-        if (file == null || file.Length == 0)
+        if (file is null || file.Length == 0)
         {
             return null;
         }

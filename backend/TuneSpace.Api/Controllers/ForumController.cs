@@ -34,10 +34,15 @@ public class ForumController(
     [HttpGet("categories/{categoryId}")]
     public async Task<ActionResult<CategoryResponse>> GetCategoryById(Guid categoryId)
     {
+        if (categoryId == Guid.Empty)
+        {
+            return BadRequest("Category ID cannot be empty");
+        }
+
         try
         {
             var category = await _forumService.GetCategoryByIdAsync(categoryId);
-            if (category == null)
+            if (category is null)
             {
                 return NotFound("Forum category not found");
             }
@@ -69,18 +74,22 @@ public class ForumController(
     [HttpGet("threads/{threadId}")]
     public async Task<ActionResult<ThreadDetailResponse>> GetThreadDetail(Guid threadId)
     {
+        if (threadId == Guid.Empty)
+        {
+            return BadRequest("Thread ID cannot be empty");
+        }
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized("Invalid or missing user ID");
+        }
+
         try
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid userGuid = Guid.Empty;
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                _ = Guid.TryParse(userId, out userGuid);
-            }
-
-            var thread = await _forumService.GetThreadDetailAsync(threadId, userGuid);
-            if (thread == null)
+            var thread = await _forumService.GetThreadDetailAsync(threadId, userId);
+            if (thread is null)
             {
                 return NotFound("Thread not found");
             }
@@ -99,19 +108,25 @@ public class ForumController(
     [HttpGet("posts/{postId}")]
     public async Task<ActionResult<ForumPostResponse>> GetPostById(Guid postId)
     {
+        if (postId == Guid.Empty)
+        {
+            return BadRequest("Post ID cannot be empty");
+        }
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized("Invalid or missing user ID");
+        }
+
         try
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Guid userGuid = Guid.Empty;
-
-            if (!string.IsNullOrEmpty(userId))
+            var post = await _forumService.GetPostByIdAsync(postId, userId);
+            if (post is null)
             {
-                _ = Guid.TryParse(userId, out userGuid);
-            }
-
-            var post = await _forumService.GetPostByIdAsync(postId, userGuid);
-            if (post == null)
                 return NotFound("Post not found");
+            }
 
             return Ok(post);
         }
@@ -125,6 +140,11 @@ public class ForumController(
     [HttpGet("threads/band/{bandId}")]
     public async Task<ActionResult<List<ThreadResponse>>> GetBandThreads(Guid bandId)
     {
+        if (bandId == Guid.Empty)
+        {
+            return BadRequest("Band ID cannot be empty");
+        }
+
         try
         {
             var threads = await _forumService.GetBandThreads(bandId);

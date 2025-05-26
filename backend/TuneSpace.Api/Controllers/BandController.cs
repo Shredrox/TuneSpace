@@ -18,9 +18,19 @@ public class BandController(
     [HttpGet("{bandId}")]
     public async Task<IActionResult> GetBandById(string bandId)
     {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
         try
         {
-            var band = await _bandService.GetBandById(Guid.Parse(bandId));
+            var band = await _bandService.GetBandByIdAsync(parsedBandId);
             return Ok(band);
         }
         catch (Exception e)
@@ -33,9 +43,19 @@ public class BandController(
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetBandByUserId(string userId)
     {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return BadRequest("User ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+        {
+            return BadRequest("Invalid User ID format");
+        }
+
         try
         {
-            var band = await _bandService.GetBandByUserId(userId);
+            var band = await _bandService.GetBandByUserIdAsync(userId);
             return Ok(band);
         }
         catch (Exception e)
@@ -48,18 +68,19 @@ public class BandController(
     [HttpGet("{bandId}/image")]
     public async Task<IActionResult> GetBandImage(string bandId)
     {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
         try
         {
-            if (string.IsNullOrEmpty(bandId))
-            {
-                return BadRequest("Band ID cannot be null or empty");
-            }
-            if (!Guid.TryParse(bandId, out var parsedBandId))
-            {
-                return BadRequest("Invalid Band ID format");
-            }
-
-            var imageData = await _bandService.GetBandImage(parsedBandId);
+            var imageData = await _bandService.GetBandImageAsync(parsedBandId);
 
             if (imageData is null)
             {
@@ -88,11 +109,12 @@ public class BandController(
                 request.Description,
                 request.Genre,
                 request.Location,
-                fileDto ?? null);
+                fileDto ?? null
+            );
 
-            var band = await _bandService.CreateBand(createBandRequest);
+            var band = await _bandService.CreateBandAsync(createBandRequest);
 
-            if (band == null)
+            if (band is null)
             {
                 return BadRequest();
             }
@@ -124,7 +146,7 @@ public class BandController(
 
         try
         {
-            await _bandService.AddMemberToBand(Guid.Parse(userId), Guid.Parse(bandId));
+            await _bandService.AddMemberToBandAsync(parsedUserId, parsedBandId);
             return Ok("Member added successfully");
         }
         catch (Exception e)
@@ -148,9 +170,10 @@ public class BandController(
                 request.Genre,
                 request.SpotifyId,
                 request.YouTubeEmbedId,
-                fileDto ?? null);
+                fileDto ?? null
+            );
 
-            await _bandService.UpdateBand(updateBandRequest);
+            await _bandService.UpdateBandAsync(updateBandRequest);
             return Ok("Band updated successfully");
         }
         catch (Exception e)
@@ -163,9 +186,19 @@ public class BandController(
     [HttpDelete("{bandId}")]
     public async Task<IActionResult> DeleteBand(string bandId)
     {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
         try
         {
-            await _bandService.DeleteBand(Guid.Parse(bandId));
+            await _bandService.DeleteBandAsync(parsedBandId);
             return Ok("Band deleted successfully");
         }
         catch (Exception e)

@@ -15,7 +15,7 @@ public interface IArtistDiscoveryService
     /// <param name="artistIds">List of Spotify artist IDs to retrieve.</param>
     /// <param name="batchSize">Maximum number of artists to request in a single API call. Default is 50.</param>
     /// <returns>A list of artist details from Spotify.</returns>
-    Task<List<SpotifyArtistDTO>?> GetArtistDetailsInBatches(string token, List<string> artistIds, int batchSize = 50);
+    Task<List<SpotifyArtistDTO>?> GetArtistDetailsInBatchesAsync(string token, List<string> artistIds, int batchSize = 50);
 
     /// <summary>
     /// Searches for artists matching specific genre criteria using a query template.
@@ -26,7 +26,7 @@ public interface IArtistDiscoveryService
     /// <param name="limit">Maximum number of artists to return.</param>
     /// <param name="isNewRelease">Whether to focus on new releases. Default is false.</param>
     /// <returns>A list of band models matching the search criteria.</returns>
-    Task<List<BandModel>> FindArtistsByQuery(string token, List<string> genres, string queryTemplate, int limit, bool isNewRelease = false);
+    Task<List<BandModel>> FindArtistsByQueryAsync(string token, List<string> genres, string queryTemplate, int limit, bool isNewRelease = false);
 
     /// <summary>
     /// Retrieves bands registered in the system as BandModel objects, enriched with additional information.
@@ -34,5 +34,5 @@ public interface IArtistDiscoveryService
     /// <param name="genres">List of genres to filter by.</param>
     /// <param name="location">Location (country or city) to filter by.</param>
     /// <returns>A list of band models for registered bands matching the criteria.</returns>
-    Task<List<BandModel>> GetRegisteredBandsAsModels(List<string> genres, string location);
+    Task<List<BandModel>> GetRegisteredBandsAsModelsAsync(List<string> genres, string location);
 }

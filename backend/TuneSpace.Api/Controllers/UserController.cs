@@ -19,9 +19,14 @@ public class UserController(
     [HttpGet("{username}")]
     public async Task<IActionResult> GetUserByName(string username)
     {
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Username cannot be null or empty");
+        }
+
         try
         {
-            var user = await _userService.GetUserByName(username);
+            var user = await _userService.GetUserByNameAsync(username);
             if (user is null)
             {
                 return NotFound("User not found");
@@ -46,7 +51,7 @@ public class UserController(
 
         try
         {
-            var users = await _userService.SearchByName(search);
+            var users = await _userService.SearchByNameAsync(search);
             var response = users
                 .Select(user => new UserSearchResultResponse(user.Id, user.UserName ?? string.Empty, user.ProfilePicture ?? []))
                 .ToList();
@@ -63,11 +68,16 @@ public class UserController(
     [HttpGet("{username}/profile-picture")]
     public async Task<IActionResult> GetProfilePicture(string username)
     {
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Username cannot be null or empty");
+        }
+
         try
         {
-            var profilePicture = await _userService.GetProfilePicture(username);
+            var profilePicture = await _userService.GetProfilePictureAsync(username);
 
-            if (profilePicture == null)
+            if (profilePicture is null)
             {
                 return NotFound("Profile picture not found");
             }
@@ -84,9 +94,14 @@ public class UserController(
     [HttpGet("{username}/profile")]
     public async Task<IActionResult> GetUserProfile(string username)
     {
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Username cannot be null or empty");
+        }
+
         try
         {
-            var user = await _userService.GetUserByName(username);
+            var user = await _userService.GetUserByNameAsync(username);
             if (user is null)
             {
                 return NotFound("User not found");
@@ -120,32 +135,32 @@ public class UserController(
     [Authorize]
     public async Task<IActionResult> UploadProfilePicture([FromForm] ProfileUpdateRequest request)
     {
+        var file = request.File;
+        var username = request.Username;
+
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest("No file uploaded");
+        }
+
+        string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+        if (!allowedFileTypes.Contains(file.ContentType.ToLower()))
+        {
+            return BadRequest("Invalid file type. Only JPEG, PNG, JPG and GIF are allowed.");
+        }
+
+        if (file.Length > 5 * 1024 * 1024)
+        {
+            return BadRequest("File size cannot exceed 5MB");
+        }
+
         try
         {
-            var file = request.File;
-            var username = request.Username;
-
-            if (file == null || file.Length == 0)
-            {
-                return BadRequest("No file uploaded");
-            }
-
-            string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
-            if (!allowedFileTypes.Contains(file.ContentType.ToLower()))
-            {
-                return BadRequest("Invalid file type. Only JPEG, PNG, JPG and GIF are allowed.");
-            }
-
-            if (file.Length > 5 * 1024 * 1024)
-            {
-                return BadRequest("File size cannot exceed 5MB");
-            }
-
             using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
             byte[] fileBytes = memoryStream.ToArray();
 
-            await _userService.UpdateProfilePicture(username, fileBytes);
+            await _userService.UpdateProfilePictureAsync(username, fileBytes);
 
             return Ok(new { message = "Profile picture updated successfully" });
         }

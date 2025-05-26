@@ -8,34 +8,6 @@ namespace TuneSpace.Core.Interfaces.IRepositories;
 public interface IForumRepository
 {
     /// <summary>
-    /// Creates a new forum category
-    /// </summary>
-    /// <param name="category">The category to create</param>
-    /// <returns>The created category with assigned ID</returns>
-    Task<ForumCategory> CreateCategoryAsync(ForumCategory category);
-
-    /// <summary>
-    /// Creates a new forum thread
-    /// </summary>
-    /// <param name="thread">The thread to create</param>
-    /// <returns>The created thread with assigned ID</returns>
-    Task<ForumThread> CreateThreadAsync(ForumThread thread);
-
-    /// <summary>
-    /// Creates a new forum post
-    /// </summary>
-    /// <param name="post">The post to create</param>
-    /// <returns>The created post with assigned ID</returns>
-    Task<ForumPost> CreatePostAsync(ForumPost post);
-
-    /// <summary>
-    /// Creates a new like for a forum post
-    /// </summary>
-    /// <param name="like">The like to create</param>
-    /// <returns>The created like with assigned ID</returns>
-    Task<ForumPostLike> CreatePostLikeAsync(ForumPostLike like);
-
-    /// <summary>
     /// Retrieves all forum categories
     /// </summary>
     /// <returns>A list of all forum categories</returns>
@@ -99,6 +71,42 @@ public interface IForumRepository
     Task<int> GetPostLikeCountAsync(Guid postId);
 
     /// <summary>
+    /// Checks if a user has liked a specific post
+    /// </summary>
+    /// <param name="postId">The ID of the post</param>
+    /// <param name="userId">The ID of the user</param>
+    /// <returns>True if the user has liked the post, false otherwise</returns>
+    Task<bool> HasUserLikedPostAsync(Guid postId, Guid userId);
+
+    /// <summary>
+    /// Creates a new forum category
+    /// </summary>
+    /// <param name="category">The category to create</param>
+    /// <returns>The created category with assigned ID</returns>
+    Task<ForumCategory> InsertCategoryAsync(ForumCategory category);
+
+    /// <summary>
+    /// Creates a new forum thread
+    /// </summary>
+    /// <param name="thread">The thread to create</param>
+    /// <returns>The created thread with assigned ID</returns>
+    Task<ForumThread> InsertThreadAsync(ForumThread thread);
+
+    /// <summary>
+    /// Creates a new forum post
+    /// </summary>
+    /// <param name="post">The post to create</param>
+    /// <returns>The created post with assigned ID</returns>
+    Task<ForumPost> InsertPostAsync(ForumPost post);
+
+    /// <summary>
+    /// Creates a new like for a forum post
+    /// </summary>
+    /// <param name="like">The like to create</param>
+    /// <returns>The created like with assigned ID</returns>
+    Task<ForumPostLike> InsertPostLikeAsync(ForumPostLike like);
+
+    /// <summary>
     /// Updates the last activity timestamp for a thread
     /// </summary>
     /// <param name="threadId">The ID of the thread</param>
@@ -112,14 +120,6 @@ public interface IForumRepository
     /// <param name="threadId">The ID of the thread</param>
     /// <returns>A task representing the asynchronous operation</returns>
     Task IncrementThreadViewAsync(Guid threadId);
-
-    /// <summary>
-    /// Checks if a user has liked a specific post
-    /// </summary>
-    /// <param name="postId">The ID of the post</param>
-    /// <param name="userId">The ID of the user</param>
-    /// <returns>True if the user has liked the post, false otherwise</returns>
-    Task<bool> HasUserLikedPostAsync(Guid postId, Guid userId);
 
     /// <summary>
     /// Removes a like from a forum post

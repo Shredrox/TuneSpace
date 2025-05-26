@@ -6,4 +6,5 @@ public record BandCreateRequest(
     string Description,
     string Genre,
     string Location,
-    IFormFile Picture);
+    IFormFile Picture
+);

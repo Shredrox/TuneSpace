@@ -44,7 +44,7 @@ internal class LastFmClient(
                 var img = images.FirstOrDefault(i => i["size"]?.ToString() == size);
                 if (img != null && !string.IsNullOrWhiteSpace(img["#text"]?.ToString()))
                 {
-                    imageUrl = img["#text"].ToString();
+                    imageUrl = img["#text"]?.ToString() ?? "";
                     break;
                 }
             }
@@ -60,7 +60,7 @@ internal class LastFmClient(
         var tags = artist["tags"]?["tag"]?.ToObject<JArray>();
         var genres = tags?.Select(t => t["name"]?.ToString() ?? "")
             .Where(t => !string.IsNullOrEmpty(t))
-            .ToList() ?? new List<string>();
+            .ToList() ?? [];
 
         return new BandModel
         {
@@ -79,14 +79,13 @@ internal class LastFmClient(
         var similarBands = JObject.Parse(response);
 
         var artists = similarBands["similarartists"]?["artist"]?.ToObject<JArray>();
-        if (artists == null)
+        if (artists is null)
         {
-            return new List<string>();
+            return [];
         }
 
-        return artists
+        return [.. artists
             .Select(artist => artist["name"]?.ToString() ?? "")
-            .Where(name => !string.IsNullOrEmpty(name))
-            .ToList();
+            .Where(name => !string.IsNullOrEmpty(name))];
     }
 }

@@ -9,13 +9,6 @@ internal class MessageRepository(TuneSpaceDbContext context) : IMessageRepositor
 {
     private readonly TuneSpaceDbContext _context = context;
 
-    async Task<Message> IMessageRepository.InsertMessage(Message message)
-    {
-        _context.Messages.Add(message);
-        await _context.SaveChangesAsync();
-        return message;
-    }
-
     async Task<List<Message>> IMessageRepository.GetMessagesBetweenUsersAsync(Guid userId, Guid otherUserId)
     {
         return await _context.Messages
@@ -74,6 +67,13 @@ internal class MessageRepository(TuneSpaceDbContext context) : IMessageRepositor
     {
         return await _context.Messages
             .CountAsync(m => m.RecipientId == userId && !m.IsRead);
+    }
+
+    async Task<Message> IMessageRepository.InsertMessageAsync(Message message)
+    {
+        _context.Messages.Add(message);
+        await _context.SaveChangesAsync();
+        return message;
     }
 
     async Task<bool> IMessageRepository.UpdateMessagesAsync(IEnumerable<Message> messages)

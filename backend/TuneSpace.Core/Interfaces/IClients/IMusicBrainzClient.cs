@@ -21,5 +21,5 @@ public interface IMusicBrainzClient
     /// <param name="limit">The maximum number of results to retrieve.</param>
     /// <param name="genres">Optional list of genres to filter the results by. If null, no genre filtering is applied.</param>
     /// <returns>A task that represents the asynchronous operation, containing a list of bands matching the search criteria.</returns>
-    Task<List<BandModel>> GetBandsByLocationAsync(string location, int limit, List<string>? genres = null);
+    Task<List<BandModel>> GetBandsByLocationAsync(string location, int limit, List<string>? genres);
 }

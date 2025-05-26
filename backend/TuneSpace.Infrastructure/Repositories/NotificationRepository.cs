@@ -9,31 +9,31 @@ internal class NotificationRepository(TuneSpaceDbContext context) : INotificatio
 {
     private readonly TuneSpaceDbContext _context = context;
 
-    async Task INotificationRepository.InsertNotification(Notification notification)
-    {
-        _context.Notifications.Add(notification);
-        await _context.SaveChangesAsync();
-    }
-
-    async Task<Notification?> INotificationRepository.GetNotificationById(Guid id)
+    async Task<Notification?> INotificationRepository.GetNotificationByIdAsync(Guid id)
     {
         return await _context.Notifications.FindAsync(id);
     }
 
-    async Task<List<Notification>> INotificationRepository.GetNotificationsByUser(User user)
+    async Task<List<Notification>> INotificationRepository.GetNotificationsByUserAsync(User user)
     {
         return await _context.Notifications
             .Where(n => n.User == user)
             .ToListAsync();
     }
 
-    async Task INotificationRepository.UpdateNotifications(List<Notification> notifications)
+    async Task INotificationRepository.InsertNotificationAsync(Notification notification)
+    {
+        _context.Notifications.Add(notification);
+        await _context.SaveChangesAsync();
+    }
+
+    async Task INotificationRepository.UpdateNotificationsAsync(List<Notification> notifications)
     {
         _context.Notifications.UpdateRange(notifications);
         await _context.SaveChangesAsync();
     }
 
-    async Task INotificationRepository.DeleteNotification(Guid id)
+    async Task INotificationRepository.DeleteNotificationAsync(Guid id)
     {
         var notification = await _context.Notifications.FindAsync(id);
         if (notification != null)

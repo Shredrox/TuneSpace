@@ -9,11 +9,9 @@ using TuneSpace.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Add logger
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
-//Add cors
 builder.Services.AddCors(options =>
     options.AddPolicy("AllowOrigin", policy =>
     {

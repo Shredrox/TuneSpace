@@ -25,7 +25,7 @@ internal class ArtistDiscoveryService(
     private readonly ILogger<ArtistDiscoveryService> _logger = logger;
     private readonly IApiThrottler _apiThrottler = apiThrottler;
 
-    public async Task<List<SpotifyArtistDTO>?> GetArtistDetailsInBatches(string token, List<string> artistIds, int batchSize = 50)
+    public async Task<List<SpotifyArtistDTO>?> GetArtistDetailsInBatchesAsync(string token, List<string> artistIds, int batchSize = 50)
     {
         var result = new List<SpotifyArtistDTO>();
         if (artistIds.Count == 0)
@@ -50,7 +50,7 @@ internal class ArtistDiscoveryService(
             try
             {
                 var artistIdsParam = string.Join(",", batch);
-                var artists = await _apiThrottler.ThrottledApiCall(() => _spotifyService.GetSeveralArtists(token, artistIdsParam));
+                var artists = await _apiThrottler.ThrottledApiCall(() => _spotifyService.GetSeveralArtistsAsync(token, artistIdsParam));
 
                 if (artists != null)
                 {
@@ -67,7 +67,7 @@ internal class ArtistDiscoveryService(
         return result;
     }
 
-    async Task<List<BandModel>> IArtistDiscoveryService.FindArtistsByQuery(string token, List<string> genres, string queryTemplate, int limit, bool isNewRelease)
+    async Task<List<BandModel>> IArtistDiscoveryService.FindArtistsByQueryAsync(string token, List<string> genres, string queryTemplate, int limit, bool isNewRelease)
     {
         var result = new List<BandModel>();
         var processedArtistNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -108,7 +108,7 @@ internal class ArtistDiscoveryService(
                         }
                     }
 
-                    var artistDetails = await GetArtistDetailsInBatches(token, artistIds);
+                    var artistDetails = await GetArtistDetailsInBatchesAsync(token, artistIds);
 
                     var undergroundArtists = artistDetails?
                         .Where(artist => artist.Popularity <= MusicDiscoveryConstants.MaxPopularityForUnderground)
@@ -206,7 +206,7 @@ internal class ArtistDiscoveryService(
                             }
                         }
 
-                        var yearArtistDetails = await GetArtistDetailsInBatches(token, yearArtistIds);
+                        var yearArtistDetails = await GetArtistDetailsInBatchesAsync(token, yearArtistIds);
 
                         var recentUndergroundArtists = yearArtistDetails?
                             .Where(artist => artist.Popularity <= MusicDiscoveryConstants.MaxPopularityForUnderground)
@@ -254,7 +254,7 @@ internal class ArtistDiscoveryService(
         return result;
     }
 
-    async Task<List<BandModel>> IArtistDiscoveryService.GetRegisteredBandsAsModels(List<string> genres, string location)
+    async Task<List<BandModel>> IArtistDiscoveryService.GetRegisteredBandsAsModelsAsync(List<string> genres, string location)
     {
         var bands = new List<BandModel>();
         var matchingBands = await GetMatchingRegisteredBands(genres, location);
@@ -360,7 +360,7 @@ internal class ArtistDiscoveryService(
             {
                 foreach (var genre in genres)
                 {
-                    var bands = await _bandRepository.GetBandsByGenreAndLocation(genre, location);
+                    var bands = await _bandRepository.GetBandsByGenreAndLocationAsync(genre, location);
                     foreach (var band in bands)
                     {
                         if (!result.Any(b => b.Id == band.Id))
@@ -372,13 +372,13 @@ internal class ArtistDiscoveryService(
 
                 if (result.Count == 0)
                 {
-                    result = await _bandRepository.GetBandsByLocation(location);
+                    result = await _bandRepository.GetBandsByLocationAsync(location);
 
                     if (result.Count == 0)
                     {
                         foreach (var genre in genres)
                         {
-                            var bands = await _bandRepository.GetBandsByGenre(genre);
+                            var bands = await _bandRepository.GetBandsByGenreAsync(genre);
                             foreach (var band in bands)
                             {
                                 if (!result.Any(b => b.Id == band.Id))
@@ -394,7 +394,7 @@ internal class ArtistDiscoveryService(
             {
                 foreach (var genre in genres)
                 {
-                    var bands = await _bandRepository.GetBandsByGenre(genre);
+                    var bands = await _bandRepository.GetBandsByGenreAsync(genre);
                     foreach (var band in bands)
                     {
                         if (!result.Any(b => b.Id == band.Id))
@@ -406,16 +406,16 @@ internal class ArtistDiscoveryService(
             }
             else if (!string.IsNullOrEmpty(location))
             {
-                result = await _bandRepository.GetBandsByLocation(location);
+                result = await _bandRepository.GetBandsByLocationAsync(location);
             }
             else
             {
-                result = await _bandRepository.GetAllBands();
+                result = await _bandRepository.GetAllBandsAsync();
             }
 
             if (result.Count == 0)
             {
-                result = await _bandRepository.GetAllBands();
+                result = await _bandRepository.GetAllBandsAsync();
             }
 
             _cachingService.CacheItem(cacheKey, result, TimeSpan.FromMinutes(30));
@@ -429,17 +429,17 @@ internal class ArtistDiscoveryService(
         return result;
     }
 
-    private List<List<string>> BatchGenres(List<string> genres, int batchSize)
+    private static List<List<string>> BatchGenres(List<string> genres, int batchSize)
     {
         var result = new List<List<string>>();
         for (int i = 0; i < genres.Count; i += batchSize)
         {
             result.Add(genres.Skip(i).Take(batchSize).ToList());
         }
-        return result.Count > 0 ? result : new List<List<string>> { new List<string>() };
+        return result.Count > 0 ? result : [[]];
     }
 
-    private string BuildBatchQuery(string queryTemplate, List<string> genres)
+    private static string BuildBatchQuery(string queryTemplate, List<string> genres)
     {
         if (queryTemplate.Contains("{genre}"))
         {

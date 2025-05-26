@@ -11,50 +11,118 @@ namespace TuneSpace.Api.Controllers;
 [ApiController]
 public class ChatController(
     IHubContext<SocketHub, ISocketClient> hubContext,
-    IChatService chatService) : ControllerBase
+    IChatService chatService,
+    ILogger<ChatController> logger) : ControllerBase
 {
+    private readonly IHubContext<SocketHub, ISocketClient> _hubContext = hubContext;
+    private readonly IChatService _chatService = chatService;
+    private readonly ILogger<ChatController> _logger = logger;
+
     [HttpGet("get-messages/{chatId}")]
     public async Task<IActionResult> GetMessages(Guid chatId)
     {
-        return Ok(await chatService.GetChatMessages(chatId));
+        if (chatId == Guid.Empty)
+        {
+            return BadRequest("Chat ID cannot be empty.");
+        }
+
+        try
+        {
+            return Ok(await _chatService.GetChatMessagesAsync(chatId));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetMessages for chatId {ChatId}", chatId);
+            return StatusCode(500, "An error occurred while retrieving messages.");
+        }
     }
 
     [HttpGet("get-chat/{chatId}")]
     public async Task<IActionResult> GetChat(Guid chatId)
     {
-        return Ok(await chatService.GetChatById(chatId));
+        if (chatId == Guid.Empty)
+        {
+            return BadRequest("Chat ID cannot be empty.");
+        }
+
+        try
+        {
+            return Ok(await _chatService.GetChatByIdAsync(chatId));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetChat for chatId {ChatId}", chatId);
+            return StatusCode(500, "An error occurred while retrieving chat.");
+        }
     }
 
     [HttpGet("get-user-chats")]
     public async Task<IActionResult> GetUserChats([FromQuery] string username)
     {
-        return Ok(await chatService.GetUserChats(username));
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Username cannot be null or empty.");
+        }
+
+        try
+        {
+            return Ok(await _chatService.GetUserChatsAsync(username));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in GetUserChats for username {Username}", username);
+            return StatusCode(500, "An error occurred while retrieving user chats.");
+        }
     }
 
     [HttpPost("create-chat")]
     public async Task<IActionResult> CreateChat([FromBody] CreateChatRequest request)
     {
-        var chatResponse = await chatService.CreateChat(request);
+        try
+        {
+            var chatResponse = await _chatService.CreateChatAsync(request);
 
-        await hubContext.Clients.Group(request.User2Name).ChatCreated(chatResponse);
+            await _hubContext.Clients.Group(request.User2Name).ChatCreated(chatResponse);
 
-        return Ok();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in CreateChat for users {User1}, {User2}", request.User1Name, request.User2Name);
+            return StatusCode(500, "An error occurred while creating chat.");
+        }
     }
 
     [HttpPost("send-private-message")]
     public async Task<IActionResult> SendPrivateMessage([FromBody] SendMessageRequest request)
     {
-        var messageResponse = await chatService.CreateMessage(request);
+        try
+        {
+            var messageResponse = await _chatService.CreateMessageAsync(request);
 
-        await hubContext.Clients.Group(request.Receiver).ReceiveMessage(messageResponse);
+            await _hubContext.Clients.Group(request.Receiver).ReceiveMessage(messageResponse);
 
-        return Ok();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in SendPrivateMessage from {Sender} to {Receiver}", request.Sender, request.Receiver);
+            return StatusCode(500, "An error occurred while sending message.");
+        }
     }
 
     [HttpPost("mark-as-read")]
     public async Task<IActionResult> MarkMessagesAsRead([FromBody] MarkMessagesReadRequest request)
     {
-        await chatService.MarkMessagesAsRead(request.ChatId, request.Username);
-        return Ok();
+        try
+        {
+            await _chatService.MarkMessagesAsReadAsync(request.ChatId, request.Username);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in MarkMessagesAsRead for chatId {ChatId} and username {Username}", request.ChatId, request.Username);
+            return StatusCode(500, "An error occurred while marking messages as read.");
+        }
     }
 }

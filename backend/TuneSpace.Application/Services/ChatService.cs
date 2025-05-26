@@ -12,9 +12,9 @@ internal class ChatService(
     IMessageRepository messageRepository,
     IUserRepository userRepository) : IChatService
 {
-    async Task<List<MessageResponse>> IChatService.GetChatMessages(Guid chatId)
+    async Task<List<MessageResponse>> IChatService.GetChatMessagesAsync(Guid chatId)
     {
-        var chat = await chatRepository.GetChatById(chatId) ?? throw new NotFoundException("Chat not found");
+        var chat = await chatRepository.GetChatByIdAsync(chatId) ?? throw new NotFoundException("Chat not found");
         var messages = await messageRepository.GetMessagesByChatIdAsync(chat.Id);
 
         var response = messages
@@ -35,9 +35,9 @@ internal class ChatService(
         return response;
     }
 
-    async Task<ChatResponse> IChatService.GetChatById(Guid chatId)
+    async Task<ChatResponse> IChatService.GetChatByIdAsync(Guid chatId)
     {
-        var chat = await chatRepository.GetChatById(chatId) ?? throw new NotFoundException("Chat not found");
+        var chat = await chatRepository.GetChatByIdAsync(chatId) ?? throw new NotFoundException("Chat not found");
 
         var latestMessage = await messageRepository.GetLatestMessageBetweenUsersAsync(
                 chat.ParticipantA.Id,
@@ -62,10 +62,10 @@ internal class ChatService(
         );
     }
 
-    async Task<List<ChatResponse>> IChatService.GetUserChats(string username)
+    async Task<List<ChatResponse>> IChatService.GetUserChatsAsync(string username)
     {
-        var user = await userRepository.GetUserByName(username) ?? throw new NotFoundException("User not found");
-        var chats = await chatRepository.GetChatsByUser1IdOrUser2Id(user, user);
+        var user = await userRepository.GetUserByNameAsync(username) ?? throw new NotFoundException("User not found");
+        var chats = await chatRepository.GetChatsByUser1IdOrUser2IdAsync(user, user);
 
         var response = new List<ChatResponse>();
 
@@ -74,7 +74,7 @@ internal class ChatService(
             var otherUserId = chat.ParticipantA.UserName == username ? chat.ParticipantB.Id : chat.ParticipantA.Id;
             var otherUsername = chat.ParticipantA.UserName == username ? chat.ParticipantB.UserName : chat.ParticipantA.UserName;
 
-            var otherUser = await userRepository.GetUserById(otherUserId.ToString()) ?? throw new NotFoundException("User not found");
+            var otherUser = await userRepository.GetUserByIdAsync(otherUserId.ToString()) ?? throw new NotFoundException("User not found");
 
             var latestMessage = await messageRepository.GetLatestMessageBetweenUsersAsync(
                 chat.ParticipantA.Id,
@@ -102,10 +102,10 @@ internal class ChatService(
         return response;
     }
 
-    async Task<ChatResponse> IChatService.CreateChat(CreateChatRequest request)
+    async Task<ChatResponse> IChatService.CreateChatAsync(CreateChatRequest request)
     {
-        var user1 = await userRepository.GetUserByName(request.User1Name);
-        var user2 = await userRepository.GetUserByName(request.User2Name);
+        var user1 = await userRepository.GetUserByNameAsync(request.User1Name);
+        var user2 = await userRepository.GetUserByNameAsync(request.User2Name);
 
         if (user1 is null || user2 is null)
         {
@@ -119,7 +119,7 @@ internal class ChatService(
             CreatedAt = DateTime.Now.ToUniversalTime()
         };
 
-        await chatRepository.InsertChat(chat);
+        await chatRepository.InsertChatAsync(chat);
 
         return new ChatResponse(
             chat.Id,
@@ -135,17 +135,17 @@ internal class ChatService(
         );
     }
 
-    async Task<MessageResponse> IChatService.CreateMessage(SendMessageRequest request)
+    async Task<MessageResponse> IChatService.CreateMessageAsync(SendMessageRequest request)
     {
-        var user1 = await userRepository.GetUserByName(request.Sender);
-        var user2 = await userRepository.GetUserByName(request.Receiver);
+        var user1 = await userRepository.GetUserByNameAsync(request.Sender);
+        var user2 = await userRepository.GetUserByNameAsync(request.Receiver);
 
         if (user1 is null || user2 is null)
         {
             throw new NotFoundException("User not found");
         }
 
-        var chat = await chatRepository.GetChatByUser1AndUser2(user1, user2) ?? throw new NotFoundException("Chat not found");
+        var chat = await chatRepository.GetChatByUser1AndUser2Async(user1, user2) ?? throw new NotFoundException("Chat not found");
         var message = new Message
         {
             Content = request.Content,
@@ -155,7 +155,7 @@ internal class ChatService(
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
-        await messageRepository.InsertMessage(message);
+        await messageRepository.InsertMessageAsync(message);
 
         return new MessageResponse(
             message.Id,
@@ -170,10 +170,10 @@ internal class ChatService(
         );
     }
 
-    async Task IChatService.MarkMessagesAsRead(Guid chatId, string username)
+    async Task IChatService.MarkMessagesAsReadAsync(Guid chatId, string username)
     {
-        var user = await userRepository.GetUserByName(username) ?? throw new NotFoundException("User not found");
-        var chat = await chatRepository.GetChatById(chatId) ?? throw new NotFoundException("Chat not found");
+        var user = await userRepository.GetUserByNameAsync(username) ?? throw new NotFoundException("User not found");
+        var chat = await chatRepository.GetChatByIdAsync(chatId) ?? throw new NotFoundException("Chat not found");
 
         var otherUser = chat.ParticipantA.UserName == username ? chat.ParticipantB : chat.ParticipantA;
 

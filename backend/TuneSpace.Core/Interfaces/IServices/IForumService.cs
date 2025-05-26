@@ -9,29 +9,6 @@ namespace TuneSpace.Core.Interfaces.IServices;
 public interface IForumService
 {
     /// <summary>
-    /// Creates a new forum category
-    /// </summary>
-    /// <param name="request">The category creation request containing category details</param>
-    /// <returns>A response containing the created category information</returns>
-    Task<CategoryResponse> CreateCategoryAsync(CreateCategoryRequest request);
-
-    /// <summary>
-    /// Creates a new forum thread
-    /// </summary>
-    /// <param name="request">The thread creation request containing thread details</param>
-    /// <param name="userId">The ID of the user creating the thread</param>
-    /// <returns>A response containing the created thread information</returns>
-    Task<ThreadResponse> CreateThreadAsync(CreateThreadRequest request, Guid userId);
-
-    /// <summary>
-    /// Creates a new forum post in a thread
-    /// </summary>
-    /// <param name="request">The post creation request containing post details</param>
-    /// <param name="userId">The ID of the user creating the post</param>
-    /// <returns>A response containing the created post information</returns>
-    Task<ForumPostResponse> CreatePostAsync(CreatePostRequest request, Guid userId);
-
-    /// <summary>
     /// Retrieves all forum categories
     /// </summary>
     /// <returns>A list of all forum categories</returns>
@@ -73,6 +50,29 @@ public interface IForumService
     /// <param name="userId">The ID of the user viewing the post (for like status)</param>
     /// <returns>The post information if found, null otherwise</returns>
     Task<ForumPostResponse?> GetPostByIdAsync(Guid postId, Guid userId);
+
+    /// <summary>
+    /// Creates a new forum category
+    /// </summary>
+    /// <param name="request">The category creation request containing category details</param>
+    /// <returns>A response containing the created category information</returns>
+    Task<CategoryResponse> CreateCategoryAsync(CreateCategoryRequest request);
+
+    /// <summary>
+    /// Creates a new forum thread
+    /// </summary>
+    /// <param name="request">The thread creation request containing thread details</param>
+    /// <param name="userId">The ID of the user creating the thread</param>
+    /// <returns>A response containing the created thread information</returns>
+    Task<ThreadResponse> CreateThreadAsync(CreateThreadRequest request, Guid userId);
+
+    /// <summary>
+    /// Creates a new forum post in a thread
+    /// </summary>
+    /// <param name="request">The post creation request containing post details</param>
+    /// <param name="userId">The ID of the user creating the post</param>
+    /// <returns>A response containing the created post information</returns>
+    Task<ForumPostResponse> CreatePostAsync(CreatePostRequest request, Guid userId);
 
     /// <summary>
     /// Increments the view count for a specific thread

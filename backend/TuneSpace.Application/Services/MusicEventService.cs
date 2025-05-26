@@ -16,12 +16,12 @@ internal class MusicEventService(
     private readonly IBandRepository _bandRepository = bandRepository;
     private readonly ILogger<MusicEventService> _logger = logger;
 
-    async Task<List<MusicEventResponse>> IMusicEventService.GetAllMusicEvents()
+    async Task<List<MusicEventResponse>> IMusicEventService.GetAllMusicEventsAsync()
     {
         try
         {
             _logger.LogInformation("Getting all music events");
-            var events = await _musicEventRepository.GetAllMusicEvents();
+            var events = await _musicEventRepository.GetAllMusicEventsAsync();
 
             return events.Select(e => new MusicEventResponse(
                 e.Id,
@@ -48,13 +48,13 @@ internal class MusicEventService(
         }
     }
 
-    async Task<List<MusicEventResponse>> IMusicEventService.GetMusicEventsByBandId(Guid bandId)
+    async Task<List<MusicEventResponse>> IMusicEventService.GetMusicEventsByBandIdAsync(Guid bandId)
     {
         try
         {
             _logger.LogInformation("Getting events for band with ID {BandId}", bandId);
-            var events = await _musicEventRepository.GetMusicEventsByBandId(bandId);
-            var band = await _bandRepository.GetBandById(bandId);
+            var events = await _musicEventRepository.GetMusicEventsByBandIdAsync(bandId);
+            var band = await _bandRepository.GetBandByIdAsync(bandId);
 
             if (band == null)
             {
@@ -87,12 +87,12 @@ internal class MusicEventService(
         }
     }
 
-    async Task<MusicEventResponse?> IMusicEventService.GetMusicEventById(Guid eventId)
+    async Task<MusicEventResponse?> IMusicEventService.GetMusicEventByIdAsync(Guid eventId)
     {
         try
         {
             _logger.LogInformation("Getting event with ID {EventId}", eventId);
-            var musicEvent = await _musicEventRepository.GetMusicEventById(eventId);
+            var musicEvent = await _musicEventRepository.GetMusicEventByIdAsync(eventId);
 
             if (musicEvent == null)
             {
@@ -125,13 +125,13 @@ internal class MusicEventService(
         }
     }
 
-    async Task<List<MusicEventResponse>> IMusicEventService.GetUpcomingMusicEvents(Guid bandId)
+    async Task<List<MusicEventResponse>> IMusicEventService.GetUpcomingMusicEventsAsync(Guid bandId)
     {
         try
         {
             _logger.LogInformation("Getting upcoming events for band with ID {BandId}", bandId);
-            var events = await _musicEventRepository.GetUpcomingMusicEvents(bandId);
-            var band = await _bandRepository.GetBandById(bandId);
+            var events = await _musicEventRepository.GetUpcomingMusicEventsAsync(bandId);
+            var band = await _bandRepository.GetBandByIdAsync(bandId);
 
             if (band == null)
             {
@@ -164,13 +164,13 @@ internal class MusicEventService(
         }
     }
 
-    async Task<MusicEvent?> IMusicEventService.CreateMusicEvent(CreateMusicEventRequest request)
+    async Task<MusicEvent?> IMusicEventService.CreateMusicEventAsync(CreateMusicEventRequest request)
     {
         try
         {
             _logger.LogInformation("Creating new event for band with ID {BandId}", request.BandId);
 
-            var band = await _bandRepository.GetBandById(request.BandId);
+            var band = await _bandRepository.GetBandByIdAsync(request.BandId);
             if (band == null)
             {
                 _logger.LogWarning("Band with ID {BandId} not found when creating event", request.BandId);
@@ -193,7 +193,7 @@ internal class MusicEventService(
                 Country = request.Country
             };
 
-            await _musicEventRepository.InsertMusicEvent(musicEvent);
+            await _musicEventRepository.InsertMusicEventAsync(musicEvent);
             _logger.LogInformation("Event {EventTitle} created successfully with ID {EventId} for band {BandId}",
                 musicEvent.Title, musicEvent.Id, musicEvent.BandId);
 
@@ -206,13 +206,13 @@ internal class MusicEventService(
         }
     }
 
-    async Task IMusicEventService.UpdateMusicEvent(UpdateMusicEventRequest request)
+    async Task IMusicEventService.UpdateMusicEventAsync(UpdateMusicEventRequest request)
     {
         try
         {
             _logger.LogInformation("Updating event with ID {EventId}", request.Id);
 
-            var musicEvent = await _musicEventRepository.GetMusicEventById(request.Id);
+            var musicEvent = await _musicEventRepository.GetMusicEventByIdAsync(request.Id);
             if (musicEvent == null)
             {
                 _logger.LogWarning("Event with ID {EventId} not found for update", request.Id);
@@ -259,7 +259,7 @@ internal class MusicEventService(
                 musicEvent.IsCancelled = request.IsCancelled.Value;
             }
 
-            await _musicEventRepository.UpdateMusicEvent(musicEvent);
+            await _musicEventRepository.UpdateMusicEventAsync(musicEvent);
             _logger.LogInformation("Event with ID {EventId} updated successfully", request.Id);
         }
         catch (Exception ex)
@@ -269,12 +269,12 @@ internal class MusicEventService(
         }
     }
 
-    async Task IMusicEventService.DeleteMusicEvent(Guid eventId)
+    async Task IMusicEventService.DeleteMusicEventAsync(Guid eventId)
     {
         try
         {
             _logger.LogInformation("Deleting event with ID {EventId}", eventId);
-            await _musicEventRepository.DeleteMusicEvent(eventId);
+            await _musicEventRepository.DeleteMusicEventAsync(eventId);
             _logger.LogInformation("Event with ID {EventId} deleted successfully", eventId);
         }
         catch (KeyNotFoundException)

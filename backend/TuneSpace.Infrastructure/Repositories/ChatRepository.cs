@@ -9,13 +9,7 @@ internal class ChatRepository(TuneSpaceDbContext context) : IChatRepository
 {
     private readonly TuneSpaceDbContext _context = context;
 
-    async Task IChatRepository.InsertChat(Chat chat)
-    {
-        _context.Chats.Add(chat);
-        await _context.SaveChangesAsync();
-    }
-
-    async Task<Chat?> IChatRepository.GetChatById(Guid chatId)
+    async Task<Chat?> IChatRepository.GetChatByIdAsync(Guid chatId)
     {
         return await _context.Chats
             .Include(c => c.ParticipantA)
@@ -23,7 +17,7 @@ internal class ChatRepository(TuneSpaceDbContext context) : IChatRepository
             .FirstOrDefaultAsync(c => c.Id == chatId);
     }
 
-    async Task<List<Chat>> IChatRepository.GetChatsByUser1IdOrUser2Id(User user1, User user2)
+    async Task<List<Chat>> IChatRepository.GetChatsByUser1IdOrUser2IdAsync(User user1, User user2)
     {
         return await _context.Chats
             .Include(c => c.ParticipantA)
@@ -32,9 +26,15 @@ internal class ChatRepository(TuneSpaceDbContext context) : IChatRepository
             .ToListAsync();
     }
 
-    async Task<Chat?> IChatRepository.GetChatByUser1AndUser2(User user1, User user2)
+    async Task<Chat?> IChatRepository.GetChatByUser1AndUser2Async(User user1, User user2)
     {
         return await _context.Chats
             .FirstOrDefaultAsync(c => (c.ParticipantA == user1 && c.ParticipantB == user2) || c.ParticipantA == user2 && c.ParticipantB == user1);
+    }
+
+    async Task IChatRepository.InsertChatAsync(Chat chat)
+    {
+        _context.Chats.Add(chat);
+        await _context.SaveChangesAsync();
     }
 }

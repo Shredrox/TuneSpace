@@ -16,35 +16,35 @@ public interface ISpotifyService
     /// </summary>
     /// <param name="code">Authorization code received from Spotify callback</param>
     /// <returns>A token response containing access and refresh tokens</returns>
-    Task<SpotifyTokenResponse> ExchangeCodeForToken(string code);
+    Task<SpotifyTokenResponse> ExchangeCodeForTokenAsync(string code);
 
     /// <summary>
     /// Gets a user's Spotify profile information
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>User's Spotify profile details</returns>
-    Task<SpotifyProfileDTO> GetUserSpotifyProfile(string token);
+    Task<SpotifyProfileDTO> GetUserSpotifyProfileAsync(string token);
 
     /// <summary>
     /// Gets a list of artists the user follows on Spotify
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>List of followed artists</returns>
-    Task<List<SpotifyArtistDTO>> GetUserFollowedArtists(string token);
+    Task<List<SpotifyArtistDTO>> GetUserFollowedArtistsAsync(string token);
 
     /// <summary>
     /// Gets a user's top artists from Spotify
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>List of user's top artists</returns>
-    Task<List<TopArtistDTO>> GetUserTopArtists(string token);
+    Task<List<TopArtistDTO>> GetUserTopArtistsAsync(string token);
 
     /// <summary>
     /// Gets a user's recently played tracks on Spotify
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>List of recently played tracks</returns>
-    Task<List<RecentlyPlayedTrackDTO>> GetUserRecentlyPlayedTracks(string token);
+    Task<List<RecentlyPlayedTrackDTO>> GetUserRecentlyPlayedTracksAsync(string token);
 
     /// <summary>
     /// Gets information for a specific artist from Spotify
@@ -52,7 +52,7 @@ public interface ISpotifyService
     /// <param name="token">Spotify access token</param>
     /// <param name="artistId">Spotify artist ID</param>
     /// <returns>Artist information</returns>
-    Task<SpotifyArtistDTO> GetArtist(string token, string artistId);
+    Task<SpotifyArtistDTO> GetArtistAsync(string token, string artistId);
 
     /// <summary>
     /// Gets information for multiple artists from Spotify
@@ -60,14 +60,14 @@ public interface ISpotifyService
     /// <param name="token">Spotify access token</param>
     /// <param name="artistIds">Comma-separated list of Spotify artist IDs</param>
     /// <returns>List of artist information</returns>
-    Task<List<SpotifyArtistDTO>> GetSeveralArtists(string token, string artistIds);
+    Task<List<SpotifyArtistDTO>> GetSeveralArtistsAsync(string token, string artistIds);
 
     /// <summary>
     /// Gets a user's top songs from Spotify
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>List of user's top songs</returns>
-    Task<List<TopSongDTO>> GetUserTopSongs(string token);
+    Task<List<TopSongDTO>> GetUserTopSongsAsync(string token);
 
     /// <summary>
     /// Searches for songs on Spotify matching the given query
@@ -75,21 +75,21 @@ public interface ISpotifyService
     /// <param name="token">Spotify access token</param>
     /// <param name="search">Search query</param>
     /// <returns>List of songs matching the search query</returns>
-    Task<List<SearchSongDTO>> GetSongsBySearch(string token, string search);
+    Task<List<SearchSongDTO>> GetSongsBySearchAsync(string token, string search);
 
     /// <summary>
     /// Creates a new playlist on the user's Spotify account
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <param name="request">Playlist creation details</param>
-    Task CreatePlaylist(string token, CreatePlaylistRequest request);
+    Task CreatePlaylistAsync(string token, CreatePlaylistRequest request);
 
     /// <summary>
     /// Refreshes a Spotify access token using a refresh token
     /// </summary>
     /// <param name="refreshToken">Spotify refresh token</param>
     /// <returns>New access and refresh tokens</returns>
-    Task<SpotifyTokenResponse> RefreshAccessToken(string refreshToken);
+    Task<SpotifyTokenResponse> RefreshAccessTokenAsync(string refreshToken);
 
     /// <summary>
     /// Performs a search across Spotify's catalog for albums and/or artists

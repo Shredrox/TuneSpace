@@ -9,13 +9,6 @@ internal class MerchandiseRepository(TuneSpaceDbContext context) : IMerchandiseR
 {
     private readonly TuneSpaceDbContext _context = context;
 
-    async Task<Merchandise> IMerchandiseRepository.CreateMerchandiseAsync(Merchandise merchandise)
-    {
-        _context.Merchandises.Add(merchandise);
-        await _context.SaveChangesAsync();
-        return merchandise;
-    }
-
     async Task<Merchandise?> IMerchandiseRepository.GetMerchandiseByIdAsync(Guid merchandiseId)
     {
         return await _context.Merchandises
@@ -34,6 +27,13 @@ internal class MerchandiseRepository(TuneSpaceDbContext context) : IMerchandiseR
             .ToListAsync();
     }
 
+    async Task<Merchandise> IMerchandiseRepository.InsertMerchandiseAsync(Merchandise merchandise)
+    {
+        _context.Merchandises.Add(merchandise);
+        await _context.SaveChangesAsync();
+        return merchandise;
+    }
+
     async Task<Merchandise> IMerchandiseRepository.UpdateMerchandiseAsync(Merchandise merchandise)
     {
         _context.Merchandises.Update(merchandise);
@@ -44,7 +44,7 @@ internal class MerchandiseRepository(TuneSpaceDbContext context) : IMerchandiseR
     async Task<bool> IMerchandiseRepository.DeleteMerchandiseAsync(Guid merchandiseId)
     {
         var merchandise = await _context.Merchandises.FindAsync(merchandiseId);
-        if (merchandise == null)
+        if (merchandise is null)
         {
             return false;
         }

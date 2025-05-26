@@ -16,42 +16,7 @@ internal class MerchandiseService(
     private readonly IBandRepository _bandRepository = bandRepository;
     private readonly ILogger<MerchandiseService> _logger = logger;
 
-    async Task<Merchandise?> IMerchandiseService.CreateMerchandise(CreateMerchandiseRequest request)
-    {
-        try
-        {
-            _logger.LogInformation("Creating new merchandise item for band {BandId}", request.BandId);
-
-            var band = await _bandRepository.GetBandById(request.BandId);
-            if (band == null)
-            {
-                _logger.LogWarning("Band with ID {BandId} not found when creating merchandise", request.BandId);
-                return null;
-            }
-
-            var merchandise = new Merchandise
-            {
-                BandId = request.BandId,
-                Name = request.Name,
-                Description = request.Description,
-                Price = request.Price,
-                Image = request.Image?.Content,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            await _merchandiseRepository.CreateMerchandiseAsync(merchandise);
-            _logger.LogInformation("Merchandise {MerchandiseName} created successfully with ID {MerchandiseId}", merchandise.Name, merchandise.Id);
-            return merchandise;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating merchandise for band {BandId}", request.BandId);
-            throw;
-        }
-    }
-
-    async Task<MerchandiseResponse?> IMerchandiseService.GetMerchandiseById(Guid id)
+    async Task<MerchandiseResponse?> IMerchandiseService.GetMerchandiseByIdAsync(Guid id)
     {
         try
         {
@@ -81,7 +46,7 @@ internal class MerchandiseService(
         }
     }
 
-    async Task<IEnumerable<MerchandiseResponse>> IMerchandiseService.GetMerchandiseByBandId(Guid bandId)
+    async Task<IEnumerable<MerchandiseResponse>> IMerchandiseService.GetMerchandiseByBandIdAsync(Guid bandId)
     {
         try
         {
@@ -106,7 +71,42 @@ internal class MerchandiseService(
         }
     }
 
-    async Task IMerchandiseService.UpdateMerchandise(UpdateMerchandiseRequest request)
+    async Task<Merchandise?> IMerchandiseService.CreateMerchandiseAsync(CreateMerchandiseRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Creating new merchandise item for band {BandId}", request.BandId);
+
+            var band = await _bandRepository.GetBandByIdAsync(request.BandId);
+            if (band == null)
+            {
+                _logger.LogWarning("Band with ID {BandId} not found when creating merchandise", request.BandId);
+                return null;
+            }
+
+            var merchandise = new Merchandise
+            {
+                BandId = request.BandId,
+                Name = request.Name,
+                Description = request.Description,
+                Price = request.Price,
+                Image = request.Image?.Content,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _merchandiseRepository.InsertMerchandiseAsync(merchandise);
+            _logger.LogInformation("Merchandise {MerchandiseName} created successfully with ID {MerchandiseId}", merchandise.Name, merchandise.Id);
+            return merchandise;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating merchandise for band {BandId}", request.BandId);
+            throw;
+        }
+    }
+
+    async Task IMerchandiseService.UpdateMerchandiseAsync(UpdateMerchandiseRequest request)
     {
         try
         {
@@ -151,7 +151,7 @@ internal class MerchandiseService(
         }
     }
 
-    async Task IMerchandiseService.DeleteMerchandise(Guid id)
+    async Task IMerchandiseService.DeleteMerchandiseAsync(Guid id)
     {
         try
         {

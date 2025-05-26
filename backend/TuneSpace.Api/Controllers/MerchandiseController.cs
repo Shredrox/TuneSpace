@@ -18,10 +18,20 @@ public class MerchandiseController(
     [HttpGet("{merchandiseId}")]
     public async Task<IActionResult> GetMerchandiseById(string merchandiseId)
     {
+        if (string.IsNullOrEmpty(merchandiseId))
+        {
+            return BadRequest("Merchandise ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(merchandiseId, out var parsedMerchandiseId))
+        {
+            return BadRequest("Invalid Merchandise ID format");
+        }
+
         try
         {
-            var merchandise = await _merchandiseService.GetMerchandiseById(Guid.Parse(merchandiseId));
-            if (merchandise == null)
+            var merchandise = await _merchandiseService.GetMerchandiseByIdAsync(parsedMerchandiseId);
+            if (merchandise is null)
             {
                 return NotFound();
             }
@@ -38,9 +48,19 @@ public class MerchandiseController(
     [HttpGet("band/{bandId}")]
     public async Task<IActionResult> GetMerchandiseByBandId(string bandId)
     {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
         try
         {
-            var merchandise = await _merchandiseService.GetMerchandiseByBandId(Guid.Parse(bandId));
+            var merchandise = await _merchandiseService.GetMerchandiseByBandIdAsync(parsedBandId);
             return Ok(merchandise);
         }
         catch (Exception e)
@@ -53,20 +73,21 @@ public class MerchandiseController(
     [HttpGet("{merchandiseId}/image")]
     public async Task<IActionResult> GetMerchandiseImage(string merchandiseId)
     {
+        if (string.IsNullOrEmpty(merchandiseId))
+        {
+            return BadRequest("Merchandise ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(merchandiseId, out var parsedMerchandiseId))
+        {
+            return BadRequest("Invalid Merchandise ID format");
+        }
+
         try
         {
-            if (string.IsNullOrEmpty(merchandiseId))
-            {
-                return BadRequest("Merchandise ID cannot be null or empty");
-            }
-            if (!Guid.TryParse(merchandiseId, out var parsedMerchandiseId))
-            {
-                return BadRequest("Invalid Merchandise ID format");
-            }
+            var merchandise = await _merchandiseService.GetMerchandiseByIdAsync(parsedMerchandiseId);
 
-            var merchandise = await _merchandiseService.GetMerchandiseById(parsedMerchandiseId);
-
-            if (merchandise?.Image == null)
+            if (merchandise?.Image is null)
             {
                 return NotFound();
             }
@@ -92,11 +113,12 @@ public class MerchandiseController(
                 request.Name,
                 request.Description,
                 decimal.Parse(request.Price),
-                fileDto);
+                fileDto
+            );
 
-            var merchandise = await _merchandiseService.CreateMerchandise(createMerchandiseRequest);
+            var merchandise = await _merchandiseService.CreateMerchandiseAsync(createMerchandiseRequest);
 
-            if (merchandise == null)
+            if (merchandise is null)
             {
                 return BadRequest();
             }
@@ -122,9 +144,10 @@ public class MerchandiseController(
                 request.Name,
                 request.Description,
                 decimal.Parse(request.Price!),
-                fileDto);
+                fileDto
+            );
 
-            await _merchandiseService.UpdateMerchandise(updateMerchandiseRequest);
+            await _merchandiseService.UpdateMerchandiseAsync(updateMerchandiseRequest);
             return Ok("Merchandise updated successfully");
         }
         catch (Exception e)
@@ -137,9 +160,19 @@ public class MerchandiseController(
     [HttpDelete("{merchandiseId}")]
     public async Task<IActionResult> DeleteMerchandise(string merchandiseId)
     {
+        if (string.IsNullOrEmpty(merchandiseId))
+        {
+            return BadRequest("Merchandise ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(merchandiseId, out var parsedMerchandiseId))
+        {
+            return BadRequest("Invalid Merchandise ID format");
+        }
+
         try
         {
-            await _merchandiseService.DeleteMerchandise(Guid.Parse(merchandiseId));
+            await _merchandiseService.DeleteMerchandiseAsync(parsedMerchandiseId);
             return Ok("Merchandise deleted successfully");
         }
         catch (Exception e)

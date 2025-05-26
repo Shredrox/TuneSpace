@@ -8,13 +8,6 @@ namespace TuneSpace.Core.Interfaces.IRepositories;
 public interface IMerchandiseRepository
 {
     /// <summary>
-    /// Creates a new merchandise item in the system.
-    /// </summary>
-    /// <param name="merchandise">The merchandise item to create.</param>
-    /// <returns>The created merchandise item with assigned ID.</returns>
-    Task<Merchandise> CreateMerchandiseAsync(Merchandise merchandise);
-
-    /// <summary>
     /// Retrieves a merchandise item by its unique identifier.
     /// </summary>
     /// <param name="merchandiseId">The unique identifier of the merchandise item.</param>
@@ -33,6 +26,13 @@ public interface IMerchandiseRepository
     /// <param name="bandId">The unique identifier of the band.</param>
     /// <returns>A collection of merchandise items for the specified band.</returns>
     Task<IEnumerable<Merchandise>> GetAllMerchandisesByBandIdAsync(Guid bandId);
+
+    /// <summary>
+    /// Creates a new merchandise item in the system.
+    /// </summary>
+    /// <param name="merchandise">The merchandise item to create.</param>
+    /// <returns>The created merchandise item with assigned ID.</returns>
+    Task<Merchandise> InsertMerchandiseAsync(Merchandise merchandise);
 
     /// <summary>
     /// Updates an existing merchandise item.

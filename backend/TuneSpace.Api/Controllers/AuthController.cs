@@ -24,8 +24,8 @@ public class AuthController(
     {
         try
         {
-            await _authService.Register(request.Name, request.Email, request.Password, Enum.Parse<Roles>(request.Role));
-            var user = await _userService.GetUserByName(request.Name);
+            await _authService.RegisterAsync(request.Name, request.Email, request.Password, Enum.Parse<Roles>(request.Role));
+            var user = await _userService.GetUserByNameAsync(request.Name);
 
             if (user is null)
             {
@@ -51,7 +51,7 @@ public class AuthController(
     {
         try
         {
-            var response = await _authService.Login(request.Email, request.Password);
+            var response = await _authService.LoginAsync(request.Email, request.Password);
 
             var username = response.Username;
             var accessToken = response.AccessToken;
@@ -104,13 +104,13 @@ public class AuthController(
                 return BadRequest("Refresh token is required");
             }
 
-            var user = await _userService.GetUserFromRefreshToken(refreshToken);
+            var user = await _userService.GetUserFromRefreshTokenAsync(refreshToken);
 
             if (user is not null)
             {
                 user.RefreshToken = null;
                 user.RefreshTokenValidity = null;
-                await _userService.UpdateUserRefreshToken(user);
+                await _userService.UpdateUserRefreshTokenAsync(user);
                 _logger.LogInformation("User logged out and refresh token cleared: {UserId}", user.Id);
             }
 
@@ -138,7 +138,7 @@ public class AuthController(
                 return BadRequest("Refresh token is required");
             }
 
-            var user = await _userService.GetUserFromRefreshToken(refreshToken);
+            var user = await _userService.GetUserFromRefreshTokenAsync(refreshToken);
 
             if (user is null)
             {
@@ -156,7 +156,7 @@ public class AuthController(
             }
 
             var newAccessToken = _tokenService.CreateAccessToken(user);
-            var newRefreshToken = await _tokenService.CreateRefreshToken(user);
+            var newRefreshToken = await _tokenService.CreateRefreshTokenAsync(user);
 
             Response.Cookies.Append("AccessToken", newAccessToken, new CookieOptions
             {

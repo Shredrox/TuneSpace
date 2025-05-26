@@ -17,7 +17,7 @@ internal class DataEnrichmentService(
     private readonly ILogger<DataEnrichmentService> _logger = logger;
     private readonly IApiThrottler _apiThrottler = apiThrottler;
 
-    async Task<List<BandModel>> IDataEnrichmentService.EnrichMultipleBands(List<BandModel> bands)
+    async Task<List<BandModel>> IDataEnrichmentService.EnrichMultipleBandsAsync(List<BandModel> bands)
     {
         if (bands.Count == 0)
         {
@@ -34,7 +34,7 @@ internal class DataEnrichmentService(
                 {
                     try
                     {
-                        return (name, await GetCachedBandData(name));
+                        return (name, await GetCachedBandDataAsync(name));
                     }
                     catch (Exception ex)
                     {
@@ -80,7 +80,7 @@ internal class DataEnrichmentService(
         return bands;
     }
 
-    public async Task<BandModel?> GetCachedBandData(string bandName)
+    public async Task<BandModel?> GetCachedBandDataAsync(string bandName)
     {
         string cacheKey = $"band:{bandName}";
 
@@ -93,7 +93,7 @@ internal class DataEnrichmentService(
         return bandData;
     }
 
-    async Task<Dictionary<string, List<BandModel>>> IDataEnrichmentService.GetSimilarBandsForMultipleArtists(
+    async Task<Dictionary<string, List<BandModel>>> IDataEnrichmentService.GetSimilarBandsForMultipleArtistsAsync(
         List<string> artistNames, int maxSimilarPerArtist, HashSet<string>? processedBandNames,
         bool isRegisteredBandSimilar)
     {
@@ -127,7 +127,7 @@ internal class DataEnrichmentService(
 
                         try
                         {
-                            var band = await GetCachedBandData(similarArtistName);
+                            var band = await GetCachedBandDataAsync(similarArtistName);
 
                             if (band == null)
                             {

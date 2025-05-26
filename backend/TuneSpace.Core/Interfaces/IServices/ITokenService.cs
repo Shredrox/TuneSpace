@@ -19,5 +19,5 @@ public interface ITokenService
     /// </summary>
     /// <param name="user">The user entity for which to generate the refresh token.</param>
     /// <returns>A task representing the asynchronous operation that returns the refresh token string.</returns>
-    Task<string> CreateRefreshToken(User user);
+    Task<string> CreateRefreshTokenAsync(User user);
 }

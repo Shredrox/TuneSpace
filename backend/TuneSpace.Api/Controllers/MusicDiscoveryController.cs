@@ -25,7 +25,7 @@ public class MusicDiscoveryController(
             }
 
             var genresList = string.IsNullOrEmpty(genres)
-                ? new List<string>()
+                ? []
                 : genres.Split(',').ToList();
 
             var recommendations = await _musicDiscoveryService.GetBandRecommendationsAsync(

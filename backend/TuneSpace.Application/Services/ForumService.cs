@@ -16,106 +16,6 @@ internal class ForumService(
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IBandRepository _bandRepository = bandRepository;
 
-    async Task<CategoryResponse> IForumService.CreateCategoryAsync(CreateCategoryRequest request)
-    {
-        var category = new ForumCategory
-        {
-            Name = request.Name,
-            Description = request.Description,
-            IconName = request.IconName,
-            CreatedAt = DateTime.UtcNow,
-            IsActive = true,
-            IsPinned = false,
-        };
-
-        var createdCategory = await _forumRepository.CreateCategoryAsync(category);
-
-        return new CategoryResponse(
-            createdCategory.Id,
-            createdCategory.Name,
-            createdCategory.Description ?? string.Empty,
-            createdCategory.IconName,
-            0,
-            0
-        );
-    }
-
-    async Task<ThreadResponse> IForumService.CreateThreadAsync(CreateThreadRequest request, Guid userId)
-    {
-        var user = await _userRepository.GetUserById(userId.ToString()) ?? throw new ArgumentException("User not found");
-
-        var now = DateTime.UtcNow;
-        var thread = new ForumThread
-        {
-            Title = request.Title,
-            CategoryId = request.CategoryId,
-            AuthorId = userId,
-            CreatedAt = now,
-            LastActivityAt = now,
-            Views = 0,
-            IsPinned = false,
-            IsLocked = false,
-        };
-
-        var createdThread = await _forumRepository.CreateThreadAsync(thread);
-
-        var post = new ForumPost
-        {
-            Content = request.Content,
-            ThreadId = createdThread.Id,
-            AuthorId = userId,
-            CreatedAt = now,
-        };
-
-        await _forumRepository.CreatePostAsync(post);
-
-        return new ThreadResponse(
-            createdThread.Id,
-            createdThread.Title,
-            "",
-            user.Id,
-            user.UserName ?? "Unknown",
-            user.ProfilePicture ?? [],
-            createdThread.CreatedAt,
-            createdThread.LastActivityAt,
-            0,
-            0,
-            createdThread.IsPinned,
-            createdThread.IsLocked
-        );
-    }
-
-    async Task<ForumPostResponse> IForumService.CreatePostAsync(CreatePostRequest request, Guid userId)
-    {
-        var user = await _userRepository.GetUserById(userId.ToString()) ?? throw new ArgumentException("User not found");
-
-        var now = DateTime.UtcNow;
-        var post = new ForumPost
-        {
-            Content = request.Content,
-            ThreadId = request.ThreadId,
-            AuthorId = userId,
-            CreatedAt = now,
-        };
-
-        var createdPost = await _forumRepository.CreatePostAsync(post);
-
-        await _forumRepository.UpdateThreadLastActivityAsync(request.ThreadId, now);
-
-        return new ForumPostResponse(
-            createdPost.Id,
-            createdPost.Content,
-            user.Id,
-            user.UserName ?? "Unknown",
-            user.ProfilePicture ?? [],
-            user.Role.ToString(),
-            createdPost.CreatedAt,
-            null,
-            0,
-            false
-        );
-    }
-
     async Task<List<CategoryResponse>> IForumService.GetAllCategoriesAsync()
     {
         var categories = await _forumRepository.GetAllCategoriesAsync();
@@ -208,7 +108,7 @@ internal class ForumService(
 
     async Task<List<ThreadResponse>?> IForumService.GetBandThreads(Guid bandId)
     {
-        var band = await _bandRepository.GetBandById(bandId);
+        var band = await _bandRepository.GetBandByIdAsync(bandId);
 
         if (band == null)
         {
@@ -268,6 +168,106 @@ internal class ForumService(
         );
     }
 
+    async Task<CategoryResponse> IForumService.CreateCategoryAsync(CreateCategoryRequest request)
+    {
+        var category = new ForumCategory
+        {
+            Name = request.Name,
+            Description = request.Description,
+            IconName = request.IconName,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = true,
+            IsPinned = false,
+        };
+
+        var createdCategory = await _forumRepository.InsertCategoryAsync(category);
+
+        return new CategoryResponse(
+            createdCategory.Id,
+            createdCategory.Name,
+            createdCategory.Description ?? string.Empty,
+            createdCategory.IconName,
+            0,
+            0
+        );
+    }
+
+    async Task<ThreadResponse> IForumService.CreateThreadAsync(CreateThreadRequest request, Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId.ToString()) ?? throw new ArgumentException("User not found");
+
+        var now = DateTime.UtcNow;
+        var thread = new ForumThread
+        {
+            Title = request.Title,
+            CategoryId = request.CategoryId,
+            AuthorId = userId,
+            CreatedAt = now,
+            LastActivityAt = now,
+            Views = 0,
+            IsPinned = false,
+            IsLocked = false,
+        };
+
+        var createdThread = await _forumRepository.InsertThreadAsync(thread);
+
+        var post = new ForumPost
+        {
+            Content = request.Content,
+            ThreadId = createdThread.Id,
+            AuthorId = userId,
+            CreatedAt = now,
+        };
+
+        await _forumRepository.InsertPostAsync(post);
+
+        return new ThreadResponse(
+            createdThread.Id,
+            createdThread.Title,
+            "",
+            user.Id,
+            user.UserName ?? "Unknown",
+            user.ProfilePicture ?? [],
+            createdThread.CreatedAt,
+            createdThread.LastActivityAt,
+            0,
+            0,
+            createdThread.IsPinned,
+            createdThread.IsLocked
+        );
+    }
+
+    async Task<ForumPostResponse> IForumService.CreatePostAsync(CreatePostRequest request, Guid userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId.ToString()) ?? throw new ArgumentException("User not found");
+
+        var now = DateTime.UtcNow;
+        var post = new ForumPost
+        {
+            Content = request.Content,
+            ThreadId = request.ThreadId,
+            AuthorId = userId,
+            CreatedAt = now,
+        };
+
+        var createdPost = await _forumRepository.InsertPostAsync(post);
+
+        await _forumRepository.UpdateThreadLastActivityAsync(request.ThreadId, now);
+
+        return new ForumPostResponse(
+            createdPost.Id,
+            createdPost.Content,
+            user.Id,
+            user.UserName ?? "Unknown",
+            user.ProfilePicture ?? [],
+            user.Role.ToString(),
+            createdPost.CreatedAt,
+            null,
+            0,
+            false
+        );
+    }
+
     async Task IForumService.IncrementThreadViewAsync(Guid threadId)
     {
         await _forumRepository.IncrementThreadViewAsync(threadId);
@@ -288,7 +288,7 @@ internal class ForumService(
             CreatedAt = DateTime.UtcNow
         };
 
-        await _forumRepository.CreatePostLikeAsync(like);
+        await _forumRepository.InsertPostLikeAsync(like);
         return true;
     }
 

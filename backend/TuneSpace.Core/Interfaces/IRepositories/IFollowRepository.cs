@@ -8,13 +8,6 @@ namespace TuneSpace.Core.Interfaces.IRepositories;
 public interface IFollowRepository
 {
     /// <summary>
-    /// Creates a new follow relationship
-    /// </summary>
-    /// <param name="follow">The follow entity to create</param>
-    /// <returns>The created follow entity with generated ID</returns>
-    Task<Follow> CreateFollowAsync(Follow follow);
-
-    /// <summary>
     /// Retrieves a specific follow relationship
     /// </summary>
     /// <param name="followerId">ID of the user who is following</param>
@@ -57,6 +50,13 @@ public interface IFollowRepository
     /// <param name="userId">ID of the user potentially being followed</param>
     /// <returns>True if followerId is following userId, false otherwise</returns>
     Task<bool> IsFollowingAsync(Guid followerId, Guid userId);
+
+    /// <summary>
+    /// Creates a new follow relationship
+    /// </summary>
+    /// <param name="follow">The follow entity to create</param>
+    /// <returns>The created follow entity with generated ID</returns>
+    Task<Follow> InsertFollowAsync(Follow follow);
 
     /// <summary>
     /// Removes a follow relationship

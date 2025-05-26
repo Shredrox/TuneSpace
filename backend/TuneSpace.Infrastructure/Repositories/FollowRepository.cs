@@ -9,13 +9,6 @@ internal class FollowRepository(TuneSpaceDbContext context) : IFollowRepository
 {
     private readonly TuneSpaceDbContext _context = context;
 
-    async Task<Follow> IFollowRepository.CreateFollowAsync(Follow follow)
-    {
-        _context.Follows.Add(follow);
-        await _context.SaveChangesAsync();
-        return follow;
-    }
-
     async Task<Follow?> IFollowRepository.GetFollowAsync(Guid followerId, Guid userId)
     {
         return await _context.Follows
@@ -58,12 +51,19 @@ internal class FollowRepository(TuneSpaceDbContext context) : IFollowRepository
             .AnyAsync(f => f.FollowerId == followerId && f.UserId == userId);
     }
 
+    async Task<Follow> IFollowRepository.InsertFollowAsync(Follow follow)
+    {
+        _context.Follows.Add(follow);
+        await _context.SaveChangesAsync();
+        return follow;
+    }
+
     async Task<bool> IFollowRepository.DeleteFollowAsync(Guid followerId, Guid userId)
     {
         var follow = await _context.Follows
             .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.UserId == userId);
 
-        if (follow == null)
+        if (follow is null)
         {
             return false;
         }

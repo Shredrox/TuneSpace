@@ -13,25 +13,25 @@ internal class UserService(
     private readonly IUserRepository _userRepository = userRepository;
     private readonly ILogger<UserService> _logger = logger;
 
-    async Task<User?> IUserService.GetUserById(string id)
+    async Task<User?> IUserService.GetUserByIdAsync(string id)
     {
-        return await _userRepository.GetUserById(id);
+        return await _userRepository.GetUserByIdAsync(id);
     }
 
-    async Task<User?> IUserService.GetUserByName(string name)
+    async Task<User?> IUserService.GetUserByNameAsync(string name)
     {
-        return await _userRepository.GetUserByName(name);
+        return await _userRepository.GetUserByNameAsync(name);
     }
 
-    async Task<User?> IUserService.GetUserFromRefreshToken(string refreshToken)
+    async Task<User?> IUserService.GetUserFromRefreshTokenAsync(string refreshToken)
     {
-        var user = await _userRepository.GetUserByRefreshToken(refreshToken);
+        var user = await _userRepository.GetUserByRefreshTokenAsync(refreshToken);
         return user ?? null;
     }
 
-    async Task<byte[]?> IUserService.GetProfilePicture(string username)
+    async Task<byte[]?> IUserService.GetProfilePictureAsync(string username)
     {
-        var user = await _userRepository.GetUserByName(username);
+        var user = await _userRepository.GetUserByNameAsync(username);
 
         if (user == null)
         {
@@ -42,9 +42,9 @@ internal class UserService(
         return user.ProfilePicture;
     }
 
-    async Task<List<User>> IUserService.SearchByName(string name)
+    async Task<List<User>> IUserService.SearchByNameAsync(string name)
     {
-        var users = await _userRepository.SearchByName(name);
+        var users = await _userRepository.SearchByNameAsync(name);
 
         if (users == null || users.Count == 0)
         {
@@ -55,9 +55,9 @@ internal class UserService(
         return users;
     }
 
-    async Task IUserService.UpdateUserRefreshToken(User user)
+    async Task IUserService.UpdateUserRefreshTokenAsync(User user)
     {
-        var existingUser = await _userRepository.GetUserById(user.Id.ToString());
+        var existingUser = await _userRepository.GetUserByIdAsync(user.Id.ToString());
 
         if (existingUser == null)
         {
@@ -67,12 +67,12 @@ internal class UserService(
         existingUser.RefreshToken = user.RefreshToken;
         existingUser.RefreshTokenValidity = user.RefreshTokenValidity;
 
-        await _userRepository.UpdateUser(user);
+        await _userRepository.UpdateUserAsync(user);
     }
 
-    async Task IUserService.UpdateProfilePicture(string username, byte[] profilePicture)
+    async Task IUserService.UpdateProfilePictureAsync(string username, byte[] profilePicture)
     {
-        var user = await _userRepository.GetUserByName(username);
+        var user = await _userRepository.GetUserByNameAsync(username);
 
         if (user == null)
         {
@@ -81,7 +81,7 @@ internal class UserService(
         }
 
         user.ProfilePicture = profilePicture;
-        await _userRepository.UpdateUser(user);
+        await _userRepository.UpdateUserAsync(user);
 
         _logger.LogInformation("Profile picture updated for user: {Username}", username);
     }

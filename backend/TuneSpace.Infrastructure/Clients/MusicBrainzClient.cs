@@ -38,13 +38,13 @@ internal class MusicBrainzClient : IMusicBrainzClient
         {
             Name = name,
             Location = country,
-            Genres = tags?.Select(t => t["name"]?.ToString() ?? "").Where(t => !string.IsNullOrEmpty(t)).ToList() ?? new List<string>()
+            Genres = tags?.Select(t => t["name"]?.ToString() ?? "").Where(t => !string.IsNullOrEmpty(t)).ToList() ?? []
         };
 
         return bandModel;
     }
 
-    async Task<List<BandModel>> IMusicBrainzClient.GetBandsByLocationAsync(string location, int limit, List<string>? genres = null)
+    async Task<List<BandModel>> IMusicBrainzClient.GetBandsByLocationAsync(string location, int limit, List<string>? genres)
     {
         var query = $"area:{HttpUtility.UrlEncode(location)}";
 
@@ -88,7 +88,7 @@ internal class MusicBrainzClient : IMusicBrainzClient
                     Location = country ?? location,
                     Genres = tags?.Select(t => t["name"]?.ToString() ?? "")
                         .Where(t => !string.IsNullOrEmpty(t))
-                        .ToList() ?? new List<string>()
+                        .ToList() ?? []
                 });
             }
         }

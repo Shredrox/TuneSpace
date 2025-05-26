@@ -8,13 +8,6 @@ namespace TuneSpace.Core.Interfaces.IRepositories;
 public interface IMessageRepository
 {
     /// <summary>
-    /// Inserts a new message into the repository.
-    /// </summary>
-    /// <param name="message">The message entity to insert.</param>
-    /// <returns>A task representing the asynchronous operation, containing the inserted message with any generated values (e.g. ID).</returns>
-    Task<Message> InsertMessage(Message message);
-
-    /// <summary>
     /// Retrieves all messages exchanged between two users.
     /// </summary>
     /// <param name="userId">The ID of the first user.</param>
@@ -67,6 +60,13 @@ public interface IMessageRepository
     /// <param name="userId">The ID of the user to check unread messages for.</param>
     /// <returns>A task representing the asynchronous operation, containing the count of total unread messages.</returns>
     Task<int> GetTotalUnreadMessageCountAsync(Guid userId);
+
+    /// <summary>
+    /// Inserts a new message into the repository.
+    /// </summary>
+    /// <param name="message">The message entity to insert.</param>
+    /// <returns>A task representing the asynchronous operation, containing the inserted message with any generated values (e.g. ID).</returns>
+    Task<Message> InsertMessageAsync(Message message);
 
     /// <summary>
     /// Updates a collection of messages in the repository.

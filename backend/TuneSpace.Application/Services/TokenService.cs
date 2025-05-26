@@ -41,14 +41,14 @@ internal class TokenService(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    async Task<string> ITokenService.CreateRefreshToken(User user)
+    async Task<string> ITokenService.CreateRefreshTokenAsync(User user)
     {
         var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
         user.RefreshToken = refreshToken;
         user.RefreshTokenValidity = DateTime.Now.AddHours(2).ToUniversalTime();
 
-        await userRepository.UpdateUser(user);
+        await userRepository.UpdateUserAsync(user);
 
         return refreshToken;
     }

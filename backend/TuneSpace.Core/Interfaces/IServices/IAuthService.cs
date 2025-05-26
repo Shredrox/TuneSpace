@@ -16,7 +16,7 @@ public interface IAuthService
     /// <param name="password">The user's password, which should meet security requirements.</param>
     /// <param name="role">The user's role in the system, determining their permissions.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    Task Register(string name, string email, string password, Roles role);
+    Task RegisterAsync(string name, string email, string password, Roles role);
 
     /// <summary>
     /// Authenticates a user based on their credentials and generates authentication tokens.
@@ -27,5 +27,5 @@ public interface IAuthService
     /// A task representing the asynchronous operation that returns a <see cref="LoginResponse"/>
     /// containing authentication tokens and user information upon successful login.
     /// </returns>
-    Task<LoginResponse> Login(string email, string password);
+    Task<LoginResponse> LoginAsync(string email, string password);
 }

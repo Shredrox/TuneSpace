@@ -7,4 +7,5 @@ public record BandUpdateRequest(
     string? Description,
     string? SpotifyId,
     string? YouTubeEmbedId,
-    IFormFile? Picture);
+    IFormFile? Picture
+);

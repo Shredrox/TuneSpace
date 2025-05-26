@@ -18,7 +18,7 @@ public class MusicEventController(
     {
         try
         {
-            var events = await _musicEventService.GetAllMusicEvents();
+            var events = await _musicEventService.GetAllMusicEventsAsync();
             return Ok(events);
         }
         catch (Exception e)
@@ -31,14 +31,19 @@ public class MusicEventController(
     [HttpGet("band/{bandId}")]
     public async Task<IActionResult> GetBandEvents(string bandId)
     {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
         try
         {
-            if (!Guid.TryParse(bandId, out var parsedBandId))
-            {
-                return BadRequest("Invalid Band ID format");
-            }
-
-            var events = await _musicEventService.GetMusicEventsByBandId(parsedBandId);
+            var events = await _musicEventService.GetMusicEventsByBandIdAsync(parsedBandId);
             return Ok(events);
         }
         catch (Exception e)
@@ -51,16 +56,21 @@ public class MusicEventController(
     [HttpGet("{eventId}")]
     public async Task<IActionResult> GetEventById(string eventId)
     {
+        if (string.IsNullOrEmpty(eventId))
+        {
+            return BadRequest("Event ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(eventId, out var parsedEventId))
+        {
+            return BadRequest("Invalid Event ID format");
+        }
+
         try
         {
-            if (!Guid.TryParse(eventId, out var parsedEventId))
-            {
-                return BadRequest("Invalid Event ID format");
-            }
+            var musicEvent = await _musicEventService.GetMusicEventByIdAsync(parsedEventId);
 
-            var musicEvent = await _musicEventService.GetMusicEventById(parsedEventId);
-
-            if (musicEvent == null)
+            if (musicEvent is null)
             {
                 return NotFound();
             }
@@ -77,14 +87,19 @@ public class MusicEventController(
     [HttpGet("band/{bandId}/upcoming")]
     public async Task<IActionResult> GetUpcomingBandEvents(string bandId)
     {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
         try
         {
-            if (!Guid.TryParse(bandId, out var parsedBandId))
-            {
-                return BadRequest("Invalid Band ID format");
-            }
-
-            var events = await _musicEventService.GetUpcomingMusicEvents(parsedBandId);
+            var events = await _musicEventService.GetUpcomingMusicEventsAsync(parsedBandId);
             return Ok(events);
         }
         catch (Exception e)
@@ -99,9 +114,9 @@ public class MusicEventController(
     {
         try
         {
-            var musicEvent = await _musicEventService.CreateMusicEvent(request);
+            var musicEvent = await _musicEventService.CreateMusicEventAsync(request);
 
-            if (musicEvent == null)
+            if (musicEvent is null)
             {
                 return BadRequest("Could not create event.");
             }
@@ -120,7 +135,7 @@ public class MusicEventController(
     {
         try
         {
-            await _musicEventService.UpdateMusicEvent(request);
+            await _musicEventService.UpdateMusicEventAsync(request);
             return Ok("Event updated successfully");
         }
         catch (Exception e)
@@ -133,14 +148,19 @@ public class MusicEventController(
     [HttpDelete("{eventId}")]
     public async Task<IActionResult> DeleteMusicEvent(string eventId)
     {
+        if (string.IsNullOrEmpty(eventId))
+        {
+            return BadRequest("Event ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(eventId, out var parsedEventId))
+        {
+            return BadRequest("Invalid Event ID format");
+        }
+
         try
         {
-            if (!Guid.TryParse(eventId, out var parsedEventId))
-            {
-                return BadRequest("Invalid Event ID format");
-            }
-
-            await _musicEventService.DeleteMusicEvent(parsedEventId);
+            await _musicEventService.DeleteMusicEventAsync(parsedEventId);
             return Ok("Event deleted successfully");
         }
         catch (Exception e)

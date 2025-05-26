@@ -17,9 +17,9 @@ internal class AuthService(
     private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
     private readonly ITokenService _tokenService = tokenService;
 
-    async Task IAuthService.Register(string name, string email, string password, Roles role)
+    async Task IAuthService.RegisterAsync(string name, string email, string password, Roles role)
     {
-        if (await _userRepository.GetUserByName(name) is not null)
+        if (await _userRepository.GetUserByNameAsync(name) is not null)
         {
             throw new ArgumentException("Username already taken");
         }
@@ -31,12 +31,12 @@ internal class AuthService(
             Role = role
         };
 
-        await _userRepository.InsertUser(user, password);
+        await _userRepository.InsertUserAsync(user, password);
     }
 
-    async Task<LoginResponse> IAuthService.Login(string email, string password)
+    async Task<LoginResponse> IAuthService.LoginAsync(string email, string password)
     {
-        var user = await _userRepository.GetUserByEmail(email);
+        var user = await _userRepository.GetUserByEmailAsync(email);
 
         if (user is null || VerifyPassword(user, password) is false)
         {
@@ -44,7 +44,7 @@ internal class AuthService(
         }
 
         var accessToken = _tokenService.CreateAccessToken(user);
-        var refreshToken = await _tokenService.CreateRefreshToken(user);
+        var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
 
         return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
     }

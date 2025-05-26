@@ -17,54 +17,12 @@ internal class BandService(
     private readonly IUserRepository _userRepository = userRepository;
     private readonly ILogger<BandService> _logger = logger;
 
-    async Task<Band?> IBandService.CreateBand(CreateBandRequest request)
-    {
-        try
-        {
-            _logger.LogInformation("Creating new band with name: {BandName}", request.Name);
-
-            var user = await _userRepository.GetUserById(request.UserId);
-            if (user == null)
-            {
-                _logger.LogWarning("User with ID {UserId} not found when creating band", request.UserId);
-                return null;
-            }
-
-            var city = request.Location.Split(',')[1].Trim();
-            var country = request.Location.Split(',')[0].Trim();
-
-            user.Role = Roles.BandAdmin;
-            await _userRepository.UpdateUser(user);
-            _logger.LogInformation("User {UserName} updated to BandAdmin role", user.UserName);
-
-            var band = new Band
-            {
-                Name = request.Name,
-                Genre = request.Genre,
-                Description = request.Description,
-                Country = country,
-                City = city,
-                CoverImage = request.Picture?.Content,
-                Members = [user],
-            };
-
-            await _bandRepository.InsertBand(band);
-            _logger.LogInformation("Band {BandName} created successfully with ID {BandId}", band.Name, band.Id);
-            return band;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating band with name {BandName}", request.Name);
-            throw;
-        }
-    }
-
-    async Task<Band?> IBandService.GetBandById(Guid id)
+    async Task<Band?> IBandService.GetBandByIdAsync(Guid id)
     {
         try
         {
             _logger.LogInformation("Getting band with ID {BandId}", id);
-            var band = await _bandRepository.GetBandById(id);
+            var band = await _bandRepository.GetBandByIdAsync(id);
             if (band == null)
             {
                 _logger.LogWarning("Band with ID {BandId} not found", id);
@@ -79,12 +37,12 @@ internal class BandService(
         }
     }
 
-    async Task<Band?> IBandService.GetBandByName(string name)
+    async Task<Band?> IBandService.GetBandByNameAsync(string name)
     {
         try
         {
             _logger.LogInformation("Getting band with name {BandName}", name);
-            var band = await _bandRepository.GetBandByName(name);
+            var band = await _bandRepository.GetBandByNameAsync(name);
             if (band == null)
             {
                 _logger.LogWarning("Band with name {BandName} not found", name);
@@ -98,12 +56,12 @@ internal class BandService(
         }
     }
 
-    async Task<BandResponse?> IBandService.GetBandByUserId(string id)
+    async Task<BandResponse?> IBandService.GetBandByUserIdAsync(string id)
     {
         try
         {
             _logger.LogInformation("Getting band for user with ID {UserId}", id);
-            var band = await _bandRepository.GetBandByUserId(id);
+            var band = await _bandRepository.GetBandByUserIdAsync(id);
             if (band == null)
             {
                 _logger.LogWarning("No band found for user with ID {UserId}", id);
@@ -135,12 +93,12 @@ internal class BandService(
         }
     }
 
-    async Task<byte[]?> IBandService.GetBandImage(Guid bandId)
+    async Task<byte[]?> IBandService.GetBandImageAsync(Guid bandId)
     {
         try
         {
             _logger.LogInformation("Getting image for band with ID {BandId}", bandId);
-            var band = await _bandRepository.GetBandById(bandId);
+            var band = await _bandRepository.GetBandByIdAsync(bandId);
             if (band == null)
             {
                 _logger.LogWarning("Band with ID {BandId} not found when retrieving image", bandId);
@@ -155,13 +113,55 @@ internal class BandService(
         }
     }
 
-    async Task IBandService.UpdateBand(UpdateBandRequest request)
+    async Task<Band?> IBandService.CreateBandAsync(CreateBandRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("Creating new band with name: {BandName}", request.Name);
+
+            var user = await _userRepository.GetUserByIdAsync(request.UserId);
+            if (user == null)
+            {
+                _logger.LogWarning("User with ID {UserId} not found when creating band", request.UserId);
+                return null;
+            }
+
+            var city = request.Location.Split(',')[1].Trim();
+            var country = request.Location.Split(',')[0].Trim();
+
+            user.Role = Roles.BandAdmin;
+            await _userRepository.UpdateUserAsync(user);
+            _logger.LogInformation("User {UserName} updated to BandAdmin role", user.UserName);
+
+            var band = new Band
+            {
+                Name = request.Name,
+                Genre = request.Genre,
+                Description = request.Description,
+                Country = country,
+                City = city,
+                CoverImage = request.Picture?.Content,
+                Members = [user],
+            };
+
+            await _bandRepository.InsertBandAsync(band);
+            _logger.LogInformation("Band {BandName} created successfully with ID {BandId}", band.Name, band.Id);
+            return band;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating band with name {BandName}", request.Name);
+            throw;
+        }
+    }
+
+    async Task IBandService.UpdateBandAsync(UpdateBandRequest request)
     {
         try
         {
             _logger.LogInformation("Updating band with ID {Id}", request.Id);
 
-            var band = await _bandRepository.GetBandById(request.Id);
+            var band = await _bandRepository.GetBandByIdAsync(request.Id);
             if (band == null)
             {
                 _logger.LogWarning("Band with ID {Id} not found for update", request.Id);
@@ -198,7 +198,7 @@ internal class BandService(
                 band.CoverImage = request.Picture.Content;
             }
 
-            await _bandRepository.UpdateBand(band);
+            await _bandRepository.UpdateBandAsync(band);
             _logger.LogInformation("Band with ID {Id} updated successfully", request.Id);
         }
         catch (Exception ex)
@@ -208,19 +208,19 @@ internal class BandService(
         }
     }
 
-    async Task IBandService.AddMemberToBand(Guid userId, Guid bandId)
+    async Task IBandService.AddMemberToBandAsync(Guid userId, Guid bandId)
     {
         try
         {
             _logger.LogInformation("Adding user with ID {UserId} to band with ID {BandId}", userId, bandId);
-            var band = await _bandRepository.GetBandById(bandId);
+            var band = await _bandRepository.GetBandByIdAsync(bandId);
             if (band == null)
             {
                 _logger.LogWarning("Band with ID {BandId} not found when adding member", bandId);
                 return;
             }
 
-            var user = await _userRepository.GetUserById(userId.ToString());
+            var user = await _userRepository.GetUserByIdAsync(userId.ToString());
             if (user == null)
             {
                 _logger.LogWarning("User with ID {UserId} not found when adding to band", userId);
@@ -228,7 +228,7 @@ internal class BandService(
             }
 
             band.Members.Add(user);
-            await _bandRepository.UpdateBand(band);
+            await _bandRepository.UpdateBandAsync(band);
             _logger.LogInformation("User with ID {UserId} added to band with ID {BandId} successfully", userId, bandId);
         }
         catch (Exception ex)
@@ -238,12 +238,12 @@ internal class BandService(
         }
     }
 
-    async Task IBandService.DeleteBand(Guid id)
+    async Task IBandService.DeleteBandAsync(Guid id)
     {
         try
         {
             _logger.LogInformation("Deleting band with ID {Id}", id);
-            await _bandRepository.DeleteBand(id);
+            await _bandRepository.DeleteBandAsync(id);
             _logger.LogInformation("Band with ID {Id} deleted successfully", id);
         }
         catch (KeyNotFoundException)

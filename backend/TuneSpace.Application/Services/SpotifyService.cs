@@ -37,7 +37,7 @@ internal class SpotifyService(
         return redirectUrl;
     }
 
-    async Task<SpotifyTokenResponse> ISpotifyService.ExchangeCodeForToken(string code)
+    async Task<SpotifyTokenResponse> ISpotifyService.ExchangeCodeForTokenAsync(string code)
     {
         var parameters = new FormUrlEncodedContent(
         [
@@ -71,7 +71,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<SpotifyProfileDTO> ISpotifyService.GetUserSpotifyProfile(string token)
+    async Task<SpotifyProfileDTO> ISpotifyService.GetUserSpotifyProfileAsync(string token)
     {
         try
         {
@@ -102,7 +102,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<TopArtistDTO>> ISpotifyService.GetUserTopArtists(string token)
+    async Task<List<TopArtistDTO>> ISpotifyService.GetUserTopArtistsAsync(string token)
     {
         try
         {
@@ -132,7 +132,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetUserFollowedArtists(string token)
+    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetUserFollowedArtistsAsync(string token)
     {
         try
         {
@@ -183,7 +183,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<RecentlyPlayedTrackDTO>> ISpotifyService.GetUserRecentlyPlayedTracks(string token)
+    async Task<List<RecentlyPlayedTrackDTO>> ISpotifyService.GetUserRecentlyPlayedTracksAsync(string token)
     {
         try
         {
@@ -217,7 +217,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<TopSongDTO>> ISpotifyService.GetUserTopSongs(string token)
+    async Task<List<TopSongDTO>> ISpotifyService.GetUserTopSongsAsync(string token)
     {
         try
         {
@@ -247,7 +247,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<SearchSongDTO>> ISpotifyService.GetSongsBySearch(string token, string search)
+    async Task<List<SearchSongDTO>> ISpotifyService.GetSongsBySearchAsync(string token, string search)
     {
         try
         {
@@ -272,7 +272,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<SpotifyArtistDTO> ISpotifyService.GetArtist(string token, string artistId)
+    async Task<SpotifyArtistDTO> ISpotifyService.GetArtistAsync(string token, string artistId)
     {
         try
         {
@@ -294,7 +294,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetSeveralArtists(string token, string artistIds)
+    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetSeveralArtistsAsync(string token, string artistIds)
     {
         try
         {
@@ -316,7 +316,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task ISpotifyService.CreatePlaylist(string token, CreatePlaylistRequest request)
+    async Task ISpotifyService.CreatePlaylistAsync(string token, CreatePlaylistRequest request)
     {
         var requestContent = Helpers.ToLowercaseJsonStringContent(request);
 
@@ -331,7 +331,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<SpotifyTokenResponse> ISpotifyService.RefreshAccessToken(string refreshToken)
+    async Task<SpotifyTokenResponse> ISpotifyService.RefreshAccessTokenAsync(string refreshToken)
     {
         var clientId = _configuration["SpotifyApi:ClientId"] ??
             throw new ArgumentNullException(nameof(_configuration), "Spotify client ID is not configured");

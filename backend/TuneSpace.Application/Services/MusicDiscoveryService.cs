@@ -22,9 +22,9 @@ internal class MusicDiscoveryService(
 
     async Task<List<BandModel>> IMusicDiscoveryService.GetBandRecommendationsAsync(string spotifyAccessToken, List<string> genres, string location)
     {
-        var recentlyPlayedTask = _spotifyService.GetUserRecentlyPlayedTracks(spotifyAccessToken);
-        var followedArtistsTask = _spotifyService.GetUserFollowedArtists(spotifyAccessToken);
-        var topArtistsTask = _spotifyService.GetUserTopArtists(spotifyAccessToken);
+        var recentlyPlayedTask = _spotifyService.GetUserRecentlyPlayedTracksAsync(spotifyAccessToken);
+        var followedArtistsTask = _spotifyService.GetUserFollowedArtistsAsync(spotifyAccessToken);
+        var topArtistsTask = _spotifyService.GetUserTopArtistsAsync(spotifyAccessToken);
 
         await Task.WhenAll(recentlyPlayedTask, followedArtistsTask, topArtistsTask);
 
@@ -55,7 +55,7 @@ internal class MusicDiscoveryService(
             .Distinct()
             .ToList();
 
-        var recentArtistsWithGenres = await _artistDiscoveryService.GetArtistDetailsInBatches(spotifyAccessToken, recentlyPlayedArtistIds);
+        var recentArtistsWithGenres = await _artistDiscoveryService.GetArtistDetailsInBatchesAsync(spotifyAccessToken, recentlyPlayedArtistIds);
 
         var recentlyPlayedGenres = recentArtistsWithGenres?
             .SelectMany(artist => artist.Genres ?? [])
@@ -71,14 +71,14 @@ internal class MusicDiscoveryService(
 
         genres = combinedGenres.Count > 0 ? combinedGenres : genres;
 
-        var undergroundArtistsTask = _artistDiscoveryService.FindArtistsByQuery(
+        var undergroundArtistsTask = _artistDiscoveryService.FindArtistsByQueryAsync(
             spotifyAccessToken, genres, "genre:{genre} tag:hipster", MusicDiscoveryConstants.UndergroundArtistsToFetch);
 
-        var newReleasesArtistsTask = _artistDiscoveryService.FindArtistsByQuery(
+        var newReleasesArtistsTask = _artistDiscoveryService.FindArtistsByQueryAsync(
             spotifyAccessToken, genres, "genre:{genre} tag:new", MusicDiscoveryConstants.UndergroundArtistsToFetch / 2, true);
 
         var localBandsTask = _musicBrainzClient.GetBandsByLocationAsync(location, 20, genres);
-        var registeredBandsTask = _artistDiscoveryService.GetRegisteredBandsAsModels(genres, location);
+        var registeredBandsTask = _artistDiscoveryService.GetRegisteredBandsAsModelsAsync(genres, location);
 
         await Task.WhenAll(localBandsTask, registeredBandsTask, undergroundArtistsTask, newReleasesArtistsTask);
 
@@ -89,8 +89,8 @@ internal class MusicDiscoveryService(
 
         undergroundArtists.AddRange(newReleaseArtists);
 
-        localBands = await _dataEnrichmentService.EnrichMultipleBands(localBands);
-        undergroundArtists = await _dataEnrichmentService.EnrichMultipleBands(undergroundArtists);
+        localBands = await _dataEnrichmentService.EnrichMultipleBandsAsync(localBands);
+        undergroundArtists = await _dataEnrichmentService.EnrichMultipleBandsAsync(undergroundArtists);
 
         var similarBands = new List<BandModel>();
         var processedBandNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -99,7 +99,7 @@ internal class MusicDiscoveryService(
         undergroundArtists.ForEach(b => processedBandNames.Add(b.Name));
 
         var selectedArtists = topArtists.Take(5).Select(a => a.Name).ToList();
-        var similarBandsDict = await _dataEnrichmentService.GetSimilarBandsForMultipleArtists(selectedArtists, 7, processedBandNames);
+        var similarBandsDict = await _dataEnrichmentService.GetSimilarBandsForMultipleArtistsAsync(selectedArtists, 7, processedBandNames);
 
         foreach (var kvp in similarBandsDict)
         {
@@ -112,7 +112,7 @@ internal class MusicDiscoveryService(
         }
 
         var selectedRegisteredBands = registeredBands.Take(5).Select(b => b.Name).ToList();
-        var similarToRegisteredDict = await _dataEnrichmentService.GetSimilarBandsForMultipleArtists(selectedRegisteredBands, 3, processedBandNames, isRegisteredBandSimilar: true);
+        var similarToRegisteredDict = await _dataEnrichmentService.GetSimilarBandsForMultipleArtistsAsync(selectedRegisteredBands, 3, processedBandNames, isRegisteredBandSimilar: true);
 
         foreach (var kvp in similarToRegisteredDict)
         {
@@ -142,9 +142,7 @@ internal class MusicDiscoveryService(
 
         var finalRecommendations = _scoringService.ApplyDiversityAndExploration(recommendedBands, PreviouslyRecommendedBands);
 
-        finalRecommendations = finalRecommendations
-            .Where(band => !knownArtistNames.Contains(band.Name))
-            .ToList();
+        finalRecommendations = [.. finalRecommendations.Where(band => !knownArtistNames.Contains(band.Name))];
 
         foreach (var band in finalRecommendations)
         {

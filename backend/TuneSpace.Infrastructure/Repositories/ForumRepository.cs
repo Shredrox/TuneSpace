@@ -9,34 +9,6 @@ internal class ForumRepository(TuneSpaceDbContext context) : IForumRepository
 {
     private readonly TuneSpaceDbContext _context = context;
 
-    async Task<ForumCategory> IForumRepository.CreateCategoryAsync(ForumCategory category)
-    {
-        _context.ForumCategories.Add(category);
-        await _context.SaveChangesAsync();
-        return category;
-    }
-
-    async Task<ForumThread> IForumRepository.CreateThreadAsync(ForumThread thread)
-    {
-        _context.ForumThreads.Add(thread);
-        await _context.SaveChangesAsync();
-        return thread;
-    }
-
-    async Task<ForumPost> IForumRepository.CreatePostAsync(ForumPost post)
-    {
-        _context.ForumPosts.Add(post);
-        await _context.SaveChangesAsync();
-        return post;
-    }
-
-    async Task<ForumPostLike> IForumRepository.CreatePostLikeAsync(ForumPostLike like)
-    {
-        _context.ForumPostLikes.Add(like);
-        await _context.SaveChangesAsync();
-        return like;
-    }
-
     async Task<List<ForumCategory>> IForumRepository.GetAllCategoriesAsync()
     {
         return await _context.ForumCategories
@@ -115,6 +87,40 @@ internal class ForumRepository(TuneSpaceDbContext context) : IForumRepository
             .CountAsync(l => l.PostId == postId);
     }
 
+    async Task<bool> IForumRepository.HasUserLikedPostAsync(Guid postId, Guid userId)
+    {
+        return await _context.ForumPostLikes
+            .AnyAsync(l => l.PostId == postId && l.UserId == userId);
+    }
+
+    async Task<ForumCategory> IForumRepository.InsertCategoryAsync(ForumCategory category)
+    {
+        _context.ForumCategories.Add(category);
+        await _context.SaveChangesAsync();
+        return category;
+    }
+
+    async Task<ForumThread> IForumRepository.InsertThreadAsync(ForumThread thread)
+    {
+        _context.ForumThreads.Add(thread);
+        await _context.SaveChangesAsync();
+        return thread;
+    }
+
+    async Task<ForumPost> IForumRepository.InsertPostAsync(ForumPost post)
+    {
+        _context.ForumPosts.Add(post);
+        await _context.SaveChangesAsync();
+        return post;
+    }
+
+    async Task<ForumPostLike> IForumRepository.InsertPostLikeAsync(ForumPostLike like)
+    {
+        _context.ForumPostLikes.Add(like);
+        await _context.SaveChangesAsync();
+        return like;
+    }
+
     async Task IForumRepository.UpdateThreadLastActivityAsync(Guid threadId, DateTime activityDate)
     {
         var thread = await _context.ForumThreads.FindAsync(threadId);
@@ -133,12 +139,6 @@ internal class ForumRepository(TuneSpaceDbContext context) : IForumRepository
             thread.Views++;
             await _context.SaveChangesAsync();
         }
-    }
-
-    async Task<bool> IForumRepository.HasUserLikedPostAsync(Guid postId, Guid userId)
-    {
-        return await _context.ForumPostLikes
-            .AnyAsync(l => l.PostId == postId && l.UserId == userId);
     }
 
     async Task IForumRepository.RemovePostLikeAsync(ForumPostLike like)
