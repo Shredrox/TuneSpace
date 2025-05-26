@@ -29,6 +29,7 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import Link from "next/link";
+import { Disc, User as LucideUser } from "lucide-react";
 
 interface ProfileProps {
   username: string;
@@ -226,11 +227,12 @@ const Profile = ({
                       key={index}
                       className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
                     >
-                      <img
-                        className="rounded-full w-16 h-16 object-cover shadow-md"
-                        src={artist.image}
-                        alt={artist.name}
-                      />
+                      <Avatar className="h-16 w-16 border-2 border-background shadow-md">
+                        <AvatarImage src={artist.image} alt={artist.name} />
+                        <AvatarFallback>
+                          <LucideUser className="w-6 h-6 text-muted-foreground" />
+                        </AvatarFallback>
+                      </Avatar>
                       <div>
                         <p className="font-medium text-lg text-card-foreground">
                           {artist.name}
@@ -254,11 +256,17 @@ const Profile = ({
                       key={index}
                       className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
                     >
-                      <img
-                        className="rounded-md w-16 h-16 object-cover shadow-md"
-                        src={song.image}
-                        alt={song.name}
-                      />
+                      {song.image ? (
+                        <img
+                          className="rounded-md w-16 h-16 object-cover shadow-md"
+                          src={song.image}
+                          alt={song.name}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center rounded-md w-16 h-16 bg-muted shadow-md">
+                          <Disc className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                      )}
                       <div className="flex flex-col">
                         <p className="font-medium text-lg text-card-foreground">
                           {song.name}
@@ -288,11 +296,17 @@ const Profile = ({
                         key={`${track.trackName}-${index}`}
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-all"
                       >
-                        <img
-                          src={track.albumImageUrl}
-                          alt={track.albumName}
-                          className="w-16 h-16 object-cover rounded shadow-md"
-                        />
+                        {track.albumImageUrl ? (
+                          <img
+                            src={track.albumImageUrl}
+                            alt={track.albumName}
+                            className="w-16 h-16 object-cover rounded shadow-md"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center rounded w-16 h-16 bg-muted shadow-md">
+                            <Disc className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                        )}
                         <div className="flex flex-col overflow-hidden">
                           <p className="font-medium text-card-foreground truncate">
                             {track.trackName}
