@@ -309,6 +309,19 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Log Out"
+                  className="transition-all duration-300 relative overflow-visible rounded-md group border border-transparent hover:border-red-500/20 hover:animate-[border-pulse-subtle_1.5s_ease_infinite] text-red-400 hover:text-red-300 focus:text-red-300"
+                  onClick={handleLogout}
+                >
+                  <div className="absolute inset-y-0 w-1 left-0 rounded-full transition-all duration-300 bg-transparent group-hover:bg-red-500/30" />
+                  <div className="relative z-10 flex items-center gap-2 transition-colors duration-300">
+                    <LogOut className="h-4 w-4" />
+                    <span>Log Out</span>
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton
@@ -342,13 +355,6 @@ export function AppSidebar() {
                       Account Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-indigo-300/10" />
-                    <DropdownMenuItem
-                      className="text-red-400 transition-colors duration-200 hover:bg-red-500/20 focus:bg-red-500/20 hover:text-red-300 focus:text-red-300"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      <span>Log Out</span>
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </SidebarMenuItem>
