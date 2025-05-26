@@ -90,7 +90,7 @@ const EditBandDialog = ({ band, handleBandUpdate }: EditBandDialogProps) => {
             <Input
               name="name"
               type="text"
-              value={updatedBand?.name}
+              value={updatedBand?.name || ""}
               onChange={handleInputChange}
               className="border p-2 w-full max-w-md rounded"
             />
@@ -100,7 +100,7 @@ const EditBandDialog = ({ band, handleBandUpdate }: EditBandDialogProps) => {
             <Input
               name="description"
               type="text"
-              value={updatedBand?.description}
+              value={updatedBand?.description || ""}
               onChange={handleInputChange}
               className="border p-2 w-full max-w-md rounded"
             />
@@ -110,7 +110,7 @@ const EditBandDialog = ({ band, handleBandUpdate }: EditBandDialogProps) => {
             <Input
               name="genre"
               type="text"
-              value={updatedBand?.genre}
+              value={updatedBand?.genre || ""}
               onChange={handleInputChange}
               className="border p-2 w-full max-w-md rounded"
             />
@@ -120,7 +120,7 @@ const EditBandDialog = ({ band, handleBandUpdate }: EditBandDialogProps) => {
             <Input
               name="spotifyId"
               type="text"
-              value={updatedBand?.spotifyId}
+              value={updatedBand?.spotifyId || ""}
               onChange={handleInputChange}
               className="border p-2 w-full max-w-md rounded"
             />
@@ -130,7 +130,7 @@ const EditBandDialog = ({ band, handleBandUpdate }: EditBandDialogProps) => {
             <Input
               name="youTubeEmbedId"
               type="text"
-              value={updatedBand?.youTubeEmbedId}
+              value={updatedBand?.youTubeEmbedId || ""}
               onChange={handleInputChange}
               className="border p-2 w-full max-w-md rounded"
             />
