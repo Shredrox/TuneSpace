@@ -37,7 +37,7 @@ internal class UserRepository(
     async Task<List<User>> IUserRepository.SearchByName(string name)
     {
         return await _userManager.Users
-            .Where(u => u.UserName != null && u.UserName.StartsWith(name))
+            .Where(u => u.UserName != null && EF.Functions.ILike(u.UserName, $"{name}%"))
             .Take(5)
             .ToListAsync();
     }
