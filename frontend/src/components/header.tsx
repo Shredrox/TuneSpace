@@ -42,7 +42,6 @@ const Header = () => {
     >
       <div className="scroll-m-20 text-2xl font-semibold tracking-tight flex items-center gap-6 w-full">
         <div className="flex flex-1 justify-start items-center gap-6">
-          <SidebarTrigger />
           <div className="flex justify-center items-center gap-2">
             <Avatar className="h-9 w-9 bg-gradient-to-br from-blue-500 to-purple-600">
               <AvatarImage src="/logo.png" alt="TuneSpace" />
