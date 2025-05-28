@@ -16,13 +16,12 @@ import { useRouter } from "next/navigation";
 import { Button } from "../shadcn/button";
 import useAuth from "@/hooks/useAuth";
 import httpClient from "@/services/http-client";
+import Link from "next/link";
 
 const Register = ({
   setFormStep,
-  setIsLogin,
 }: {
   setFormStep: Dispatch<SetStateAction<number>>;
-  setIsLogin: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [error, setError] = useState("");
   const router = useRouter();
@@ -146,13 +145,9 @@ const Register = ({
         <p className="text-orange-600">{error}</p>
         <div className="text-center text-sm">
           Already have an account?{" "}
-          <a
-            onClick={() => setIsLogin(true)}
-            href="#"
-            className="underline underline-offset-4"
-          >
+          <Link href="/login" className="underline underline-offset-4">
             Log in
-          </a>
+          </Link>
         </div>
       </div>
     </form>

@@ -11,14 +11,9 @@ import { Button } from "../shadcn/button";
 import { FaSpotify } from "react-icons/fa";
 import useAuth from "@/hooks/useAuth";
 import httpClient from "@/services/http-client";
+import Link from "next/link";
 
-const Login = ({
-  shouldRedirect,
-  setIsLogin,
-}: {
-  shouldRedirect: boolean;
-  setIsLogin: Dispatch<SetStateAction<boolean>>;
-}) => {
+const Login = () => {
   const { setAuth } = useAuth();
 
   const [error, setError] = useState("");
@@ -74,9 +69,7 @@ const Login = ({
         role: response?.data?.role,
       });
 
-      if (shouldRedirect) {
-        router.push("/");
-      }
+      router.push("/");
     } catch (error: any) {
       handleRequestError(error);
     }
@@ -156,13 +149,9 @@ const Login = ({
         </div>
         <div className="text-center text-sm">
           Don&apos;t have an account?{" "}
-          <a
-            onClick={() => setIsLogin(false)}
-            href="#"
-            className="underline underline-offset-4"
-          >
+          <Link href="/signup" className="underline underline-offset-4">
             Sign up
-          </a>
+          </Link>
         </div>
       </div>
     </form>

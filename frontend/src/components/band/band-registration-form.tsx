@@ -62,7 +62,7 @@ const BandRegistrationForm = ({ locationData }: { locationData: any }) => {
 
     try {
       await registerBand(combinedRequest);
-      router.push("/?auth=true&type=login");
+      router.push("/login");
       toast.success("Band registered successfully. Please log in.");
     } catch (error: any) {
       handleRequestError(error);

@@ -8,7 +8,6 @@ import useAuth from "@/hooks/useAuth";
 import useRefreshToken from "@/hooks/useRefreshToken";
 import { useEffect, useState } from "react";
 import LandingLayout from "@/layouts/landing-layout";
-import { useSearchParams } from "next/navigation";
 
 export default function MainClientLayout({
   children,
@@ -16,27 +15,33 @@ export default function MainClientLayout({
   children: React.ReactNode;
 }) {
   const { auth } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
   const { refresh, refreshSpotifyToken } = useRefreshToken();
-  const searchParams = useSearchParams();
 
-  const showAuthForm = searchParams.get("auth") === "true";
-  const authType = searchParams.get("type");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const verifyRefreshToken = async () => {
       try {
         await refresh();
-      } catch (error) {
-        console.log(error);
-      } finally {
+        if (!isMounted) {
+          return;
+        }
+
         if (
           !auth?.spotifyTokenExpiry ||
           new Date(auth.spotifyTokenExpiry) <= new Date()
         ) {
-          verifySpotifyToken();
-        } else {
+          await verifySpotifyToken();
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        if (isMounted) {
           setIsLoading(false);
+          setIsInitialized(true);
         }
       }
     };
@@ -47,27 +52,46 @@ export default function MainClientLayout({
       } catch (error) {
         console.log(error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+          setIsInitialized(true);
+        }
       }
     };
 
-    if (!auth?.accessToken) {
-      verifyRefreshToken();
-    } else if (
-      !auth?.spotifyTokenExpiry ||
-      new Date(auth.spotifyTokenExpiry) <= new Date()
-    ) {
-      verifySpotifyToken();
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
+    const initializeAuth = async () => {
+      if (auth?.accessToken) {
+        if (
+          !auth?.spotifyTokenExpiry ||
+          new Date(auth.spotifyTokenExpiry) <= new Date()
+        ) {
+          await verifySpotifyToken();
+        } else {
+          if (isMounted) {
+            setIsLoading(false);
+            setIsInitialized(true);
+          }
+        }
+      } else {
+        await verifyRefreshToken();
+      }
+    };
 
+    if (!isInitialized) {
+      initializeAuth();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [refresh, refreshSpotifyToken, isInitialized]);
   if (isLoading) {
     return <Loading />;
   }
 
-  if (auth.accessToken) {
+  const hasValidAuth = auth.accessToken && auth.accessToken.length > 0;
+
+  if (hasValidAuth) {
     return (
       <>
         <SidebarProvider defaultOpen={true}>
@@ -82,9 +106,7 @@ export default function MainClientLayout({
   } else {
     return (
       <>
-        <LandingLayout showAuthForm={showAuthForm} authType={authType}>
-          {children}
-        </LandingLayout>
+        <LandingLayout>{children}</LandingLayout>
       </>
     );
   }
