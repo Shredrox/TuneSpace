@@ -638,7 +638,8 @@
           "Microsoft.IdentityModel.Tokens": "[8.9.0, )",
           "Newtonsoft.Json": "[13.0.3, )",
           "System.Net.Http.Json": "[9.0.3, )",
-          "TuneSpace.Core": "[1.0.0, )"
+          "TuneSpace.Core": "[1.0.0, )",
+          "TuneSpace.Infrastructure": "[1.0.0, )"
         }
       },
       "tunespace.core": {

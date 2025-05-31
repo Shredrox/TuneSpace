@@ -32,10 +32,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDatabaseServices(builder.Configuration);
+builder.Services.AddOptions(builder.Configuration);
+builder.Services.AddDatabaseServices();
 builder.Services.AddRepositoryServices();
 builder.Services.AddCachingServices();
-builder.Services.AddIdentityServices(builder.Configuration);
+builder.Services.AddIdentityServices();
 builder.Services.AddHttpClientServices();
 
 builder.Services.AddApplicationServices();

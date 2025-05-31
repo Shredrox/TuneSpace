@@ -12,15 +12,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using TuneSpace.Infrastructure.Identity;
+using TuneSpace.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace TuneSpace.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDatabaseServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDatabaseServices(this IServiceCollection services)
     {
-        services.AddDbContext<TuneSpaceDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("TuneSpaceDb")));
+        services.AddDbContext<TuneSpaceDbContext>((provider, options) =>
+            options.UseNpgsql(provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value.DefaultConnection));
 
         return services;
     }
@@ -31,9 +33,9 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddIdentityServices(this IServiceCollection services)
     {
-        var jwtSettings = configuration.GetSection("Jwt");
+        var jwtOptions = services.BuildServiceProvider().GetRequiredService<IOptionsSnapshot<JwtOptions>>().Value;
 
         services.AddAuthentication(options =>
         {
@@ -46,15 +48,14 @@ public static class ServiceCollectionExtensions
             options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSettings["Token"] ?? throw new InvalidOperationException("JWT Token secret is not configured"))
-                ),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                 ValidateIssuer = true,
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
+                ValidIssuer = jwtOptions.Issuer,
+                ValidAudience = jwtOptions.Audience,
+                ClockSkew = TimeSpan.Zero
             };
 
             options.Events = new JwtBearerEvents
@@ -108,6 +109,16 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<ILastFmClient, LastFmClient>();
         services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
         services.AddHttpClient<ISpotifyClient, SpotifyClient>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        services.Configure<DatabaseOptions>(configuration.GetSection("ConnectionStrings"));
+        services.Configure<SpotifyOptions>(configuration.GetSection("Spotify"));
+        services.Configure<LastFmOptions>(configuration.GetSection("LastFm"));
 
         return services;
     }

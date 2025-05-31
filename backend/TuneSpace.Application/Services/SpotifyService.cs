@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using TuneSpace.Application.Common;
@@ -8,17 +8,18 @@ using TuneSpace.Core.DTOs.Responses.Spotify;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IServices;
+using TuneSpace.Infrastructure.Options;
 
 namespace TuneSpace.Application.Services;
 
 internal class SpotifyService(
     ISpotifyClient spotifyClient,
-    IConfiguration configuration,
-    ILogger<SpotifyService> logger) : ISpotifyService
+    ILogger<SpotifyService> logger,
+    IOptions<SpotifyOptions> spotifyOptions) : ISpotifyService
 {
     private readonly ISpotifyClient _spotifyClient = spotifyClient;
-    private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<SpotifyService> _logger = logger;
+    private readonly SpotifyOptions _spotifyOptions = spotifyOptions.Value;
 
     private const string SpotifyRedirectUri = "http://localhost:5053/api/Spotify/callback";
 
@@ -29,7 +30,7 @@ internal class SpotifyService(
 
         var redirectUrl = $"https://accounts.spotify.com/authorize?" +
                           $"response_type=code" +
-                          $"&client_id={_configuration["SpotifyApi:ClientId"]}" +
+                          $"&client_id={_spotifyOptions.ClientId}" +
                           $"&scope={scope}" +
                           $"&redirect_uri={SpotifyRedirectUri}" +
                           $"&state={state}";
@@ -44,8 +45,8 @@ internal class SpotifyService(
             new KeyValuePair<string, string?>("grant_type", "authorization_code"),
             new KeyValuePair<string, string?>("code", code),
             new KeyValuePair<string, string?>("redirect_uri", SpotifyRedirectUri),
-            new KeyValuePair<string, string?>("client_id", _configuration["SpotifyApi:ClientId"]),
-            new KeyValuePair<string, string?>("client_secret", _configuration["SpotifyApi:ClientSecret"])
+            new KeyValuePair<string, string?>("client_id", _spotifyOptions.ClientId),
+            new KeyValuePair<string, string?>("client_secret", _spotifyOptions.ClientSecret)
         ]);
 
         try
@@ -333,17 +334,12 @@ internal class SpotifyService(
 
     async Task<SpotifyTokenResponse> ISpotifyService.RefreshAccessTokenAsync(string refreshToken)
     {
-        var clientId = _configuration["SpotifyApi:ClientId"] ??
-            throw new ArgumentNullException(nameof(_configuration), "Spotify client ID is not configured");
-        var clientSecret = _configuration["SpotifyApi:ClientSecret"] ??
-            throw new ArgumentNullException(nameof(_configuration), "Spotify client secret is not configured");
-
         var parameters = new Dictionary<string, string>
         {
             { "grant_type", "refresh_token" },
             { "refresh_token", refreshToken },
-            { "client_id", clientId },
-            { "client_secret", clientSecret }
+            { "client_id", _spotifyOptions.ClientId },
+            { "client_secret", _spotifyOptions.ClientSecret }
         };
 
         var content = new FormUrlEncodedContent(parameters);
