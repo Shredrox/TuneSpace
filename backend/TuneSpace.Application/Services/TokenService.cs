@@ -1,55 +1,144 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Core.Interfaces.IServices;
+using TuneSpace.Infrastructure.Options;
 
 namespace TuneSpace.Application.Services;
 
 internal class TokenService(
-    IConfiguration configuration,
-    IUserRepository userRepository) : ITokenService
+    IRefreshTokenRepository refreshTokenRepository,
+    IUserRepository userRepository,
+    IOptions<JwtOptions> jwtOptions) : ITokenService
 {
-    string ITokenService.CreateAccessToken(User user)
+    private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+
+    string ITokenService.GenerateAccessToken(User user)
     {
-        var claims = new List<Claim>
-        {
+        var secretKey = _jwtOptions.Secret ?? throw new InvalidOperationException("JWT Token secret is not configured");
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claimsIdentity = new ClaimsIdentity([
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Role, user.Role.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        ]);
+
+        var tokenHandler = new JsonWebTokenHandler();
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = claimsIdentity,
+            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes),
+            Issuer = _jwtOptions.Issuer,
+            Audience = _jwtOptions.Audience,
+            SigningCredentials = credentials
         };
 
-        var tokenConfig = configuration.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-            tokenConfig["Token"] ?? throw new InvalidOperationException("JWT Token secret is not configured")));
+        var token = tokenHandler.CreateToken(tokenDescriptor);
 
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: tokenConfig["Issuer"],
-            audience: tokenConfig["Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(tokenConfig["ExpiryMinutes"] ?? "60")),
-            signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return token;
     }
 
-    async Task<string> ITokenService.CreateRefreshTokenAsync(User user)
+    string ITokenService.GenerateRefreshToken()
     {
-        var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    }
 
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenValidity = DateTime.Now.AddHours(2).ToUniversalTime();
+    async Task<string> ITokenService.SaveRefreshTokenAsync(User user, string refreshToken)
+    {
+        var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken)));
 
-        await userRepository.UpdateUserAsync(user);
+        var newToken = new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = tokenHash,
+            Expiry = DateTime.UtcNow.AddDays(7),
+        };
+
+        await _refreshTokenRepository.InsertAsync(newToken);
 
         return refreshToken;
+    }
+
+    async Task<ClaimsPrincipal?> ITokenService.ValidateAccessTokenAsync(string token)
+    {
+        try
+        {
+            var secretKey = _jwtOptions.Secret ?? throw new InvalidOperationException("JWT Token secret is not configured");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
+            var tokenHandler = new JsonWebTokenHandler();
+
+            var validationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = securityKey,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _jwtOptions.Issuer,
+                ValidAudience = _jwtOptions.Audience,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+            if (result.IsValid)
+            {
+                return new ClaimsPrincipal(result.ClaimsIdentity);
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    async Task<User?> ITokenService.ValidateRefreshTokenAsync(string token)
+    {
+        var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(tokenHash);
+
+        if (existingToken is null || existingToken.Expiry < DateTime.UtcNow || existingToken.RevokedAt != null)
+        {
+            return null;
+        }
+
+        existingToken.RevokedAt = DateTime.UtcNow;
+        await _refreshTokenRepository.UpdateAsync(existingToken);
+
+        var user = await _userRepository.GetUserByIdAsync(existingToken.UserId.ToString());
+        if (user is null)
+        {
+            return null;
+        }
+
+        return user;
+    }
+
+    async Task ITokenService.RevokeRefreshTokenAsync(string token)
+    {
+        var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(tokenHash);
+
+        if (existingToken is not null && !existingToken.RevokedAt.HasValue)
+        {
+            existingToken.RevokedAt = DateTime.UtcNow;
+            await _refreshTokenRepository.UpdateAsync(existingToken);
+        }
     }
 }

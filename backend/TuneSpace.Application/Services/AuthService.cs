@@ -43,8 +43,10 @@ internal class AuthService(
             throw new UnauthorizedException("Incorrect email or password");
         }
 
-        var accessToken = _tokenService.CreateAccessToken(user);
-        var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
+        var accessToken = _tokenService.GenerateAccessToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        await _tokenService.SaveRefreshTokenAsync(user, refreshToken);
 
         return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
     }

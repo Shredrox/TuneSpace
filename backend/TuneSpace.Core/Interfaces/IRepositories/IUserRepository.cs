@@ -29,13 +29,6 @@ public interface IUserRepository
     Task<User?> GetUserByNameAsync(string name);
 
     /// <summary>
-    /// Retrieves a user by their refresh token.
-    /// </summary>
-    /// <param name="refreshToken">The refresh token to search for.</param>
-    /// <returns>The user if found; otherwise, null.</returns>
-    Task<User?> GetUserByRefreshTokenAsync(string refreshToken);
-
-    /// <summary>
     /// Searches for users whose names match the specified search term.
     /// </summary>
     /// <param name="name">The search term to match against usernames.</param>

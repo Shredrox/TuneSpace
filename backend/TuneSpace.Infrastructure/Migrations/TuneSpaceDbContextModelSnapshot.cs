@@ -494,6 +494,32 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Expiry")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -542,13 +568,6 @@ namespace TuneSpace.Infrastructure.Migrations
 
                     b.Property<byte[]>("ProfilePicture")
                         .HasColumnType("bytea");
-
-                    b.Property<string>("RefreshToken")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<DateTime?>("RefreshTokenValidity")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Role")
                         .HasColumnType("integer");
@@ -800,6 +819,17 @@ namespace TuneSpace.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Notification", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.RefreshToken", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "User")
                         .WithMany()

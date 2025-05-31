@@ -1,4 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using TuneSpace.Api.Infrastructure;
 using TuneSpace.Core.DTOs.Requests.Auth;
 using TuneSpace.Core.Enums;
 using TuneSpace.Core.Exceptions;
@@ -19,12 +22,66 @@ public class AuthController(
     private readonly ITokenService _tokenService = tokenService;
     private readonly ILogger<AuthController> _logger = logger;
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    [HttpGet("is-authenticated")]
+    public async Task<IActionResult> IsAuthenticated()
     {
         try
         {
-            await _authService.RegisterAsync(request.Name, request.Email, request.Password, Enum.Parse<Roles>(request.Role));
+            var accessToken = CookieHelper.GetAccessToken(Request);
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return Unauthorized("No access token provided");
+            }
+
+            var principal = await _tokenService.ValidateAccessTokenAsync(accessToken);
+            if (principal is null)
+            {
+                return Unauthorized("Invalid access token");
+            }
+
+            var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var username = principal.FindFirst(ClaimTypes.Name)?.Value;
+            var role = principal.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token claims");
+            }
+
+            return Ok(new
+            {
+                id = userId,
+                username,
+                role
+            });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unexpected error during authentication check");
+            return StatusCode(500, "An error occurred while checking authentication.");
+        }
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    {
+        if (request is null
+        || string.IsNullOrEmpty(request.Name)
+        || string.IsNullOrEmpty(request.Email)
+        || string.IsNullOrEmpty(request.Password)
+        || string.IsNullOrEmpty(request.Role))
+        {
+            return BadRequest("Invalid registration request.");
+        }
+
+        if (!Enum.TryParse<Roles>(request.Role, true, out var role))
+        {
+            return BadRequest("Invalid role specified");
+        }
+
+        try
+        {
+            await _authService.RegisterAsync(request.Name, request.Email, request.Password, role);
             var user = await _userService.GetUserByNameAsync(request.Name);
 
             if (user is null)
@@ -49,6 +106,11 @@ public class AuthController(
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        if (request is null || string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+        {
+            return BadRequest("Invalid login request.");
+        }
+
         try
         {
             var response = await _authService.LoginAsync(request.Email, request.Password);
@@ -58,27 +120,15 @@ public class AuthController(
             var role = response.Role;
             var id = response.Id;
 
-            Response.Cookies.Append("AccessToken", response.AccessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddMinutes(15),
-                Domain = "localhost",
-                IsEssential = true,
-                SameSite = SameSiteMode.None
-            });
+            CookieHelper.SetAuthTokens(Response, response.AccessToken, response.RefreshToken);
 
-            Response.Cookies.Append("RefreshToken", response.RefreshToken, new CookieOptions
+            return Ok(new
             {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddHours(1),
-                Domain = "localhost",
-                IsEssential = true,
-                SameSite = SameSiteMode.None
+                id,
+                username,
+                accessToken,
+                role
             });
-
-            return Ok(new { id, username, accessToken, role });
         }
         catch (UnauthorizedException e)
         {
@@ -97,25 +147,20 @@ public class AuthController(
     {
         try
         {
-            var refreshToken = Request.Cookies["RefreshToken"];
+            var refreshToken = CookieHelper.GetRefreshToken(Request);
             if (string.IsNullOrEmpty(refreshToken))
             {
                 _logger.LogWarning("Logout failed: No refresh token provided");
                 return BadRequest("Refresh token is required");
             }
 
-            var user = await _userService.GetUserFromRefreshTokenAsync(refreshToken);
-
+            var user = await _tokenService.ValidateRefreshTokenAsync(refreshToken);
             if (user is not null)
             {
-                user.RefreshToken = null;
-                user.RefreshTokenValidity = null;
-                await _userService.UpdateUserRefreshTokenAsync(user);
                 _logger.LogInformation("User logged out and refresh token cleared: {UserId}", user.Id);
             }
 
-            Response.Cookies.Delete("AccessToken");
-            Response.Cookies.Delete("RefreshToken");
+            CookieHelper.ClearAuthTokens(Response);
 
             return NoContent();
         }
@@ -131,55 +176,36 @@ public class AuthController(
     {
         try
         {
-            var refreshToken = Request.Cookies["RefreshToken"];
+            var refreshToken = CookieHelper.GetRefreshToken(Request);
             if (string.IsNullOrEmpty(refreshToken))
             {
                 _logger.LogWarning("Refresh token is missing");
                 return BadRequest("Refresh token is required");
             }
 
-            var user = await _userService.GetUserFromRefreshTokenAsync(refreshToken);
-
+            var user = await _tokenService.ValidateRefreshTokenAsync(refreshToken);
             if (user is null)
             {
-                return NotFound();
+                return Unauthorized();
             }
+
+            var newAccessToken = _tokenService.GenerateAccessToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            CookieHelper.SetAuthTokens(Response, newAccessToken, newRefreshToken);
 
             var username = user.UserName;
             var role = user.Role.ToString().ToUpper();
             var id = user.Id;
 
-            if (user is null)
-            {
-                _logger.LogWarning("Invalid refresh token provided");
-                return BadRequest("Invalid refresh token");
-            }
-
-            var newAccessToken = _tokenService.CreateAccessToken(user);
-            var newRefreshToken = await _tokenService.CreateRefreshTokenAsync(user);
-
-            Response.Cookies.Append("AccessToken", newAccessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddMinutes(15),
-                Domain = "localhost",
-                IsEssential = true,
-                SameSite = SameSiteMode.None
-            });
-
-            Response.Cookies.Append("RefreshToken", newRefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                Expires = DateTime.UtcNow.AddHours(24),
-                Domain = "localhost",
-                IsEssential = true,
-                SameSite = SameSiteMode.None
-            });
-
             _logger.LogInformation("Token refreshed successfully for user: {UserId}", user.Id);
-            return Ok(new { id, username, newAccessToken, role });
+            return Ok(new
+            {
+                id,
+                username,
+                newAccessToken,
+                role
+            });
         }
         catch (Exception e)
         {

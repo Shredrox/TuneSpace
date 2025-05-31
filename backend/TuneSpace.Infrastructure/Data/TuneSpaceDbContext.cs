@@ -7,6 +7,7 @@ namespace TuneSpace.Infrastructure.Data;
 
 public class TuneSpaceDbContext(DbContextOptions<TuneSpaceDbContext> options) : IdentityDbContext<User, ApplicationRole, Guid>(options)
 {
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Band> Bands { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Notification> Notifications { get; set; }

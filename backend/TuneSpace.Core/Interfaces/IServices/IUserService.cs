@@ -22,13 +22,6 @@ public interface IUserService
     Task<User?> GetUserByNameAsync(string name);
 
     /// <summary>
-    /// Retrieves a user associated with the provided refresh token.
-    /// </summary>
-    /// <param name="refreshToken">The refresh token used to identify the user.</param>
-    /// <returns>The user entity if a valid token match is found; otherwise, null.</returns>
-    Task<User?> GetUserFromRefreshTokenAsync(string refreshToken);
-
-    /// <summary>
     /// Retrieves the profile picture for a specified user.
     /// </summary>
     /// <param name="username">The username of the user whose profile picture should be retrieved.</param>
@@ -41,13 +34,6 @@ public interface IUserService
     /// <param name="search">The search term to match against user names.</param>
     /// <returns>A task representing the asynchronous operation, containing a list of user entities whose names match the search criteria.</returns>
     Task<List<User>> SearchByNameAsync(string search);
-
-    /// <summary>
-    /// Updates the refresh token for a specified user.
-    /// </summary>
-    /// <param name="user">The user entity whose refresh token should be updated.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateUserRefreshTokenAsync(User user);
 
     /// <summary>
     /// Updates the profile picture for a specified user.

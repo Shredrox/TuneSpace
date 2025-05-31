@@ -23,12 +23,6 @@ internal class UserService(
         return await _userRepository.GetUserByNameAsync(name);
     }
 
-    async Task<User?> IUserService.GetUserFromRefreshTokenAsync(string refreshToken)
-    {
-        var user = await _userRepository.GetUserByRefreshTokenAsync(refreshToken);
-        return user ?? null;
-    }
-
     async Task<byte[]?> IUserService.GetProfilePictureAsync(string username)
     {
         var user = await _userRepository.GetUserByNameAsync(username);
@@ -53,21 +47,6 @@ internal class UserService(
         }
 
         return users;
-    }
-
-    async Task IUserService.UpdateUserRefreshTokenAsync(User user)
-    {
-        var existingUser = await _userRepository.GetUserByIdAsync(user.Id.ToString());
-
-        if (existingUser == null)
-        {
-            return;
-        }
-
-        existingUser.RefreshToken = user.RefreshToken;
-        existingUser.RefreshTokenValidity = user.RefreshTokenValidity;
-
-        await _userRepository.UpdateUserAsync(user);
     }
 
     async Task IUserService.UpdateProfilePictureAsync(string username, byte[] profilePicture)

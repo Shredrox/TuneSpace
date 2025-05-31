@@ -40,6 +40,7 @@ builder.Services.AddIdentityServices();
 builder.Services.AddHttpClientServices();
 
 builder.Services.AddApplicationServices();
+builder.Services.AddApplicationBackgroundServices();
 
 builder.Services.AddSignalR();
 

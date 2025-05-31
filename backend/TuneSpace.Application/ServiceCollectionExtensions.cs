@@ -3,6 +3,7 @@ using TuneSpace.Core.Interfaces.IServices;
 using TuneSpace.Core.Interfaces.IInfrastructure;
 using TuneSpace.Application.Services;
 using TuneSpace.Application.Services.MusicDiscovery;
+using TuneSpace.Application.BackgroundServices;
 
 namespace TuneSpace.Application;
 
@@ -28,6 +29,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IForumService, ForumService>();
         services.AddScoped<IMerchandiseService, MerchandiseService>();
         services.AddScoped<IFollowService, FollowService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddApplicationBackgroundServices(this IServiceCollection services)
+    {
+        services.AddHostedService<RefreshTokenCleanupService>();
 
         return services;
     }
