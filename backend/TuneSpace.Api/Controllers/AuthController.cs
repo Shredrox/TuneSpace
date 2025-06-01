@@ -154,11 +154,7 @@ public class AuthController(
                 return BadRequest("Refresh token is required");
             }
 
-            var user = await _tokenService.ValidateRefreshTokenAsync(refreshToken);
-            if (user is not null)
-            {
-                _logger.LogInformation("User logged out and refresh token cleared: {UserId}", user.Id);
-            }
+            await _tokenService.RevokeRefreshTokenAsync(refreshToken);
 
             CookieHelper.ClearAuthTokens(Response);
 
@@ -191,6 +187,8 @@ public class AuthController(
 
             var newAccessToken = _tokenService.GenerateAccessToken(user);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            await _tokenService.SaveRefreshTokenAsync(user, newRefreshToken);
 
             CookieHelper.SetAuthTokens(Response, newAccessToken, newRefreshToken);
 
