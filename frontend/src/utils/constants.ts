@@ -3,13 +3,24 @@ export const BASE_URL = "http://localhost:5053/api";
 export const SIGNALR_HUB_URL = "http://localhost:5053/socket-hub";
 
 export const ROUTES = {
-  HOME: "/",
+  ROOT: "/",
+  HOME: "/home",
+  LOGIN: "/login",
+  SIGNUP: "/signup",
+  TERMS: "/terms",
+  PRIVACY: "/privacy",
+  COPYRIGHT: "/copyright",
+  ABOUT: "/about",
   DISCOVER: "/discover",
   NEWS: "/news",
   BAND_DASHBOARD: "/band/dashboard",
   EVENTS: "/events",
   PROFILE: "/profile",
   SETTINGS: "/settings",
+  FORUMS: "/forums",
+  MESSAGES: "/messages",
+  BAND: "/band",
+  BAND_REGISTER: "/band/register",
 } as const;
 
 export const ENDPOINTS = {
@@ -49,3 +60,27 @@ export enum NotificationTypes {
   Event = "Event",
   Music = "Music",
 }
+
+export const PROTECTED_ROUTES = [
+  ROUTES.HOME,
+  ROUTES.DISCOVER,
+  ROUTES.PROFILE,
+  ROUTES.SETTINGS,
+  ROUTES.EVENTS,
+  ROUTES.NEWS,
+  ROUTES.FORUMS,
+  ROUTES.MESSAGES,
+  ROUTES.BAND_DASHBOARD,
+  ROUTES.BAND,
+];
+
+export const PUBLIC_ROUTES = [
+  ROUTES.ROOT,
+  ROUTES.LOGIN,
+  ROUTES.SIGNUP,
+  ROUTES.BAND_REGISTER,
+  ROUTES.TERMS,
+  ROUTES.PRIVACY,
+  ROUTES.COPYRIGHT,
+  ROUTES.ABOUT,
+];
