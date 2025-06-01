@@ -18,7 +18,7 @@ import { Send, Paperclip } from "lucide-react";
 import ChatMessage from "./chat-message";
 import ChatPreview from "@/interfaces/social/chat/ChatPreview";
 import useMessages from "@/hooks/query/useMessages";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import { Skeleton } from "@/components/shadcn/skeleton";
 
 interface ChatInterfaceProps {

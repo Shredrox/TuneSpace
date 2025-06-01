@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import useSocket from "../useSocket";
 import { getMessages, markMessagesAsRead } from "@/services/chat-service";
-import useAuth from "../useAuth";
+import useAuth from "../auth/useAuth";
 
 const useMessages = (chatId: string | undefined) => {
   const queryClient = useQueryClient();

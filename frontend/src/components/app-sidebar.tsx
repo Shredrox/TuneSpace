@@ -39,7 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "./shadcn/dropdown-menu";
 import { usePathname, useRouter } from "next/navigation";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import { ROUTES, UserRole } from "@/utils/constants";
 import Link from "next/link";
 import useLogout from "@/hooks/useLogout";

@@ -2,7 +2,7 @@
 
 import { ReactNode, createContext, useEffect, useState } from "react";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import SocketContextType from "@/interfaces/context/SocketContextType";
 import httpClient from "@/services/http-client";
 import Message from "@/interfaces/social/chat/Message";

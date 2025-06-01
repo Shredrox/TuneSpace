@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import httpClient from "@/services/http-client";
 import useSocket from "@/hooks/useSocket";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import { getUserNotifications } from "@/services/notification-service";
 
 const useNotifications = () => {

@@ -13,7 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "../shadcn/carousel";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import useBandData from "@/hooks/query/useBandData";
 import Loading from "../fallback/loading";
 import useToast from "@/hooks/useToast";

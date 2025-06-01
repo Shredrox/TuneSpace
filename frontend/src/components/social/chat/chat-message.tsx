@@ -3,7 +3,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import Message from "@/interfaces/social/chat/Message";
 import { format } from "date-fns";
 

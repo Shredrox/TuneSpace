@@ -1,7 +1,7 @@
 "use client";
 
 import useProfileData from "@/hooks/query/useProfileData";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import { formatDate } from "@/utils/helpers";
 import {
   FaSpotify,

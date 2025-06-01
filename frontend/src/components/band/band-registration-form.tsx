@@ -22,7 +22,7 @@ import useLocationData from "@/hooks/useLocationData";
 import { Input } from "../shadcn/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/avatar";
 import { registerBand } from "@/actions/band";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import { toast } from "sonner";
 
 const BandRegistrationForm = ({ locationData }: { locationData: any }) => {

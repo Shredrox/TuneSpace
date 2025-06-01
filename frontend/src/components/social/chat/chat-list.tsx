@@ -20,7 +20,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import useChats from "@/hooks/query/useChats";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import UserType from "@/interfaces/user/User";
 import UserSearchDialog from "../user-search-dialog";
 
