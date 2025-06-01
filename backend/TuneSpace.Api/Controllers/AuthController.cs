@@ -22,8 +22,8 @@ public class AuthController(
     private readonly ITokenService _tokenService = tokenService;
     private readonly ILogger<AuthController> _logger = logger;
 
-    [HttpGet("is-authenticated")]
-    public async Task<IActionResult> IsAuthenticated()
+    [HttpGet("current-user")]
+    public async Task<IActionResult> GetCurrentUser()
     {
         try
         {
@@ -40,25 +40,33 @@ public class AuthController(
             }
 
             var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-            var username = principal.FindFirst(ClaimTypes.Name)?.Value;
-            var role = principal.FindFirst(ClaimTypes.Role)?.Value;
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Invalid token claims");
             }
 
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user is null)
+            {
+                return NotFound("User not found");
+            }
+
+            var profilePictureBase64 = user.ProfilePicture != null ?
+                Convert.ToBase64String(user.ProfilePicture) : null;
+
             return Ok(new
             {
-                id = userId,
-                username,
-                role
+                id = user.Id.ToString(),
+                username = user.UserName,
+                email = user.Email,
+                role = user.Role.ToString(),
+                profilePicture = profilePictureBase64
             });
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Unexpected error during authentication check");
-            return StatusCode(500, "An error occurred while checking authentication.");
+            _logger.LogError(e, "Unexpected error during current user retrieval");
+            return StatusCode(500, "An error occurred while retrieving current user information.");
         }
     }
 
