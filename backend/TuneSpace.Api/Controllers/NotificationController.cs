@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using TuneSpace.Core.DTOs.Requests.Notification;
@@ -9,6 +10,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class NotificationController(
     IHubContext<SocketHub, ISocketClient> hubContext,
     INotificationService notificationService,

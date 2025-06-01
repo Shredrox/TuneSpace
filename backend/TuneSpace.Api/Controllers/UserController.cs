@@ -9,6 +9,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class UserController(
     IUserService userService,
     ILogger<UserController> logger) : ControllerBase
@@ -132,7 +133,6 @@ public class UserController(
     }
 
     [HttpPost("upload-profile-picture")]
-    [Authorize]
     public async Task<IActionResult> UploadProfilePicture([FromForm] ProfileUpdateRequest request)
     {
         var file = request.File;

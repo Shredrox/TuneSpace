@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -5,6 +6,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MusicDiscoveryController(
     IMusicDiscoveryService musicDiscoveryService,
     ILogger<MusicDiscoveryController> logger) : ControllerBase

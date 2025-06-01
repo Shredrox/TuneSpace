@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TuneSpace.Api.DTOs;
 using TuneSpace.Application.Common;
@@ -8,6 +9,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MerchandiseController(
     IMerchandiseService merchandiseService,
     ILogger<MerchandiseController> logger) : ControllerBase

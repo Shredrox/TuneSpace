@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TuneSpace.Api.DTOs;
 using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Band;
@@ -16,6 +17,7 @@ public class BandController(
     private readonly ILogger<BandController> _logger = logger;
 
     [HttpGet("{bandId}")]
+    [Authorize]
     public async Task<IActionResult> GetBandById(string bandId)
     {
         if (string.IsNullOrEmpty(bandId))
@@ -41,6 +43,7 @@ public class BandController(
     }
 
     [HttpGet("user/{userId}")]
+    [Authorize]
     public async Task<IActionResult> GetBandByUserId(string userId)
     {
         if (string.IsNullOrEmpty(userId))
@@ -66,6 +69,7 @@ public class BandController(
     }
 
     [HttpGet("{bandId}/image")]
+    [Authorize]
     public async Task<IActionResult> GetBandImage(string bandId)
     {
         if (string.IsNullOrEmpty(bandId))
@@ -157,6 +161,7 @@ public class BandController(
     }
 
     [HttpPut("update")]
+    [Authorize]
     public async Task<IActionResult> UpdateBand([FromForm] BandUpdateRequest request)
     {
         try
@@ -184,6 +189,7 @@ public class BandController(
     }
 
     [HttpDelete("{bandId}")]
+    [Authorize]
     public async Task<IActionResult> DeleteBand(string bandId)
     {
         if (string.IsNullOrEmpty(bandId))

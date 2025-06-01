@@ -8,6 +8,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class FollowController(
     IFollowService followService,
     IUserService userService,

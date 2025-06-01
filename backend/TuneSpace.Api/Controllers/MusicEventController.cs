@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TuneSpace.Core.DTOs.Requests.MusicEvent;
 using TuneSpace.Core.Interfaces.IServices;
@@ -6,6 +7,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class MusicEventController(
     IMusicEventService musicEventService,
     ILogger<MusicEventController> logger) : ControllerBase

@@ -9,6 +9,7 @@ namespace TuneSpace.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class ForumController(
     IForumService forumService,
     ILogger<ForumController> logger) : ControllerBase
@@ -157,7 +158,6 @@ public class ForumController(
         }
     }
 
-    [Authorize]
     [HttpPost("categories")]
     public async Task<ActionResult<CategoryResponse>> CreateCategory([FromBody] CreateCategoryRequest request)
     {
@@ -173,7 +173,6 @@ public class ForumController(
         }
     }
 
-    [Authorize]
     [HttpPost("threads")]
     public async Task<ActionResult<ThreadResponse>> CreateThread([FromBody] CreateThreadRequest request)
     {
@@ -200,7 +199,6 @@ public class ForumController(
         }
     }
 
-    [Authorize]
     [HttpPost("posts")]
     public async Task<ActionResult<ForumPostResponse>> CreatePost([FromBody] CreatePostRequest request)
     {
@@ -227,7 +225,6 @@ public class ForumController(
         }
     }
 
-    [Authorize]
     [HttpPost("posts/{postId}/like")]
     public async Task<ActionResult> LikePost(Guid postId)
     {
@@ -249,7 +246,6 @@ public class ForumController(
         }
     }
 
-    [Authorize]
     [HttpDelete("posts/{postId}/unlike")]
     public async Task<ActionResult> UnlikePost(Guid postId)
     {
