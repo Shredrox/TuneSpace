@@ -1,7 +1,6 @@
 import Loading from "@/components/fallback/loading";
 import { SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import { cookies } from "next/headers";
-import { getUserByName } from "@/services/user-service";
 import httpClient from "@/services/http-client";
 import Profile from "@/components/user/profile";
 
@@ -20,8 +19,6 @@ export default async function ProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-
-  const user = await getUserByName(username);
 
   const cookie = (await cookies()).get("SpotifyAccessToken");
 
