@@ -5,7 +5,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -15,7 +14,6 @@ import {
   Home,
   Settings,
   LogOut,
-  Search,
   MoreHorizontal,
   CalendarDays,
   Newspaper,
@@ -42,7 +40,7 @@ import { usePathname, useRouter } from "next/navigation";
 import useAuth from "@/hooks/auth/useAuth";
 import { ROUTES, UserRole } from "@/utils/constants";
 import Link from "next/link";
-import useLogout from "@/hooks/useLogout";
+import useLogout from "@/hooks/auth/useLogout";
 import { cn } from "@/lib/utils";
 import useProfileData from "@/hooks/query/useProfileData";
 import { ReactNode } from "react";
@@ -60,7 +58,7 @@ export function AppSidebar() {
   const router = useRouter();
 
   const { auth } = useAuth();
-  const logout = useLogout();
+  const { logout } = useLogout();
 
   const { profile } = useProfileData(
     auth?.username || "",
@@ -75,8 +73,12 @@ export function AppSidebar() {
     : "TS";
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/?auth=true&type=login");
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const navigationLinks: NavLinkItem[] = [

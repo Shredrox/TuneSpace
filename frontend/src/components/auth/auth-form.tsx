@@ -44,7 +44,6 @@ const AuthForm = ({
       </Link>
       {formStep === 0 ? (
         <>
-          {" "}
           {isLogin ? (
             <Card className="overflow-hidden">
               <CardContent className="grid p-0 md:grid-cols-2">
@@ -78,7 +77,6 @@ const AuthForm = ({
           ) : (
             <Card className="overflow-hidden">
               <CardContent className="grid p-0 md:grid-cols-2">
-                {" "}
                 <div className="relative hidden bg-gradient-to-br from-purple-600/30 via-blue-600/30 to-cyan-600/30 dark:from-purple-600/50 dark:via-blue-600/50 dark:to-cyan-600/50 md:flex md:items-center md:justify-center">
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-cyan-500/20 dark:from-purple-400/30 dark:via-blue-400/30 dark:to-cyan-400/30" />
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,theme(colors.purple.500/20),transparent_70%)]" />
@@ -126,7 +124,7 @@ const AuthForm = ({
                   <div className="animate-pulse delay-300">
                     <Headphones className="h-8 w-8 text-blue-500/70" />
                   </div>
-                </div>{" "}
+                </div>
                 <div>
                   <h2 className="text-2xl font-bold mb-3 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                     Welcome to TuneSpace!
@@ -142,7 +140,7 @@ const AuthForm = ({
                 <div className="flex gap-4 w-full">
                   <Button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                     <Link
-                      href="band/register"
+                      href="/band/register"
                       className="flex items-center gap-2"
                     >
                       <Music className="h-4 w-4" />

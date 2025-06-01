@@ -5,17 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import FormInput from "@/components/form-input";
 import { RegisterInputs, registerSchema } from "@/schemas/register.schema";
-import {
-  BASE_URL,
-  ENDPOINTS,
-  SPOTIFY_ENDPOINTS,
-  UserRole,
-} from "@/utils/constants";
+import { BASE_URL, SPOTIFY_ENDPOINTS, UserRole } from "@/utils/constants";
 import { FaSpotify } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { Button } from "../shadcn/button";
-import useAuth from "@/hooks/useAuth";
-import httpClient from "@/services/http-client";
+import useAuth from "@/hooks/auth/useAuth";
+import {
+  register as registerUser,
+  RegisterData,
+} from "@/services/auth-service";
 import Link from "next/link";
 
 const Register = ({
@@ -26,7 +24,7 @@ const Register = ({
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const { setAuth } = useAuth();
+  const { updateAuth } = useAuth();
 
   const handleSpotifyLogin = () => {
     router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.LOGIN}`);
@@ -52,18 +50,11 @@ const Register = ({
 
   const onSubmit = async (data: RegisterInputs) => {
     const { confirmPassword, ...rest } = data;
-    const request = { ...rest, role: UserRole.Listener };
+    const requestData: RegisterData = { ...rest, role: UserRole.Listener };
 
     try {
-      const response = await httpClient.post(
-        `${BASE_URL}/${ENDPOINTS.REGISTER}`,
-        JSON.stringify(request),
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      setAuth({ id: response?.data?.id });
+      const userData = await registerUser(requestData);
+      updateAuth({ id: userData.id });
       setFormStep(1);
     } catch (error: any) {
       handleRequestError(error);

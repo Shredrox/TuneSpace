@@ -1,4 +1,6 @@
-import { Button } from "../shadcn/button";
+"use client";
+
+import { Button } from "@/components/shadcn/button";
 import {
   Headphones,
   Music,
@@ -10,7 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const UnauthenticatedHomeView = () => {
+export default function LandingPage() {
   return (
     <div className="flex flex-col gap-12 pb-12">
       <section className="relative overflow-hidden">
@@ -508,6 +510,4 @@ const UnauthenticatedHomeView = () => {
       </section>
     </div>
   );
-};
-
-export default UnauthenticatedHomeView;
+}

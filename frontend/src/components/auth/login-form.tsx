@@ -1,20 +1,21 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "../form-input";
 import { LoginInputs, loginSchema } from "@/schemas/login.schema";
 import { useRouter } from "next/navigation";
-import { BASE_URL, ENDPOINTS, SPOTIFY_ENDPOINTS } from "@/utils/constants";
+import { BASE_URL, SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import { Button } from "../shadcn/button";
 import { FaSpotify } from "react-icons/fa";
-import useAuth from "@/hooks/useAuth";
-import httpClient from "@/services/http-client";
+import useAuth from "@/hooks/auth/useAuth";
 import Link from "next/link";
+import useLogin from "@/hooks/auth/useLogin";
 
 const Login = () => {
-  const { setAuth } = useAuth();
+  const { updateAuth } = useAuth();
+  const { login } = useLogin();
 
   const [error, setError] = useState("");
   const router = useRouter();
@@ -24,14 +25,13 @@ const Login = () => {
     const tokenExpiryTime = searchParams.get("tokenExpiryTime");
 
     if (tokenExpiryTime) {
-      setAuth((prevAuth) => ({
-        ...prevAuth,
+      updateAuth({
         spotifyTokenExpiry: tokenExpiryTime,
-      }));
+      });
 
       router.replace(window.location.pathname);
     }
-  }, [setAuth, router]);
+  }, [updateAuth, router]);
 
   const handleSpotifyLogin = () => {
     router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.LOGIN}`);
@@ -55,21 +55,16 @@ const Login = () => {
 
   const onSubmit = async (data: LoginInputs) => {
     try {
-      const response = await httpClient.post(
-        `${BASE_URL}/${ENDPOINTS.LOGIN}`,
-        JSON.stringify(data),
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      setAuth({
-        id: response?.data?.id,
-        username: response?.data?.username,
-        accessToken: response?.data?.accessToken,
-        role: response?.data?.role,
+      const userData = await login(data);
+
+      updateAuth({
+        id: userData.id,
+        username: userData.username,
+        accessToken: userData.accessToken,
+        role: userData.role,
       });
 
-      router.push("/");
+      router.push("/home");
     } catch (error: any) {
       handleRequestError(error);
     }

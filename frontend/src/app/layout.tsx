@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import ReactQueryProvider from "@/providers/query-provider";
 import ThemeProvider from "@/providers/theme-provider";
-import AuthProvider from "@/providers/auth-provider";
 import SocketProvider from "@/providers/socket-provider";
 import { Toaster } from "@/components/shadcn/sonner";
 
@@ -35,21 +34,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-svh`}
       >
-        <AuthProvider>
-          <ReactQueryProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <SocketProvider>
-                {children}
-                <Toaster />
-              </SocketProvider>
-            </ThemeProvider>
-          </ReactQueryProvider>
-        </AuthProvider>
+        <ReactQueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SocketProvider>
+              {children}
+              <Toaster />
+            </SocketProvider>
+          </ThemeProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
