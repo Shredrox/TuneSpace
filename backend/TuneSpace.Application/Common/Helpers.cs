@@ -1,27 +1,10 @@
-using System.Text;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using TuneSpace.Core.DTOs;
-using TuneSpace.Core.DTOs.Requests.Spotify;
 
 namespace TuneSpace.Application.Common;
 
 public static class Helpers
 {
-    public static StringContent ToLowercaseJsonStringContent(CreatePlaylistRequest request)
-    {
-        var dictionary = new Dictionary<string, object>
-        {
-            ["name"] = request.Name,
-            ["description"] = request.Description,
-            ["public"] = request.Public
-        };
-
-        var jsonString = JsonConvert.SerializeObject(dictionary);
-
-        return new StringContent(jsonString, Encoding.UTF8, "application/json");
-    }
-
     public static async Task<FileDto?> ConvertToFileDto(IFormFile? file)
     {
         if (file is null || file.Length == 0)
@@ -45,5 +28,41 @@ public static class Helpers
         var random = new Random();
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         return new string([.. Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)])]);
+    }
+
+    public static (DateTime startTime, DateTime endTime, string periodName) GetTimeRangeForPeriod(string period)
+    {
+        var now = DateTime.UtcNow;
+        DateTime startTime;
+        DateTime endTime;
+        string periodName;
+
+        switch (period.ToLower())
+        {
+            case "today":
+                startTime = now.Date;
+                endTime = now;
+                periodName = "Today";
+                break;
+
+            case "this-week":
+                int daysSinceMonday = ((int)now.DayOfWeek + 6) % 7;
+                startTime = now.Date.AddDays(-daysSinceMonday);
+                endTime = now;
+                periodName = "This Week";
+                break;
+
+            default:
+                throw new ArgumentException($"Unsupported period: {period}");
+        }
+
+        // Ensure we don't go beyond Spotify's 24-hour limit for recently played
+        // var maxStartTime = now.AddHours(-24);
+        // if (startTime < maxStartTime)
+        // {
+        //     startTime = maxStartTime;
+        // }
+
+        return (startTime, endTime, periodName);
     }
 }

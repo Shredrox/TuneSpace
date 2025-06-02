@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using TuneSpace.Core.DTOs.Requests.Spotify;
 using TuneSpace.Core.DTOs.Responses.Spotify;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
@@ -307,28 +306,5 @@ public class SpotifyController(
             _logger.LogError(ex, "Error refreshing Spotify access token");
             return StatusCode(500, ex.Message);
         }
-    }
-
-    [HttpPost("create-playlist")]
-    public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistRequest request)
-    {
-        var accessToken = Request.Cookies["SpotifyAccessToken"];
-
-        if (string.IsNullOrEmpty(accessToken))
-        {
-            return Unauthorized("Access token is required");
-        }
-
-        try
-        {
-            await _spotifyService.CreatePlaylistAsync(accessToken, request);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error creating playlist");
-            return BadRequest("Error creating playlist");
-        }
-
-        return Created();
     }
 }

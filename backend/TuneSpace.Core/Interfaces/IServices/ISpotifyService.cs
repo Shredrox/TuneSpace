@@ -1,5 +1,4 @@
-﻿using TuneSpace.Core.DTOs.Requests.Spotify;
-using TuneSpace.Core.DTOs.Responses.Spotify;
+﻿using TuneSpace.Core.DTOs.Responses.Spotify;
 
 namespace TuneSpace.Core.Interfaces.IServices;
 
@@ -76,13 +75,6 @@ public interface ISpotifyService
     /// <param name="search">Search query</param>
     /// <returns>List of songs matching the search query</returns>
     Task<List<SearchSongDTO>> GetSongsBySearchAsync(string token, string search);
-
-    /// <summary>
-    /// Creates a new playlist on the user's Spotify account
-    /// </summary>
-    /// <param name="token">Spotify access token</param>
-    /// <param name="request">Playlist creation details</param>
-    Task CreatePlaylistAsync(string token, CreatePlaylistRequest request);
 
     /// <summary>
     /// Refreshes a Spotify access token using a refresh token

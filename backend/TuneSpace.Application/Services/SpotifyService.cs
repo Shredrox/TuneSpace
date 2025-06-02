@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using TuneSpace.Application.Common;
-using TuneSpace.Core.DTOs.Requests.Spotify;
 using TuneSpace.Core.DTOs.Responses.Spotify;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IClients;
@@ -313,21 +312,6 @@ internal class SpotifyService(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving Spotify artists");
-            throw;
-        }
-    }
-
-    async Task ISpotifyService.CreatePlaylistAsync(string token, CreatePlaylistRequest request)
-    {
-        var requestContent = Helpers.ToLowercaseJsonStringContent(request);
-
-        try
-        {
-            await _spotifyClient.CreatePlaylist(token, request.UserId, requestContent);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating Spotify playlist");
             throw;
         }
     }
