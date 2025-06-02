@@ -12,9 +12,7 @@ import {
 } from "@/components/shadcn/sidebar";
 import {
   Home,
-  Settings,
   LogOut,
-  MoreHorizontal,
   CalendarDays,
   Newspaper,
   MessageSquare,
@@ -28,14 +26,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./shadcn/dropdown-menu";
 import { usePathname, useRouter } from "next/navigation";
 import useAuth from "@/hooks/auth/useAuth";
 import { ROUTES, UserRole } from "@/utils/constants";
@@ -271,46 +261,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link href={ROUTES.SETTINGS} passHref>
-                  <SidebarMenuButton
-                    tooltip="Settings"
-                    isActive={pathname === ROUTES.SETTINGS}
-                    className={cn(
-                      "transition-all duration-300 relative overflow-visible rounded-md",
-                      "group border border-transparent",
-                      "hover:border-indigo-500/20 hover:animate-[border-pulse-subtle_1.5s_ease_infinite]",
-                      pathname === ROUTES.SETTINGS &&
-                        "bg-gradient-to-r from-sidebar-accent to-sidebar-accent/30 font-medium"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "absolute inset-y-0 w-1 left-0 rounded-full transition-all duration-300",
-                        pathname === ROUTES.SETTINGS
-                          ? "bg-indigo-500 shadow-[0_0_8px_rgba(var(--sidebar-primary-rgb),0.5)]"
-                          : "bg-transparent group-hover:bg-indigo-500/30"
-                      )}
-                    />
-                    <div
-                      className={cn(
-                        "relative z-10 flex items-center gap-2",
-                        "transition-colors duration-300"
-                      )}
-                    >
-                      <Settings
-                        className={cn(
-                          "h-4 w-4 text-indigo-200/80 transition-colors duration-300",
-                          pathname === ROUTES.SETTINGS
-                            ? "text-indigo-100"
-                            : "group-hover:text-indigo-300"
-                        )}
-                      />
-                      <span>Settings</span>
-                    </div>{" "}
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <SidebarMenuButton
                   tooltip="Log Out"
                   className="transition-all duration-300 relative overflow-visible rounded-md group border border-transparent hover:border-red-500/20 hover:animate-[border-pulse-subtle_1.5s_ease_infinite] text-red-400 hover:text-red-300 focus:text-red-300"
@@ -322,43 +272,6 @@ export function AppSidebar() {
                     <span>Log Out</span>
                   </div>
                 </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton
-                      tooltip="More"
-                      className="transition-all duration-300 relative overflow-visible rounded-md group border border-transparent hover:border-indigo-500/20 hover:animate-[border-pulse-subtle_1.5s_ease_infinite]"
-                    >
-                      <div className="absolute inset-y-0 w-1 left-0 rounded-full transition-all duration-300 bg-transparent group-hover:bg-indigo-500/30" />
-                      <div className="relative z-10 flex items-center gap-2 transition-colors duration-300">
-                        <MoreHorizontal className="h-4 w-4 text-indigo-200/80 transition-colors duration-300 group-hover:text-indigo-300" />
-                        <span>More</span>
-                      </div>
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    className="w-48 bg-sidebar-accent/90 backdrop-blur-md border-indigo-500/20 animate-in fade-in-80 zoom-in-95 duration-200"
-                  >
-                    <DropdownMenuLabel className="text-indigo-100 font-medium">
-                      Account
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem
-                      onClick={() => router.push("/help")}
-                      className="transition-colors duration-200 hover:bg-indigo-600/20 focus:bg-indigo-600/20 hover:text-indigo-100 focus:text-indigo-100"
-                    >
-                      Help Center
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => router.push(ROUTES.SETTINGS)}
-                      className="transition-colors duration-200 hover:bg-indigo-600/20 focus:bg-indigo-600/20 hover:text-indigo-100 focus:text-indigo-100"
-                    >
-                      Account Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-indigo-300/10" />
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

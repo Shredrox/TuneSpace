@@ -16,7 +16,6 @@ export const ROUTES = {
   BAND_DASHBOARD: "/band/dashboard",
   EVENTS: "/events",
   PROFILE: "/profile",
-  SETTINGS: "/settings",
   FORUMS: "/forums",
   MESSAGES: "/messages",
   BAND: "/band",
@@ -65,13 +64,11 @@ export const PROTECTED_ROUTES = [
   ROUTES.HOME,
   ROUTES.DISCOVER,
   ROUTES.PROFILE,
-  ROUTES.SETTINGS,
   ROUTES.EVENTS,
   ROUTES.NEWS,
   ROUTES.FORUMS,
   ROUTES.MESSAGES,
   ROUTES.BAND_DASHBOARD,
-  ROUTES.BAND,
 ];
 
 export const PUBLIC_ROUTES = [
