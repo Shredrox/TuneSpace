@@ -2,20 +2,20 @@
 
 public class SpotifySongSearchResponse
 {
-    public SearchItems Tracks { get; set; }
+    public SearchItems Tracks { get; set; } = new();
 }
 
 public class SearchItems
 {
-    public List<SearchSong> Items { get; set; }
+    public List<SearchSong> Items { get; set; } = [];
 }
 
 public class SearchSong
 {
-    public string Id { get; set; }
-    public string Name { get; set; }
-    public List<Artist> Artists { get; set; }
-    public SearchSongAlbum Album { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public List<Artist> Artists { get; set; } = [];
+    public SearchSongAlbum Album { get; set; } = new();
 }
 
 public class SongSearchImageDTO
@@ -27,5 +27,5 @@ public class SongSearchImageDTO
 
 public class SearchSongAlbum
 {
-    public List<SongSearchImageDTO> Images { get; set; }
+    public List<SongSearchImageDTO> Images { get; set; } = [];
 }

@@ -9,7 +9,7 @@ public class SpotifySearchResponse
 public class SpotifyArtistSearchResults
 {
     public string Href { get; set; } = string.Empty;
-    public List<SpotifyArtistDTO> Items { get; set; } = new();
+    public List<SpotifyArtistDTO> Items { get; set; } = [];
     public int Limit { get; set; }
     public string Next { get; set; } = string.Empty;
     public int Offset { get; set; }
@@ -20,7 +20,7 @@ public class SpotifyArtistSearchResults
 public class SpotifyAlbumSearchResults
 {
     public string Href { get; set; } = string.Empty;
-    public List<SpotifyAlbumDTO> Items { get; set; } = new();
+    public List<SpotifyAlbumDTO> Items { get; set; } = [];
     public int Limit { get; set; }
     public string Next { get; set; } = string.Empty;
     public int Offset { get; set; }
