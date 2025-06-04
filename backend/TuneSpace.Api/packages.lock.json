@@ -636,7 +636,6 @@
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.1, )",
           "Microsoft.IdentityModel.Tokens": "[8.9.0, )",
-          "Newtonsoft.Json": "[13.0.3, )",
           "System.Net.Http.Json": "[9.0.3, )",
           "TuneSpace.Core": "[1.0.0, )",
           "TuneSpace.Infrastructure": "[1.0.0, )"
@@ -646,7 +645,6 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.1, )",
-          "Newtonsoft.Json": "[13.0.3, )",
           "System.Net.Http.Json": "[9.0.3, )"
         }
       },
@@ -733,12 +731,6 @@
           "Microsoft.Extensions.Logging.Abstractions": "8.0.2",
           "Microsoft.IdentityModel.Logging": "8.9.0"
         }
-      },
-      "Newtonsoft.Json": {
-        "type": "CentralTransitive",
-        "requested": "[13.0.3, )",
-        "resolved": "13.0.3",
-        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
       "Npgsql.EntityFrameworkCore.PostgreSQL": {
         "type": "CentralTransitive",

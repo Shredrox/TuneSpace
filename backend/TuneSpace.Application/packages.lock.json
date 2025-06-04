@@ -53,12 +53,6 @@
           "Microsoft.IdentityModel.Logging": "8.9.0"
         }
       },
-      "Newtonsoft.Json": {
-        "type": "Direct",
-        "requested": "[13.0.3, )",
-        "resolved": "13.0.3",
-        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
-      },
       "System.Net.Http.Json": {
         "type": "Direct",
         "requested": "[9.0.3, )",
@@ -511,7 +505,6 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.1, )",
-          "Newtonsoft.Json": "[13.0.3, )",
           "System.Net.Http.Json": "[9.0.3, )"
         }
       },
