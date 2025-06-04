@@ -1,57 +1,57 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace TuneSpace.Core.DTOs.Responses.Spotify;
 
 public class UserFollowedArtistsResponse
 {
-    [JsonProperty("artists")]
+    [JsonPropertyName("artists")]
     public ArtistsContainer Artists { get; set; } = new();
 }
 
 public class ArtistsContainer
 {
-    [JsonProperty("href")]
+    [JsonPropertyName("href")]
     public string Href { get; set; } = string.Empty;
 
-    [JsonProperty("limit")]
+    [JsonPropertyName("limit")]
     public int Limit { get; set; }
 
-    [JsonProperty("next")]
+    [JsonPropertyName("next")]
     public string Next { get; set; } = string.Empty;
 
-    [JsonProperty("cursors")]
+    [JsonPropertyName("cursors")]
     public Cursors Cursors { get; set; } = new();
 
-    [JsonProperty("total")]
+    [JsonPropertyName("total")]
     public int Total { get; set; }
 
-    [JsonProperty("items")]
+    [JsonPropertyName("items")]
     public List<ArtistItem> Items { get; set; } = new();
 }
 
 public class Cursors
 {
-    [JsonProperty("after")]
+    [JsonPropertyName("after")]
     public string After { get; set; } = string.Empty;
 }
 
 public class ArtistItem
 {
-    [JsonProperty("id")]
+    [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
-    [JsonProperty("popularity")]
+    [JsonPropertyName("popularity")]
     public int Popularity { get; set; }
 
-    [JsonProperty("images")]
+    [JsonPropertyName("images")]
     public List<SpotifyImageDTO> Images { get; set; } = [];
 
-    [JsonProperty("genres")]
+    [JsonPropertyName("genres")]
     public List<string> Genres { get; set; } = [];
 
-    [JsonProperty("followers")]
+    [JsonPropertyName("followers")]
     public Followers Followers { get; set; } = new();
 }

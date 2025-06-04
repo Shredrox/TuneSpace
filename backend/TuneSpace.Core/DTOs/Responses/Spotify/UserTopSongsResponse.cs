@@ -1,3 +1,7 @@
-﻿namespace TuneSpace.Core.DTOs.Responses.Spotify;
+﻿using System.Text.Json.Serialization;
 
-public record UserTopSongsResponse(List<SpotifyTopSongResponse> Items);
+namespace TuneSpace.Core.DTOs.Responses.Spotify;
+
+public record UserTopSongsResponse(
+    [property: JsonPropertyName("items")] List<SpotifyTopSongResponse> Items
+);
