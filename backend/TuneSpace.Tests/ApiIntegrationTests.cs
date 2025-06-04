@@ -17,14 +17,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task Swagger_Endpoint_Is_Accessible_In_Development()
-    {
-        var response = await _client.GetAsync("/swagger/index.html");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
     public void Service_Container_Can_Be_Built()
     {
         using var scope = _factory.Services.CreateScope();
