@@ -1,6 +1,7 @@
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Models;
+using TuneSpace.Core.DTOs.Responses.MusicBrainz;
 using System.Web;
 
 namespace TuneSpace.Infrastructure.Clients;
@@ -22,23 +23,24 @@ internal class MusicBrainzClient : IMusicBrainzClient
     {
         var apiUrl = $"{BaseUrl}/artist/?query=artist:{bandName}&fmt=json";
         var response = await _httpClient.GetStringAsync(apiUrl);
-        var bandData = JObject.Parse(response);
 
-        var artist = bandData["artists"]?[0];
+        var bandData = JsonSerializer.Deserialize<MusicBrainzArtistSearchResponse>(response);
+        var artist = bandData?.Artists?.FirstOrDefault();
+
         if (artist == null)
         {
             return new BandModel { Name = bandName };
         }
 
-        var name = artist["name"]?.ToString() ?? bandName;
-        var country = artist["country"]?.ToString() ?? "Unknown";
-        var tags = artist["tags"]?.ToObject<JArray>();
+        var name = artist.Name ?? bandName;
+        var country = artist.Country ?? "Unknown";
+        var tags = artist.Tags;
 
         var bandModel = new BandModel
         {
             Name = name,
             Location = country,
-            Genres = tags?.Select(t => t["name"]?.ToString() ?? "").Where(t => !string.IsNullOrEmpty(t)).ToList() ?? []
+            Genres = tags?.Select(t => t.Name ?? "").Where(t => !string.IsNullOrEmpty(t)).ToList() ?? []
         };
 
         return bandModel;
@@ -64,11 +66,13 @@ internal class MusicBrainzClient : IMusicBrainzClient
         {
             throw new Exception($"Error fetching data from MusicBrainz: {response.StatusCode}");
         }
-        var data = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var data = JsonSerializer.Deserialize<MusicBrainzArtistSearchResponse>(responseContent);
 
         var bands = new List<BandModel>();
+        var artists = data?.Artists;
 
-        var artists = data["artists"]?.ToObject<JArray>();
         if (artists == null)
         {
             return bands;
@@ -76,9 +80,9 @@ internal class MusicBrainzClient : IMusicBrainzClient
 
         foreach (var artist in artists)
         {
-            var name = artist["name"]?.ToString();
-            var country = artist["country"]?.ToString();
-            var tags = artist["tags"]?.ToObject<JArray>();
+            var name = artist.Name;
+            var country = artist.Country;
+            var tags = artist.Tags;
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -86,7 +90,7 @@ internal class MusicBrainzClient : IMusicBrainzClient
                 {
                     Name = name,
                     Location = country ?? location,
-                    Genres = tags?.Select(t => t["name"]?.ToString() ?? "")
+                    Genres = tags?.Select(t => t.Name ?? "")
                         .Where(t => !string.IsNullOrEmpty(t))
                         .ToList() ?? []
                 });
