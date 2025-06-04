@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TuneSpace.Api.DTOs;
 using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Band;
+using TuneSpace.Core.DTOs.Responses.User;
 using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Api.Controllers;
@@ -11,13 +13,14 @@ namespace TuneSpace.Api.Controllers;
 [ApiController]
 public class BandController(
     IBandService bandService,
+    IBandFollowService bandFollowService,
     ILogger<BandController> logger) : ControllerBase
 {
     private readonly IBandService _bandService = bandService;
+    private readonly IBandFollowService _bandFollowService = bandFollowService;
     private readonly ILogger<BandController> _logger = logger;
 
     [HttpGet("{bandId}")]
-    [Authorize]
     public async Task<IActionResult> GetBandById(string bandId)
     {
         if (string.IsNullOrEmpty(bandId))
@@ -211,6 +214,218 @@ public class BandController(
         {
             _logger.LogError(e, "Error deleting band with ID: {BandId}", bandId);
             return BadRequest();
+        }
+    }
+
+    [HttpGet("{bandId}/followers")]
+    public async Task<ActionResult<List<UserSearchResultResponse>>> GetBandFollowers(string bandId)
+    {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
+        try
+        {
+            var followers = await _bandFollowService.GetBandFollowersAsync(parsedBandId);
+            return Ok(followers);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting followers for band {BandId}", bandId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("{bandId}/follower-count")]
+    public async Task<ActionResult<int>> GetBandFollowerCount(string bandId)
+    {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
+        try
+        {
+            var count = await _bandFollowService.GetBandFollowerCountAsync(parsedBandId);
+            return Ok(count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting follower count for band {BandId}", bandId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("{bandId}/is-following")]
+    [Authorize]
+    public async Task<ActionResult<bool>> IsFollowingBand(string bandId)
+    {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return BadRequest("Invalid user ID");
+        }
+
+        try
+        {
+            var isFollowing = await _bandFollowService.IsFollowingBandAsync(userId, parsedBandId);
+            return Ok(isFollowing);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking if user {UserId} is following band {BandId}", userId, bandId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpPost("{bandId}/follow")]
+    [Authorize]
+    public async Task<IActionResult> FollowBand(string bandId)
+    {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return BadRequest("Invalid user ID");
+        }
+
+        try
+        {
+            var success = await _bandFollowService.FollowBandAsync(userId, parsedBandId);
+            if (success)
+            {
+                return Ok("Successfully followed band");
+            }
+            else
+            {
+                return BadRequest("Already following this band or band/user not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when user {UserId} attempting to follow band {BandId}", userId, bandId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpDelete("{bandId}/unfollow")]
+    [Authorize]
+    public async Task<IActionResult> UnfollowBand(string bandId)
+    {
+        if (string.IsNullOrEmpty(bandId))
+        {
+            return BadRequest("Band ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(bandId, out var parsedBandId))
+        {
+            return BadRequest("Invalid Band ID format");
+        }
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return BadRequest("Invalid user ID");
+        }
+
+        try
+        {
+            var success = await _bandFollowService.UnfollowBandAsync(userId, parsedBandId);
+            if (success)
+            {
+                return Ok("Successfully unfollowed band");
+            }
+            else
+            {
+                return BadRequest("Not following this band");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when user {UserId} attempting to unfollow band {BandId}", userId, bandId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("user/{userId}/followed-bands")]
+    [Authorize]
+    public async Task<IActionResult> GetUserFollowedBands(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return BadRequest("User ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+        {
+            return BadRequest("Invalid User ID format");
+        }
+
+        try
+        {
+            var followedBands = await _bandFollowService.GetUserFollowedBandsAsync(parsedUserId);
+            return Ok(followedBands);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting followed bands for user {UserId}", userId);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    [HttpGet("user/{userId}/followed-bands-count")]
+    [Authorize]
+    public async Task<ActionResult<int>> GetUserFollowedBandsCount(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return BadRequest("User ID cannot be null or empty");
+        }
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+        {
+            return BadRequest("Invalid User ID format");
+        }
+
+        try
+        {
+            var count = await _bandFollowService.GetUserFollowedBandsCountAsync(parsedUserId);
+            return Ok(count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting followed bands count for user {UserId}", userId);
+            return StatusCode(500, "Internal server error");
         }
     }
 }
