@@ -1,4 +1,4 @@
-﻿using TuneSpace.Core.DTOs.Responses.Auth;
+using TuneSpace.Core.DTOs.Responses.Auth;
 using TuneSpace.Core.Enums;
 
 namespace TuneSpace.Core.Interfaces.IServices;

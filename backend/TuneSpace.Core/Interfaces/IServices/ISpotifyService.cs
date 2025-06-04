@@ -1,4 +1,4 @@
-﻿using TuneSpace.Core.DTOs.Responses.Spotify;
+using TuneSpace.Core.DTOs.Responses.Spotify;
 
 namespace TuneSpace.Core.Interfaces.IServices;
 

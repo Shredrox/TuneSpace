@@ -1,4 +1,4 @@
-﻿namespace TuneSpace.Core.DTOs.Responses.Spotify;
+namespace TuneSpace.Core.DTOs.Responses.Spotify;
 
 public class SpotifyProfileDTO
 {

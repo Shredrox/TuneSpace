@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using TuneSpace.Core.Enums;
 
 namespace TuneSpace.Core.Entities;

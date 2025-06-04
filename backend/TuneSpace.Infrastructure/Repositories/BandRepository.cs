@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;
 using TuneSpace.Infrastructure.Data;

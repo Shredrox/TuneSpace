@@ -1,4 +1,4 @@
-﻿using TuneSpace.Core.DTOs.Responses.Chat;
+using TuneSpace.Core.DTOs.Responses.Chat;
 using TuneSpace.Core.DTOs.Responses.Notification;
 using TuneSpace.Core.DTOs.Responses.BandChat;
 

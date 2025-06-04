@@ -1,4 +1,4 @@
-﻿namespace TuneSpace.Core.Entities;
+namespace TuneSpace.Core.Entities;
 
 public class Message
 {
