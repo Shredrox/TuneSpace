@@ -19,7 +19,7 @@ import Loading from "../fallback/loading";
 import useToast from "@/hooks/useToast";
 import ConnectSpotifyDialog from "./connect-spotify-dialog";
 import EditBandDialog from "./edit-band-dialog";
-import { MessageSquare, Users, CalendarDays } from "lucide-react";
+import { Users, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import CreateDiscussionDialog from "../social/create-discussion-dialog";
 import AddEventDialog from "../events/add-event-dialog";
@@ -29,6 +29,10 @@ import UserType from "@/interfaces/user/User";
 import { toast } from "sonner";
 import AddMerchandiseDialog from "./add-merchandise-dialog";
 import useMerchandise from "@/hooks/query/useMerchandise";
+import BandFollowers from "./band-followers";
+import BandMessagingDashboard from "./band-messaging-dashboard";
+import { useBandFollow } from "@/hooks/query/useBandFollow";
+import useBandChat from "@/hooks/query/useBandChat";
 
 const BandDashboard = () => {
   const { auth } = useAuth();
@@ -37,11 +41,56 @@ const BandDashboard = () => {
     useBandData(auth?.id || "");
 
   const { bandEvents } = useEvents(bandData?.band?.id || "");
+
   const {
     merchandise,
     isLoading: isMerchandiseLoading,
     refetch: refetchMerchandise,
   } = useMerchandise(bandData?.band?.id || "");
+
+  const { followerCount } = useBandFollow(bandData?.band?.id || "");
+
+  const { chatData } = useBandChat({
+    bandId: bandData?.band?.id || "",
+  });
+
+  const bandChats = chatData?.bandChats || [];
+  const messages = chatData?.messages || [];
+
+  const totalNewMessages = bandChats.reduce((total, chat) => {
+    try {
+      return (
+        total +
+        (messages?.filter((msg) => !msg.isRead && !msg.isFromBand).length || 0)
+      );
+    } catch (error) {
+      console.error("Error calculating new messages:", error);
+      return total;
+    }
+  }, 0);
+
+  const totalUserMessages = bandChats.reduce((total, chat) => {
+    try {
+      return total + (messages?.filter((msg) => !msg.isFromBand).length || 0);
+    } catch (error) {
+      console.error("Error calculating user messages:", error);
+      return total;
+    }
+  }, 0);
+
+  const totalBandResponses = bandChats.reduce((total, chat) => {
+    try {
+      return total + (messages?.filter((msg) => msg.isFromBand).length || 0);
+    } catch (error) {
+      console.error("Error calculating band responses:", error);
+      return total;
+    }
+  }, 0);
+
+  const responseRate =
+    totalUserMessages > 0
+      ? Math.round((totalBandResponses / totalUserMessages) * 100)
+      : 0;
 
   const [mounted, setMounted] = useState(false);
 
@@ -51,9 +100,9 @@ const BandDashboard = () => {
 
   useEffect(() => {
     if (mounted) {
-      useToast(
-        "Welcome to the Band Dashboard! Here you can manage your band activities as well as add additional info for your band."
-      );
+      // useToast(
+      //   "Welcome to the Band Dashboard! Here you can manage your band activities as well as add additional info for your band."
+      // );
     }
   }, [mounted]);
 
@@ -99,8 +148,12 @@ const BandDashboard = () => {
 
   const handleBandUpdate = async (updatedBand: any) => {
     try {
+      if (!bandData?.band?.id) {
+        throw new Error("Band ID is missing");
+      }
+
       const formData = new FormData();
-      formData.append("id", bandData.band?.id || "");
+      formData.append("id", bandData.band.id);
       formData.append("name", updatedBand.name || "");
       formData.append("description", updatedBand.description || "");
       formData.append("genre", updatedBand.genre || "");
@@ -127,14 +180,26 @@ const BandDashboard = () => {
 
   const handleAddMember = async (user: UserType) => {
     try {
+      if (!bandData?.band?.id) {
+        throw new Error("Band ID is missing");
+      }
+
+      if (!user?.id) {
+        throw new Error("User ID is missing");
+      }
+
       await mutations.addMemberMutation({
-        bandId: bandData.band?.id || "",
+        bandId: bandData.band.id,
         userId: user.id,
       });
       toast(`Added ${user.name} as a band member!`);
     } catch (error) {
       console.error("Error adding band member:", error);
-      toast("Failed to add member. Please try again.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to add member. Please try again.";
+      toast(errorMessage);
     }
   };
 
@@ -142,30 +207,49 @@ const BandDashboard = () => {
     return <Loading />;
   }
 
-  // Mock fan engagement data for now
-  const fanMessages = [
-    {
-      id: 1,
-      name: "JazzLover42",
-      message: "When are you coming to NYC?",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      name: "MusicFan",
-      message: "Loved your latest album!",
-      time: "1 day ago",
-    },
-    {
-      id: 3,
-      name: "ConcertGoer",
-      message: "Will there be VIP tickets?",
-      time: "2 days ago",
-    },
-  ];
+  if (isBandError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600">
+            Error Loading Band Data
+          </h2>
+          <p className="text-muted-foreground mt-2">
+            {bandError instanceof Error
+              ? bandError.message
+              : "Failed to load band information. Please try again."}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!bandData?.band) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">No Band Found</h2>
+          <p className="text-muted-foreground mt-2">
+            You don't have a band associated with your account yet.
+          </p>
+          <Link href="/band/register">
+            <button className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80">
+              Create a Band
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-start gap-6 px-6 py-8 max-w-[1400px] mx-auto w-full">
+    <div className="flex flex-col items-start gap-6 py-8 w-full">
       <div className="flex flex-wrap justify-between items-center w-full mb-2">
         <h1 className="text-4xl font-bold">Band Dashboard</h1>
         <EditBandDialog
@@ -187,20 +271,23 @@ const BandDashboard = () => {
                   {bandData.band?.name?.substring(0, 2) || "BP"}
                 </AvatarFallback>
               </Avatar>
-            </div>
-
+            </div>{" "}
             <div className="flex flex-col gap-4 flex-1">
               <div>
                 <h2 className="text-3xl font-bold mb-1">
-                  {bandData.band?.name}
+                  {bandData.band?.name || "Unknown Band"}
                 </h2>
                 <p className="text-xl font-medium text-muted-foreground">
-                  {bandData.band?.genre}
+                  {bandData.band?.genre || "No genre specified"}
                 </p>
                 <p className="text-muted-foreground mt-1">
-                  {bandData.band?.country}, {bandData.band?.city}
+                  {bandData.band?.country && bandData.band?.city
+                    ? `${bandData.band.country}, ${bandData.band.city}`
+                    : "Location not specified"}
                 </p>
-                <p className="mt-4 text-lg">{bandData.band?.description}</p>
+                <p className="mt-4 text-lg">
+                  {bandData.band?.description || "No description available"}
+                </p>
               </div>
 
               <div className="mt-auto">
@@ -229,7 +316,6 @@ const BandDashboard = () => {
                 )}
               </div>
             </div>
-
             <div className="lg:max-w-[320px] w-full">
               <h3 className="text-lg font-medium mb-3">Band Gallery</h3>
               <Carousel className="w-full">
@@ -264,14 +350,18 @@ const BandDashboard = () => {
                     <FaSpotify className="text-[#1DB954]" size={28} />
                     <h3 className="font-semibold text-2xl">Spotify Stats</h3>
                   </div>
-                </CardHeader>
+                </CardHeader>{" "}
                 <CardContent className="p-4">
                   {bandData.spotifyProfile ? (
                     <div className="flex flex-col gap-4">
                       <div className="flex gap-4 items-center">
                         <Avatar className="w-[100px] h-[100px]">
                           <AvatarImage
-                            src={bandData.spotifyProfile?.images[0].url}
+                            src={bandData.spotifyProfile?.images?.[0]?.url}
+                            onError={(e) => {
+                              console.error("Failed to load Spotify image");
+                              e.currentTarget.style.display = "none";
+                            }}
                           />
                           <AvatarFallback>SP</AvatarFallback>
                         </Avatar>
@@ -279,26 +369,36 @@ const BandDashboard = () => {
                           <p className="font-medium">
                             Followers:{" "}
                             <span className="font-bold">
-                              {bandData.spotifyProfile?.followers.total.toLocaleString()}
+                              {bandData.spotifyProfile?.followers?.total?.toLocaleString() ||
+                                "0"}
                             </span>
                           </p>
                           <p className="font-medium">
                             Popularity:{" "}
                             <span className="font-bold">
-                              {bandData.spotifyProfile?.popularity}%
+                              {bandData.spotifyProfile?.popularity || "0"}%
                             </span>
                           </p>
                         </div>
                       </div>
-                      <iframe
-                        className="rounded-xl mt-2"
-                        src={`https://open.spotify.com/embed/artist/${bandData.band?.spotifyId}?utm_source=generator&theme=0`}
-                        width="100%"
-                        height="152"
-                        allowFullScreen
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"
-                      ></iframe>
+                      {bandData.band?.spotifyId ? (
+                        <iframe
+                          className="rounded-xl mt-2"
+                          src={`https://open.spotify.com/embed/artist/${bandData.band.spotifyId}?utm_source=generator&theme=0`}
+                          width="100%"
+                          height="152"
+                          allowFullScreen
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                          loading="lazy"
+                          onError={() =>
+                            console.error("Failed to load Spotify embed")
+                          }
+                        ></iframe>
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground">
+                          Spotify embed unavailable
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
@@ -357,56 +457,6 @@ const BandDashboard = () => {
             <h2 className="text-2xl font-bold mb-6">Fan Community</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-900/20 to-transparent">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      <span>Fan Messages</span>
-                    </CardTitle>
-                    <Link href="/messages">
-                      <span className="text-sm text-primary hover:text-primary/80">
-                        View All
-                      </span>
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {fanMessages.map((message) => (
-                    <div
-                      key={message.id}
-                      className="flex items-center gap-3 p-3 border-b last:border-0"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback>
-                          {message.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between">
-                          <h4 className="font-medium truncate">
-                            {message.name}
-                          </h4>
-                          <span className="text-xs text-muted-foreground">
-                            {message.time}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {message.message}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="mt-4 flex justify-center">
-                    <Link href="/messages">
-                      <span className="text-primary hover:text-primary/80">
-                        Respond to Messages
-                      </span>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-purple-900/20 to-transparent">
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -460,45 +510,62 @@ const BandDashboard = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <BandMessagingDashboard bandId={bandData.band?.id || ""} />
             </div>
 
             <div className="mt-6">
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-amber-900/20 to-transparent">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    <span>Fan Engagement</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="bg-accent/30">
-                      <CardContent className="p-4 text-center">
-                        <h4 className="text-2xl font-bold">2.4K</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Total Followers
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-accent/30">
-                      <CardContent className="p-4 text-center">
-                        <h4 className="text-2xl font-bold">156</h4>
-                        <p className="text-sm text-muted-foreground">
-                          New Messages
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-accent/30">
-                      <CardContent className="p-4 text-center">
-                        <h4 className="text-2xl font-bold">87%</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Response Rate
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <BandFollowers
+                  bandId={bandData.band?.id || ""}
+                  showFollowersList={true}
+                />
+
+                <Card className="overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-amber-900/20 to-transparent">
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      <span>Fan Engagement</span>
+                    </CardTitle>
+                  </CardHeader>{" "}
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card className="bg-accent/30">
+                        <CardContent className="p-4 text-center">
+                          <h4 className="text-2xl font-bold">
+                            {followerCount
+                              ? followerCount.toLocaleString()
+                              : "0"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            Total Followers
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-accent/30">
+                        <CardContent className="p-4 text-center">
+                          <h4 className="text-2xl font-bold">
+                            {totalNewMessages}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            New Messages
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-accent/30">
+                        <CardContent className="p-4 text-center">
+                          <h4 className="text-2xl font-bold">
+                            {responseRate}%
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            Response Rate
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
 
