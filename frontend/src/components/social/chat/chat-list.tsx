@@ -7,13 +7,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/shadcn/avatar";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn/card";
-import { Search, MessageSquarePlus } from "lucide-react";
+import { Search, MessageSquarePlus, MessageSquare } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Badge } from "@/components/shadcn/badge";
 import Link from "next/link";
@@ -49,16 +43,18 @@ const ChatList = () => {
       toast("Failed to start conversation. Please try again.");
     }
   };
-
   return (
-    <Card className="h-full shadow-md">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle>Conversations</CardTitle>
+    <div className="h-full flex flex-col">
+      <div className="px-4 pb-3">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-muted-foreground">
+            {filteredChats.length} conversation
+            {filteredChats.length !== 1 ? "s" : ""}
+          </span>
           <UserSearchDialog
             trigger={
-              <Button size="sm" variant="ghost">
-                <MessageSquarePlus className="h-5 w-5" />
+              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                <MessageSquarePlus className="h-4 w-4" />
               </Button>
             }
             title="New Conversation"
@@ -66,19 +62,19 @@ const ChatList = () => {
             buttonText="Start Chat"
           />
         </div>
-        <div className="relative mt-2">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search conversations..."
-            className="pl-8"
+            className="pl-9 h-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-      </CardHeader>
-      <CardContent className="px-2">
+      </div>
+      <div className="flex-1 overflow-hidden px-2">
         {filteredChats.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-1 h-full overflow-y-auto">
             {filteredChats.map((chat) => (
               <Link
                 key={chat.id}
@@ -86,49 +82,70 @@ const ChatList = () => {
                 className="block"
               >
                 <div
-                  className={`flex items-center gap-3 p-3 rounded-md hover:bg-accent ${
-                    chat.unreadCount > 0 ? "bg-accent/30" : ""
+                  className={`flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors border border-transparent hover:border-border ${
+                    chat.unreadCount > 0 ? "bg-accent/30 border-primary/20" : ""
                   }`}
                 >
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-12 w-12 ring-2 ring-primary/10">
                     <AvatarImage
                       src={`data:image/png;base64,${
                         auth?.username === chat.user1Name
                           ? chat.user2Avatar
                           : chat.user1Avatar
                       }`}
+                      className="object-cover"
                     />
-                    <AvatarFallback>{chat.user2Name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-br from-accent to-muted font-semibold">
+                      {chat.user2Name.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center">
-                      <h4 className="font-semibold truncate">
+                    <div className="flex justify-between items-center mb-1">
+                      <h4 className="font-semibold text-sm truncate">
                         {chat.user2Name}
                       </h4>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(chat.lastMessageTime), "HH:mm")}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {chat.lastMessage}
                     </p>
+                    {chat.unreadCount > 0 && (
+                      <Badge className="mt-1 bg-primary text-primary-foreground text-xs px-2 py-0.5">
+                        {chat.unreadCount} new
+                      </Badge>
+                    )}
                   </div>
-                  {chat.unreadCount > 0 && (
-                    <Badge className="ml-2 bg-primary">
-                      {chat.unreadCount}
-                    </Badge>
-                  )}
                 </div>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No conversations found
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center max-w-xs">
+              <div className="mx-auto bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                <MessageSquare className="h-8 w-8 text-primary/60" />
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                No conversations yet. Start chatting with other music lovers!
+              </p>
+              <UserSearchDialog
+                trigger={
+                  <Button variant="outline" size="sm">
+                    <MessageSquarePlus className="h-4 w-4 mr-2" />
+                    Start Conversation
+                  </Button>
+                }
+                title="New Conversation"
+                onSelectUser={startConversation}
+                buttonText="Start Chat"
+              />
+            </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
