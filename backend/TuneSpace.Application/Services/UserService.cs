@@ -36,7 +36,7 @@ internal class UserService(
         return user.ProfilePicture;
     }
 
-    async Task<List<User>> IUserService.SearchByNameAsync(string name)
+    async Task<List<User>> IUserService.SearchByNameAsync(string name, string? currentUserId)
     {
         var users = await _userRepository.SearchByNameAsync(name);
 
@@ -44,6 +44,11 @@ internal class UserService(
         {
             _logger.LogWarning("No users found for search: {Search}", name);
             return [];
+        }
+
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            users = [.. users.Where(u => u.Id.ToString() != currentUserId)];
         }
 
         return users;

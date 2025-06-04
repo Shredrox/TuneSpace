@@ -4,6 +4,7 @@ using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.Authorization;
 using TuneSpace.Api.DTOs;
+using TuneSpace.Api.Extensions;
 
 namespace TuneSpace.Api.Controllers;
 
@@ -52,7 +53,8 @@ public class UserController(
 
         try
         {
-            var users = await _userService.SearchByNameAsync(search);
+            var currentUserId = User.GetUserId().ToString();
+            var users = await _userService.SearchByNameAsync(search, currentUserId);
             var response = users
                 .Select(user => new UserSearchResultResponse(user.Id, user.UserName ?? string.Empty, user.ProfilePicture ?? []))
                 .ToList();

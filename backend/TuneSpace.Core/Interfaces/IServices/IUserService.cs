@@ -32,8 +32,9 @@ public interface IUserService
     /// Searches for users whose names contain the specified search term.
     /// </summary>
     /// <param name="search">The search term to match against user names.</param>
+    /// <param name="currentUserId">The ID of the current user to exclude from results.</param>
     /// <returns>A task representing the asynchronous operation, containing a list of user entities whose names match the search criteria.</returns>
-    Task<List<User>> SearchByNameAsync(string search);
+    Task<List<User>> SearchByNameAsync(string search, string? currentUserId);
 
     /// <summary>
     /// Updates the profile picture for a specified user.
