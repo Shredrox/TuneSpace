@@ -1,6 +1,6 @@
 ﻿using TuneSpace.Core.DTOs.Requests.Band;
 using TuneSpace.Core.DTOs.Responses.Band;
-using TuneSpace.Core.Entities;
+using TuneSpace.Core.DTOs.Responses.User;
 
 namespace TuneSpace.Core.Interfaces.IServices;
 
@@ -13,15 +13,15 @@ public interface IBandService
     /// Retrieves a band by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the band to retrieve.</param>
-    /// <returns>The band if found; otherwise, null.</returns>
-    Task<Band?> GetBandByIdAsync(Guid id);
+    /// <returns>The band response if found; otherwise, null.</returns>
+    Task<BandResponse?> GetBandByIdAsync(Guid id);
 
     /// <summary>
     /// Retrieves a band by its name.
     /// </summary>
     /// <param name="name">The name of the band to retrieve.</param>
-    /// <returns>The band if found; otherwise, null.</returns>
-    Task<Band?> GetBandByNameAsync(string name);
+    /// <returns>The band response if found; otherwise, null.</returns>
+    Task<BandResponse?> GetBandByNameAsync(string name);
 
     /// <summary>
     /// Retrieves a band associated with a specific user.
@@ -38,11 +38,18 @@ public interface IBandService
     Task<byte[]?> GetBandImageAsync(Guid bandId);
 
     /// <summary>
+    /// Gets a list of the members of a specific band.
+    /// </summary>
+    /// <param name="bandId">The unique identifier of the band whose members are to be retrieved.</param>
+    /// <returns>An array of user result responses representing the members of the band.</returns>
+    Task<UserSearchResultResponse[]> GetBandMembersAsync(Guid bandId);
+
+    /// <summary>
     /// Creates a new band based on the provided request data.
     /// </summary>
     /// <param name="request">The data required to create a band, including name, description, genre, and image.</param>
-    /// <returns>The created band entity if successful; otherwise, null.</returns>
-    Task<Band?> CreateBandAsync(CreateBandRequest request);
+    /// <returns>The created band response if successful; otherwise, null.</returns>
+    Task<BandResponse?> CreateBandAsync(CreateBandRequest request);
 
     /// <summary>
     /// Updates an existing band with the provided information.

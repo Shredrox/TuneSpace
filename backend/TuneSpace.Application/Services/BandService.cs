@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TuneSpace.Core.DTOs.Requests.Band;
 using TuneSpace.Core.DTOs.Responses.Band;
+using TuneSpace.Core.DTOs.Responses.User;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Enums;
 using TuneSpace.Core.Interfaces.IRepositories;
@@ -17,7 +18,7 @@ internal class BandService(
     private readonly IUserRepository _userRepository = userRepository;
     private readonly ILogger<BandService> _logger = logger;
 
-    async Task<Band?> IBandService.GetBandByIdAsync(Guid id)
+    async Task<BandResponse?> IBandService.GetBandByIdAsync(Guid id)
     {
         try
         {
@@ -28,7 +29,24 @@ internal class BandService(
                 _logger.LogWarning("Band with ID {BandId} not found", id);
                 return null;
             }
-            return band;
+
+            return new BandResponse(
+                band.Id.ToString(),
+                band.Name,
+                band.Description ?? string.Empty,
+                band.Genre,
+                band.Country ?? string.Empty,
+                band.City ?? string.Empty,
+                band.CoverImage ?? [],
+                band.SpotifyId,
+                band.YouTubeEmbedId,
+                band.Members?.Select(m => new MemberResponse(
+                    m.Id.ToString(),
+                    m.UserName ?? string.Empty,
+                    "",
+                    m.ProfilePicture
+                )).ToList()
+            );
         }
         catch (Exception ex)
         {
@@ -37,7 +55,7 @@ internal class BandService(
         }
     }
 
-    async Task<Band?> IBandService.GetBandByNameAsync(string name)
+    async Task<BandResponse?> IBandService.GetBandByNameAsync(string name)
     {
         try
         {
@@ -46,8 +64,26 @@ internal class BandService(
             if (band == null)
             {
                 _logger.LogWarning("Band with name {BandName} not found", name);
+                return null;
             }
-            return band;
+
+            return new BandResponse(
+                band.Id.ToString(),
+                band.Name,
+                band.Description ?? string.Empty,
+                band.Genre,
+                band.Country ?? string.Empty,
+                band.City ?? string.Empty,
+                band.CoverImage ?? [],
+                band.SpotifyId,
+                band.YouTubeEmbedId,
+                band.Members?.Select(m => new MemberResponse(
+                    m.Id.ToString(),
+                    m.UserName ?? string.Empty,
+                    "",
+                    m.ProfilePicture
+                )).ToList()
+            );
         }
         catch (Exception ex)
         {
@@ -113,7 +149,32 @@ internal class BandService(
         }
     }
 
-    async Task<Band?> IBandService.CreateBandAsync(CreateBandRequest request)
+    async Task<UserSearchResultResponse[]> IBandService.GetBandMembersAsync(Guid bandId)
+    {
+        try
+        {
+            _logger.LogInformation("Getting members for band with ID {BandId}", bandId);
+            var band = await _bandRepository.GetBandByIdAsync(bandId);
+            if (band is null)
+            {
+                _logger.LogWarning("Band with ID {BandId} not found when retrieving members", bandId);
+                return [];
+            }
+
+            return [.. band.Members.Select(m => new UserSearchResultResponse(
+                m.Id,
+                m.UserName ?? string.Empty,
+                m.ProfilePicture ?? []
+            ))];
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving members for band with ID {BandId}", bandId);
+            throw;
+        }
+    }
+
+    async Task<BandResponse?> IBandService.CreateBandAsync(CreateBandRequest request)
     {
         try
         {
@@ -146,7 +207,24 @@ internal class BandService(
 
             await _bandRepository.InsertBandAsync(band);
             _logger.LogInformation("Band {BandName} created successfully with ID {BandId}", band.Name, band.Id);
-            return band;
+
+            return new BandResponse(
+                band.Id.ToString(),
+                band.Name,
+                band.Description ?? string.Empty,
+                band.Genre,
+                band.Country ?? string.Empty,
+                band.City ?? string.Empty,
+                band.CoverImage ?? [],
+                band.SpotifyId,
+                band.YouTubeEmbedId,
+                band.Members?.Select(m => new MemberResponse(
+                    m.Id.ToString(),
+                    m.UserName ?? string.Empty,
+                    "",
+                    m.ProfilePicture
+                )).ToList()
+            );
         }
         catch (Exception ex)
         {
@@ -229,6 +307,10 @@ internal class BandService(
 
             band.Members.Add(user);
             await _bandRepository.UpdateBandAsync(band);
+
+            user.Role = Roles.BandMember;
+            await _userRepository.UpdateUserAsync(user);
+
             _logger.LogInformation("User with ID {UserId} added to band with ID {BandId} successfully", userId, bandId);
         }
         catch (Exception ex)
