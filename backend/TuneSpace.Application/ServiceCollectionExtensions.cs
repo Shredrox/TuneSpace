@@ -30,6 +30,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IMerchandiseService, MerchandiseService>();
         services.AddScoped<IFollowService, FollowService>();
         services.AddScoped<IBandFollowService, BandFollowService>();
+        services.AddScoped<IBandChatService, BandChatService>();
+        services.AddScoped<IBandMessageService, BandMessageService>();
 
         return services;
     }

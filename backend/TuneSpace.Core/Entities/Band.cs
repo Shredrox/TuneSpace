@@ -16,4 +16,6 @@ public class Band
     public ICollection<MusicEvent> Events { get; set; } = [];
     public ICollection<Merchandise> Merchandise { get; set; } = [];
     public ICollection<BandFollow> Followers { get; set; } = [];
+    public ICollection<BandChat> BandChats { get; set; } = [];
+    public ICollection<BandMessage> SentBandMessages { get; set; } = [];
 }

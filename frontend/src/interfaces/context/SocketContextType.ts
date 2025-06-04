@@ -2,10 +2,12 @@ import Notification from "../Notification";
 import Chat from "../social/chat/Chat";
 import ChatPreview from "../social/chat/ChatPreview";
 import Message from "../social/chat/Message";
+import { BandChat, BandMessage } from "@/services/band-chat-service";
 
 export default interface SocketContextType {
   notifications: Notification[];
   messages: Message[];
+  bandMessages: BandMessage[];
   sendNotification: ({
     message,
     type,
@@ -19,9 +21,11 @@ export default interface SocketContextType {
   }) => Promise<void>;
   setUserNotifications: (notifications: Notification[]) => void;
   setUserChats: (newUserChats: ChatPreview[]) => void;
+  setBandChats: (newBandChats: BandChat[]) => void;
   createHubConnection: () => void;
   disconnectFromHub: () => void;
   setChatMessages: (newMessages: Message[]) => void;
+  setBandChatMessages: (newMessages: BandMessage[]) => void;
   sendMessage: ({
     message,
     sender,
@@ -33,4 +37,5 @@ export default interface SocketContextType {
   }) => Promise<void>;
   createChat: (chat: Chat) => Promise<void>;
   chats: ChatPreview[];
+  bandChats: BandChat[];
 }

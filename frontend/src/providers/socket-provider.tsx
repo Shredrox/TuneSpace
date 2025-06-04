@@ -10,6 +10,7 @@ import { SIGNALR_HUB_URL } from "@/utils/constants";
 import Notification from "@/interfaces/Notification";
 import Chat from "@/interfaces/social/chat/Chat";
 import ChatPreview from "@/interfaces/social/chat/ChatPreview";
+import { BandChat, BandMessage } from "@/services/band-chat-service";
 
 interface SocketProviderProps {
   children: ReactNode;
@@ -24,7 +25,9 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [bandMessages, setBandMessages] = useState<BandMessage[]>([]);
   const [chats, setChats] = useState<ChatPreview[]>([]);
+  const [bandChats, setBandChats] = useState<BandChat[]>([]);
 
   const createHubConnection = () => {
     const newConnection = new HubConnectionBuilder()
@@ -59,6 +62,8 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
       connection.on("ReceiveMessage", onMessageReceived);
       connection.on("ChatCreated", onChatCreated);
       connection.on("ReceiveNotification", onNotificationReceived);
+      connection.on("ReceiveBandMessage", onBandMessageReceived);
+      connection.on("BandChatCreated", onBandChatCreated);
     }
   }, [connection]);
 
@@ -113,6 +118,19 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     setChats(newUserChats);
   };
 
+  // Band Chats
+  const onBandMessageReceived = (message: BandMessage) => {
+    setBandMessages((prevMessages) => [...prevMessages, message]);
+  };
+
+  const onBandChatCreated = (chat: BandChat) => {
+    setBandChats((prevChats) => [...prevChats, chat]);
+  };
+
+  const setBandChatMessages = (newMessages: BandMessage[]) => {
+    setBandMessages(newMessages);
+  };
+
   // Notifications
   const sendNotification = async ({
     message,
@@ -157,11 +175,15 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     createHubConnection,
     disconnectFromHub,
     messages,
+    bandMessages,
     sendMessage,
     setChatMessages,
+    setBandChatMessages,
     createChat,
     setUserChats,
     chats,
+    bandChats,
+    setBandChats,
   };
 
   return (

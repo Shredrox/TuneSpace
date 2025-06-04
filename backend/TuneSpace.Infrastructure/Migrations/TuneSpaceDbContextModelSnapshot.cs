@@ -162,6 +162,96 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("Bands");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandChat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BandId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BandChats");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandFollow", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BandId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BandFollows");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BandChatId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsFromBand")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BandChatId");
+
+                    b.HasIndex("BandId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("BandMessages");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Chat", b =>
                 {
                     b.Property<Guid>("Id")
@@ -674,6 +764,67 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandChat", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.Band", "Band")
+                        .WithMany("BandChats")
+                        .HasForeignKey("BandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany("BandChats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Band");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandFollow", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.Band", "Band")
+                        .WithMany("Followers")
+                        .HasForeignKey("BandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Band");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandMessage", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.BandChat", "BandChat")
+                        .WithMany("Messages")
+                        .HasForeignKey("BandChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TuneSpace.Core.Entities.Band", "Band")
+                        .WithMany("SentBandMessages")
+                        .HasForeignKey("BandId");
+
+                    b.HasOne("TuneSpace.Core.Entities.User", "Sender")
+                        .WithMany("SentBandMessages")
+                        .HasForeignKey("SenderId");
+
+                    b.Navigation("Band");
+
+                    b.Navigation("BandChat");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Chat", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "ParticipantA")
@@ -849,11 +1000,22 @@ namespace TuneSpace.Infrastructure.Migrations
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Band", b =>
                 {
+                    b.Navigation("BandChats");
+
                     b.Navigation("Events");
+
+                    b.Navigation("Followers");
 
                     b.Navigation("Members");
 
                     b.Navigation("Merchandise");
+
+                    b.Navigation("SentBandMessages");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.BandChat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumCategory", b =>
@@ -869,6 +1031,13 @@ namespace TuneSpace.Infrastructure.Migrations
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumThread", b =>
                 {
                     b.Navigation("Posts");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.User", b =>
+                {
+                    b.Navigation("BandChats");
+
+                    b.Navigation("SentBandMessages");
                 });
 #pragma warning restore 612, 618
         }

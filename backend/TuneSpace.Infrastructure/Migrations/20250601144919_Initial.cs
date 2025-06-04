@@ -256,6 +256,59 @@ namespace TuneSpace.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BandChats",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BandId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastMessageAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BandChats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BandChats_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BandChats_Bands_BandId",
+                        column: x => x.BandId,
+                        principalTable: "Bands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BandFollows",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BandId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BandFollows", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BandFollows_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BandFollows_Bands_BandId",
+                        column: x => x.BandId,
+                        principalTable: "Bands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Chats",
                 columns: table => new
                 {
@@ -381,6 +434,40 @@ namespace TuneSpace.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BandMessages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    BandChatId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SenderId = table.Column<Guid>(type: "uuid", nullable: true),
+                    BandId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
+                    IsFromBand = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BandMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BandMessages_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_BandMessages_BandChats_BandChatId",
+                        column: x => x.BandChatId,
+                        principalTable: "BandChats",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BandMessages_Bands_BandId",
+                        column: x => x.BandId,
+                        principalTable: "Bands",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -515,6 +602,41 @@ namespace TuneSpace.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_BandChats_BandId",
+                table: "BandChats",
+                column: "BandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BandChats_UserId",
+                table: "BandChats",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BandFollows_BandId",
+                table: "BandFollows",
+                column: "BandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BandFollows_UserId",
+                table: "BandFollows",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BandMessages_BandChatId",
+                table: "BandMessages",
+                column: "BandChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BandMessages_BandId",
+                table: "BandMessages",
+                column: "BandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BandMessages_SenderId",
+                table: "BandMessages",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Chats_ParticipantAId",
                 table: "Chats",
                 column: "ParticipantAId");
@@ -619,6 +741,12 @@ namespace TuneSpace.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BandFollows");
+
+            migrationBuilder.DropTable(
+                name: "BandMessages");
+
+            migrationBuilder.DropTable(
                 name: "Follows");
 
             migrationBuilder.DropTable(
@@ -641,6 +769,9 @@ namespace TuneSpace.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "BandChats");
 
             migrationBuilder.DropTable(
                 name: "ForumPosts");

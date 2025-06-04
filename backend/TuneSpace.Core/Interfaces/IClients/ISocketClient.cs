@@ -1,5 +1,6 @@
 ﻿using TuneSpace.Core.DTOs.Responses.Chat;
 using TuneSpace.Core.DTOs.Responses.Notification;
+using TuneSpace.Core.DTOs.Responses.BandChat;
 
 namespace TuneSpace.Core.Interfaces.IClients;
 
@@ -29,4 +30,18 @@ public interface ISocketClient
     /// <param name="message">The message response object containing the message content and metadata.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task ReceiveMessage(MessageResponse message);
+
+    /// <summary>
+    /// Notifies the client that a new band chat has been created.
+    /// </summary>
+    /// <param name="chat">The band chat response object containing information about the newly created band chat.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task BandChatCreated(BandChatResponse chat);
+
+    /// <summary>
+    /// Receives a band message in the band chat system.
+    /// </summary>
+    /// <param name="message">The band message response object containing the message content and metadata.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task ReceiveBandMessage(BandMessageResponse message);
 }
