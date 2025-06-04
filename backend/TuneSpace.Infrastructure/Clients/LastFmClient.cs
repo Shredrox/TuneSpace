@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Models;
+using TuneSpace.Core.DTOs.Responses.LastFm;
 using TuneSpace.Infrastructure.Options;
 
 namespace TuneSpace.Infrastructure.Clients;
@@ -19,31 +20,31 @@ internal class LastFmClient(
     {
         var apiUrl = $"{BaseUrl}?method=artist.getInfo&artist={bandName}&api_key={_lastFmOptions.ApiKey}&format=json";
         var response = await _httpClient.GetStringAsync(apiUrl);
-        var bandData = JObject.Parse(response);
 
-        var artist = bandData["artist"];
+        var bandData = JsonSerializer.Deserialize<LastFmArtistInfoResponse>(response);
+        var artist = bandData?.Artist;
 
         if (artist == null)
         {
             return new BandModel { Name = bandName };
         }
 
-        var name = artist["name"]?.ToString() ?? bandName;
-        var listeners = int.TryParse(artist["listeners"]?.ToString(), out var l) ? l : 0;
-        var playCount = int.TryParse(artist["stats"]?["playcount"]?.ToString(), out var pc) ? pc : 0;
+        var name = artist.Name ?? bandName;
+        var listeners = int.TryParse(artist.Listeners, out var l) ? l : 0;
+        var playCount = int.TryParse(artist.Stats?.PlayCount, out var pc) ? pc : 0;
 
         string imageUrl = "";
-        var images = artist["image"]?.ToObject<JArray>();
+        var images = artist.Images;
         if (images != null)
         {
             var sizeOrder = new[] { "extralarge", "large", "medium", "small" };
 
             foreach (var size in sizeOrder)
             {
-                var img = images.FirstOrDefault(i => i["size"]?.ToString() == size);
-                if (img != null && !string.IsNullOrWhiteSpace(img["#text"]?.ToString()))
+                var img = images.FirstOrDefault(i => i.Size == size);
+                if (img != null && !string.IsNullOrWhiteSpace(img.Text))
                 {
-                    imageUrl = img["#text"]?.ToString() ?? "";
+                    imageUrl = img.Text;
                     break;
                 }
             }
@@ -51,13 +52,13 @@ internal class LastFmClient(
             if (string.IsNullOrWhiteSpace(imageUrl))
             {
                 imageUrl = images
-                    .Select(img => img["#text"]?.ToString())
+                    .Select(img => img.Text)
                     .FirstOrDefault(url => !string.IsNullOrWhiteSpace(url)) ?? "";
             }
         }
 
-        var tags = artist["tags"]?["tag"]?.ToObject<JArray>();
-        var genres = tags?.Select(t => t["name"]?.ToString() ?? "")
+        var tags = artist.Tags?.Tag;
+        var genres = tags?.Select(t => t.Name ?? "")
             .Where(t => !string.IsNullOrEmpty(t))
             .ToList() ?? [];
 
@@ -75,16 +76,17 @@ internal class LastFmClient(
     {
         var apiUrl = $"{BaseUrl}?method=artist.getSimilar&artist={bandName}&api_key={_lastFmOptions.ApiKey}&limit={limit}&format=json";
         var response = await _httpClient.GetStringAsync(apiUrl);
-        var similarBands = JObject.Parse(response);
 
-        var artists = similarBands["similarartists"]?["artist"]?.ToObject<JArray>();
+        var similarBands = JsonSerializer.Deserialize<LastFmSimilarArtistsResponse>(response);
+        var artists = similarBands?.SimilarArtists?.Artists;
+
         if (artists is null)
         {
             return [];
         }
 
         return [.. artists
-            .Select(artist => artist["name"]?.ToString() ?? "")
+            .Select(artist => artist.Name ?? "")
             .Where(name => !string.IsNullOrEmpty(name))];
     }
 }
