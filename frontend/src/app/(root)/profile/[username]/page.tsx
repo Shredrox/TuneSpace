@@ -3,15 +3,7 @@ import { SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import { cookies } from "next/headers";
 import httpClient from "@/services/http-client";
 import Profile from "@/components/user/profile";
-
-interface RecentlyPlayedTrack {
-  trackName: string;
-  artistName: string;
-  artistId: string;
-  albumName: string;
-  albumImageUrl: string;
-  playedAt: string;
-}
+import RecentlyPlayedTrack from "@/interfaces/spotify/RecentlyPlayedTrack";
 
 export default async function ProfilePage({
   params,
