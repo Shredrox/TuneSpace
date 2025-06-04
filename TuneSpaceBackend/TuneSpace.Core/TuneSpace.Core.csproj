@@ -1,7 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-    <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
-      <PackageReference Include="Newtonsoft.Json" />
-      <PackageReference Include="System.Net.Http.Json" />
-    </ItemGroup>
-</Project>
