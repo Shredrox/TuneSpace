@@ -103,7 +103,10 @@ const UserSearchDialog = ({
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage />
+                      <AvatarImage
+                        src={`data:image/jpeg;base64,${user.profilePicture}`}
+                        className="object-cover"
+                      />
                       <AvatarFallback>
                         {user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>

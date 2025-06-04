@@ -111,6 +111,7 @@ export default function CategoryPage() {
                     <Avatar className="h-10 w-10">
                       <AvatarImage
                         src={`data:image/png;base64,${thread.authorAvatar}`}
+                        className="object-cover"
                       />
                       <AvatarFallback>
                         {thread.authorName?.charAt(0)}

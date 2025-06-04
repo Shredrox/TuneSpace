@@ -209,6 +209,7 @@ export function AppSidebar() {
                   ? `data:image/png;base64,${profile.profilePicture}`
                   : undefined
               }
+              className="object-cover"
               alt={auth?.username || "User"}
             />
             <AvatarFallback>{userInitials}</AvatarFallback>

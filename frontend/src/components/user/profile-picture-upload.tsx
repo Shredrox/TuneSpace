@@ -68,7 +68,11 @@ const ProfilePictureUpload = ({
   return (
     <div className="flex flex-col items-center gap-4">
       <Avatar className="w-32 h-32 border-4 border-muted">
-        <AvatarImage src={imagePreview} alt={username} />
+        <AvatarImage
+          src={imagePreview}
+          alt={username}
+          className="object-cover"
+        />
         <AvatarFallback className="text-3xl">
           {username ? username.charAt(0).toUpperCase() : "U"}
         </AvatarFallback>

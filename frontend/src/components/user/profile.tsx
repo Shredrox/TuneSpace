@@ -391,6 +391,7 @@ const Profile = ({
                                 : "https://via.placeholder.com/40"
                             }
                             alt={follower?.name}
+                            className="object-cover"
                           />
                           <AvatarFallback>
                             {follower?.name?.substring(0, 2).toUpperCase()}
@@ -437,6 +438,7 @@ const Profile = ({
                                 : "https://via.placeholder.com/40"
                             }
                             alt={follower.name}
+                            className="object-cover"
                           />
                           <AvatarFallback>
                             {follower.name.substring(0, 2).toUpperCase()}

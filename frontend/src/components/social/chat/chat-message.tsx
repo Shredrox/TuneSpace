@@ -25,7 +25,10 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         }`}
       >
         <Avatar className="h-8 w-8">
-          <AvatarImage src={`data:image/png;base64,${message.senderAvatar}`} />
+          <AvatarImage
+            src={`data:image/png;base64,${message.senderAvatar}`}
+            className="object-cover"
+          />
           <AvatarFallback>{senderName.charAt(0)}</AvatarFallback>
         </Avatar>
         <div>

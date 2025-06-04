@@ -229,6 +229,7 @@ const HeaderSearchBar = () => {
                       <Avatar>
                         <AvatarImage
                           src={`data:image/png;base64,${user.profilePicture}`}
+                          className="object-cover"
                         />
                         <AvatarFallback>
                           {user.name.charAt(0).toUpperCase()}

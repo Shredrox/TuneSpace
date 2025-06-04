@@ -102,7 +102,10 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
       <CardHeader className="border-b py-3">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={`data:image/png;base64,${chatUserAvatar}`} />
+            <AvatarImage
+              src={`data:image/png;base64,${chatUserAvatar}`}
+              className="object-cover"
+            />
             <AvatarFallback>{chatUserInitial}</AvatarFallback>
           </Avatar>
           <CardTitle>{chatUser}</CardTitle>

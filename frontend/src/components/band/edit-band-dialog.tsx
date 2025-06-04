@@ -76,6 +76,7 @@ const EditBandDialog = ({ band, handleBandUpdate }: EditBandDialogProps) => {
                     : `data:image/jpeg;base64,${imagePreview}`
                   : ""
               }
+              className="object-cover"
             />
             <AvatarFallback>BandPicture</AvatarFallback>
           </Avatar>

@@ -114,7 +114,11 @@ const BandRegistrationForm = ({ locationData }: { locationData: any }) => {
             )}
             {imagePreview && (
               <Avatar className="w-1/2 h-auto mt-2">
-                <AvatarImage src={imagePreview} width={500} />
+                <AvatarImage
+                  src={imagePreview}
+                  width={500}
+                  className="object-cover"
+                />
                 <AvatarFallback>BandPicture</AvatarFallback>
               </Avatar>
             )}
