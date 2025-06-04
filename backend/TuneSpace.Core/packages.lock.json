@@ -156,6 +156,9 @@
         "resolved": "9.0.2",
         "contentHash": "puBMtKe/wLuYa7H6docBkLlfec+h8L35DXqsDKKJgW0WY5oCwJ3cBJKcDaZchv6knAyqOMfsl6VUbaR++E5LXA=="
       }
-    }
+    },
+    "net9.0/linux-x64": {},
+    "net9.0/osx-x64": {},
+    "net9.0/win-x64": {}
   }
 }
