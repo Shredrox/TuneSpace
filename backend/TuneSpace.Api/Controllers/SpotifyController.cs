@@ -186,6 +186,59 @@ public class SpotifyController(
 
     }
 
+    [HttpGet("listening-stats/today")]
+    public async Task<IActionResult> GetTodayListeningStats()
+    {
+        // TODO: Refactor
+        // Currently limits to last 50 tracks played today (in the last 24 hours)
+        // Should aggregate the stats for the day
+
+        var accessToken = Request.Cookies["SpotifyAccessToken"];
+
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return Unauthorized("Access token is required");
+        }
+
+        try
+        {
+            var stats = await _spotifyService.GetListeningStatsForPeriodAsync(accessToken, "today");
+            return Ok(stats);
+        }
+        catch (SpotifyApiException e)
+        {
+            _logger.LogError(e, "Error fetching today's listening stats");
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpGet("listening-stats/this-week")]
+    public async Task<IActionResult> GetThisWeekListeningStats()
+    {
+        // TODO: Implement this endpoint to fetch listening stats for the current week
+        // Currently, it's returning the same stats as the "today" endpoint
+        // as Spoitfy API does not provide a direct way to get weekly stats.
+        // May need to aggregate daily stats for the week.
+
+        var accessToken = Request.Cookies["SpotifyAccessToken"];
+
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return Unauthorized("Access token is required");
+        }
+
+        try
+        {
+            var stats = await _spotifyService.GetListeningStatsForPeriodAsync(accessToken, "this-week");
+            return Ok(stats);
+        }
+        catch (SpotifyApiException e)
+        {
+            _logger.LogError(e, "Error fetching this week's listening stats");
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpGet("search/{searchTerm}")]
     public async Task<IActionResult> GetSongsBySearch(string searchTerm)
     {
