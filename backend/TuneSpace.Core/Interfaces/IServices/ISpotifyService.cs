@@ -45,6 +45,15 @@ public interface ISpotifyService
     /// <returns>List of recently played tracks</returns>
     Task<List<RecentlyPlayedTrackDTO>> GetUserRecentlyPlayedTracksAsync(string token);
 
+
+    /// <summary>
+    /// Gets listening statistics for a specific time period (today or this week)
+    /// </summary>
+    /// <param name="token">Spotify access token</param>
+    /// <param name="period">Time period to filter by ("today" or "this-week")</param>
+    /// <returns>Listening statistics including tracks, total hours played, and other metrics</returns>
+    Task<RecentlyPlayedStatsResponse> GetListeningStatsForPeriodAsync(string token, string period);
+
     /// <summary>
     /// Gets information for a specific artist from Spotify
     /// </summary>
