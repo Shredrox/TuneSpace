@@ -21,10 +21,22 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         return await _httpClient.GetAsync($"{BaseApiUrl}/me");
     }
 
-    async Task<HttpResponseMessage> ISpotifyClient.GetUserRecentlyPlayedTracks(string token)
+    async Task<HttpResponseMessage> ISpotifyClient.GetUserRecentlyPlayedTracks(string token, long? after, long? before, int limit)
     {
         SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/me/player/recently-played");
+
+        var url = $"{BaseApiUrl}/me/player/recently-played?limit={limit}";
+
+        if (after.HasValue)
+        {
+            url += $"&after={after.Value}";
+        }
+        else if (before.HasValue)
+        {
+            url += $"&before={before.Value}";
+        }
+
+        return await _httpClient.GetAsync(url);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserFollowedArtists(string token, string? after)

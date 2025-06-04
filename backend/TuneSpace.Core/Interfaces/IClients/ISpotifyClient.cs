@@ -35,11 +35,14 @@ public interface ISpotifyClient
     Task<HttpResponseMessage> GetUserFollowedArtists(string token, string? after);
 
     /// <summary>
-    /// Retrieves the tracks that the current user has recently played.
+    /// Retrieves the tracks that the current user has recently played with time filtering.
     /// </summary>
     /// <param name="token">The access token for authentication.</param>
-    /// <returns>HTTP response containing the user's recently played tracks.</returns>
-    Task<HttpResponseMessage> GetUserRecentlyPlayedTracks(string token);
+    /// <param name="after">Unix timestamp in milliseconds. Returns tracks played after this time.</param>
+    /// <param name="before">Unix timestamp in milliseconds. Returns tracks played before this time.</param>
+    /// <param name="limit">Maximum number of tracks to return (1-50, default 20).</param>
+    /// <returns>HTTP response containing the user's recently played tracks within the specified time range.</returns>
+    Task<HttpResponseMessage> GetUserRecentlyPlayedTracks(string token, long? after, long? before, int limit);
 
     /// <summary>
     /// Retrieves the current user's top tracks.
