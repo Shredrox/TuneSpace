@@ -1,4 +1,4 @@
-﻿namespace TuneSpace.Core.DTOs.Responses.User;
+namespace TuneSpace.Core.DTOs.Responses.User;
 
 public record UserSearchResultResponse(
     Guid Id,

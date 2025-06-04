@@ -1,4 +1,4 @@
-﻿using TuneSpace.Core.Entities;
+using TuneSpace.Core.Entities;
 
 namespace TuneSpace.Core.Interfaces.IServices;
 

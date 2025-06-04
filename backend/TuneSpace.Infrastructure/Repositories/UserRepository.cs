@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IRepositories;

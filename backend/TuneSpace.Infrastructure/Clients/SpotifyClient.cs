@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using TuneSpace.Core.Interfaces.IClients;
 
 namespace TuneSpace.Infrastructure.Clients;

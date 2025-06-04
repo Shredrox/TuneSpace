@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using TuneSpace.Core.Entities;
 
 namespace TuneSpace.Core.Interfaces.IServices;

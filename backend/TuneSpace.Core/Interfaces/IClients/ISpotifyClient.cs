@@ -1,4 +1,4 @@
-﻿namespace TuneSpace.Core.Interfaces.IClients;
+namespace TuneSpace.Core.Interfaces.IClients;
 
 /// <summary>
 /// Provides methods for interacting with the Spotify Web API.

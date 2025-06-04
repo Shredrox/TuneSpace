@@ -1,4 +1,4 @@
-﻿namespace TuneSpace.Core.DTOs.Requests.Band;
+namespace TuneSpace.Core.DTOs.Requests.Band;
 
 public record CreateBandRequest(
     string UserId,
