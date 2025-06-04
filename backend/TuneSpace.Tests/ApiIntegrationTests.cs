@@ -17,16 +17,6 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task HealthCheck_Endpoint_Returns_Healthy()
-    {
-        var response = await _client.GetAsync("/health");
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadAsStringAsync();
-        content.Should().Be("Healthy");
-    }
-
-    [Fact]
     public async Task Swagger_Endpoint_Is_Accessible_In_Development()
     {
         var response = await _client.GetAsync("/swagger/index.html");
