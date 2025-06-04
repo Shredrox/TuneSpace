@@ -32,6 +32,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddOptions(builder.Configuration);
 builder.Services.AddDatabaseServices();
 builder.Services.AddRepositoryServices();
@@ -80,4 +82,8 @@ app.MapControllers();
 
 app.MapHub<SocketHub>("/socket-hub");
 
+app.MapHealthChecks("/health");
+
 app.Run();
+
+public partial class Program { }
