@@ -266,6 +266,33 @@ public class SpotifyController(
         }
     }
 
+    [HttpGet("search-artists/{searchTerm}")]
+    public async Task<IActionResult> SearchArtists(string searchTerm)
+    {
+        var accessToken = Request.Cookies["SpotifyAccessToken"];
+
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            return Unauthorized("Access token is required");
+        }
+
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            return BadRequest("Search term cannot be empty");
+        }
+
+        try
+        {
+            var searchResponse = await _spotifyService.SearchAsync(accessToken, searchTerm, "artist", 10);
+            return Ok(searchResponse.Artists?.Items ?? []);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error searching for artists with term: {SearchTerm}", searchTerm);
+            return BadRequest("Error searching for artists");
+        }
+    }
+
     [HttpGet("recently-played")]
     public async Task<IActionResult> GetUserRecentlyPlayedTracks()
     {

@@ -39,6 +39,7 @@ export const ENDPOINTS = {
 export const SPOTIFY_ENDPOINTS = {
   LOGIN: "Spotify/login",
   SEARCH: "Spotify/search",
+  SEARCH_ARTISTS: "Spotify/search-artists",
   PROFILE: "Spotify/profile",
   ARTIST: "Spotify/artist",
   ARTISTS: "Spotify/artists",

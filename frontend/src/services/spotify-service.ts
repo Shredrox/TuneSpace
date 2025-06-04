@@ -26,6 +26,15 @@ export const getSpotifyArtist = async (
   return (await httpClient.get(`${SPOTIFY_ENDPOINTS.ARTIST}/${artistId}`)).data;
 };
 
+export const searchSpotifyArtists = async (
+  searchTerm: string
+): Promise<SpotifyArtist[]> => {
+  const response = await httpClient.get(
+    `${SPOTIFY_ENDPOINTS.SEARCH_ARTISTS}/${searchTerm}`
+  );
+  return response.data;
+};
+
 export const getTodayListeningStats =
   async (): Promise<RecentlyPlayedStats> => {
     const response = await httpClient.get(
