@@ -43,6 +43,9 @@ export const SPOTIFY_ENDPOINTS = {
   ARTIST: "Spotify/artist",
   ARTISTS: "Spotify/artists",
   RECENTLY_PLAYED: "Spotify/recently-played",
+  FOLLOWED_ARTISTS: "Spotify/followed-artists",
+  LISTENING_STATS_TODAY: "Spotify/listening-stats/today",
+  LISTENING_STATS_THIS_WEEK: "Spotify/listening-stats/this-week",
 } as const;
 
 export enum UserRole {
