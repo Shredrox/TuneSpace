@@ -42,10 +42,6 @@ export default async function ProfilePage({
     }
   }
 
-  if (!spotifyProfileData) {
-    return <Loading />;
-  }
-
   return (
     <>
       <Profile

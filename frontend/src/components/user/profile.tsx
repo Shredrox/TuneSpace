@@ -39,16 +39,16 @@ interface ProfileProps {
       spotifyPlan: string;
       profilePicture?: string;
     };
-    topArtists: Array<{
+    topArtists?: Array<{
       name: string;
       image: string;
     }>;
-    topSongs: Array<{
+    topSongs?: Array<{
       name: string;
       artist: string;
       image: string;
     }>;
-  };
+  } | null;
   recentlyPlayedTracks: Array<{
     trackName: string;
     artistName: string;
@@ -179,9 +179,13 @@ const Profile = ({
               )}
             </div>
             <div className="flex items-center gap-2 text-muted-foreground mt-1 justify-center md:justify-start">
-              <FaSpotify className="text-[#1ed760]" />
-              <span>Premium: {spotifyProfileData?.profile?.spotifyPlan}</span>
-              <span className="mx-2">•</span>
+              {spotifyProfileData?.profile?.spotifyPlan && (
+                <>
+                  <FaSpotify className="text-[#1ed760]" />
+                  <span>Premium: {spotifyProfileData.profile.spotifyPlan}</span>
+                  <span className="mx-2">•</span>
+                </>
+              )}
               <span
                 className="flex items-center cursor-pointer hover:text-primary transition-colors"
                 onClick={() => setActiveTab("followers")}
@@ -212,160 +216,200 @@ const Profile = ({
             <TabsTrigger value="followers">Followers</TabsTrigger>
             <TabsTrigger value="following">Following</TabsTrigger>
           </TabsList>
-
           <TabsContent value="activity" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
-                <div className="p-5 border-b border-border">
-                  <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
-                    <FaGuitar className="text-primary" /> Top Artists
-                  </h2>
-                </div>
-                <div className="p-5">
-                  {spotifyProfileData?.topArtists?.map((artist, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
-                    >
-                      <Avatar className="h-16 w-16 border-2 border-background shadow-md">
-                        <AvatarImage src={artist.image} alt={artist.name} />
-                        <AvatarFallback>
-                          <LucideUser className="w-6 h-6 text-muted-foreground" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-lg text-card-foreground">
-                          {artist.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">Artist</p>
-                      </div>
+            {isOwnProfile ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
+                    <div className="p-5 border-b border-border">
+                      <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
+                        <FaGuitar className="text-primary" /> Top Artists
+                      </h2>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="p-5">
+                      {spotifyProfileData?.topArtists?.map((artist, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
+                        >
+                          <Avatar className="h-16 w-16 border-2 border-background shadow-md">
+                            <AvatarImage src={artist.image} alt={artist.name} />
+                            <AvatarFallback>
+                              <LucideUser className="w-6 h-6 text-muted-foreground" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-lg text-card-foreground">
+                              {artist.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Artist
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-              <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
-                <div className="p-5 border-b border-border">
-                  <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
-                    <IoMusicalNote className="text-primary" /> Top Songs
-                  </h2>
+                  <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
+                    <div className="p-5 border-b border-border">
+                      <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
+                        <IoMusicalNote className="text-primary" /> Top Songs
+                      </h2>
+                    </div>
+                    <div className="p-5">
+                      {spotifyProfileData?.topSongs?.map((song, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
+                        >
+                          {song.image ? (
+                            <img
+                              className="rounded-md w-16 h-16 object-cover shadow-md"
+                              src={song.image}
+                              alt={song.name}
+                            />
+                          ) : (
+                            <div className="flex items-center justify-center rounded-md w-16 h-16 bg-muted shadow-md">
+                              <Disc className="w-8 h-8 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <p className="font-medium text-lg text-card-foreground">
+                              {song.name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {song.artist}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="p-5">
-                  {spotifyProfileData?.topSongs?.map((song, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
-                    >
-                      {song.image ? (
-                        <img
-                          className="rounded-md w-16 h-16 object-cover shadow-md"
-                          src={song.image}
-                          alt={song.name}
-                        />
+
+                <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
+                  <div className="p-5 border-b border-border">
+                    <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
+                      <FaHistory className="text-primary" /> Recently Played
+                    </h2>
+                  </div>
+
+                  <div className="p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {recentlyPlayedTracks.length > 0 ? (
+                        recentlyPlayedTracks.map((track, index) => (
+                          <div
+                            key={`${track.trackName}-${index}`}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-all"
+                          >
+                            {track.albumImageUrl ? (
+                              <img
+                                src={track.albumImageUrl}
+                                alt={track.albumName}
+                                className="w-16 h-16 object-cover rounded shadow-md"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center rounded w-16 h-16 bg-muted shadow-md">
+                                <Disc className="w-8 h-8 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex flex-col overflow-hidden">
+                              <p className="font-medium text-card-foreground truncate">
+                                {track.trackName}
+                              </p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {track.artistName}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(track.playedAt)}
+                              </p>
+                            </div>
+                          </div>
+                        ))
                       ) : (
-                        <div className="flex items-center justify-center rounded-md w-16 h-16 bg-muted shadow-md">
-                          <Disc className="w-8 h-8 text-muted-foreground" />
+                        <div className="col-span-full text-center py-8 text-muted-foreground">
+                          No recently played tracks found
                         </div>
                       )}
-                      <div className="flex flex-col">
-                        <p className="font-medium text-lg text-card-foreground">
-                          {song.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {song.artist}
-                        </p>
-                      </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
-              <div className="p-5 border-b border-border">
-                <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
-                  <FaHistory className="text-primary" /> Recently Played
-                </h2>
-              </div>
-
-              <div className="p-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {recentlyPlayedTracks.length > 0 ? (
-                    recentlyPlayedTracks.map((track, index) => (
-                      <div
-                        key={`${track.trackName}-${index}`}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-all"
-                      >
-                        {track.albumImageUrl ? (
-                          <img
-                            src={track.albumImageUrl}
-                            alt={track.albumName}
-                            className="w-16 h-16 object-cover rounded shadow-md"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center rounded w-16 h-16 bg-muted shadow-md">
-                            <Disc className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div className="flex flex-col overflow-hidden">
-                          <p className="font-medium text-card-foreground truncate">
-                            {track.trackName}
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {track.artistName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(track.playedAt)}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full text-center py-8 text-muted-foreground">
-                      No recently played tracks found
+                <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-border">
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-card-foreground">
+                    <FaSpotify className="text-[#1ed760]" /> Spotify Profile
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-accent p-4 rounded-lg text-center">
+                      <p className="text-muted-foreground text-sm">
+                        Spotify Followers
+                      </p>
+                      <p className="text-2xl font-bold text-accent-foreground">
+                        {spotifyProfileData?.profile?.followerCount || 0}
+                      </p>
                     </div>
-                  )}
+                    <div
+                      className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
+                      onClick={() => setActiveTab("followers")}
+                    >
+                      <p className="text-muted-foreground text-sm">
+                        TuneSpace Followers
+                      </p>
+                      <p className="text-2xl font-bold text-accent-foreground">
+                        {followerCount}
+                      </p>
+                    </div>
+                    <div
+                      className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
+                      onClick={() => setActiveTab("following")}
+                    >
+                      <p className="text-muted-foreground text-sm">Following</p>
+                      <p className="text-2xl font-bold text-accent-foreground">
+                        {followingCount}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-border">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-card-foreground">
-                <FaSpotify className="text-[#1ed760]" /> Spotify Profile
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-accent p-4 rounded-lg text-center">
-                  <p className="text-muted-foreground text-sm">
-                    Spotify Followers
-                  </p>
-                  <p className="text-2xl font-bold text-accent-foreground">
-                    {spotifyProfileData?.profile?.followerCount || 0}
-                  </p>
+              </>
+            ) : (
+              <>
+                <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-border">
+                  <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-card-foreground">
+                    <FaSpotify className="text-[#1ed760]" /> Public Profile
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
+                      onClick={() => setActiveTab("followers")}
+                    >
+                      <p className="text-muted-foreground text-sm">
+                        TuneSpace Followers
+                      </p>
+                      <p className="text-2xl font-bold text-accent-foreground">
+                        {followerCount}
+                      </p>
+                    </div>
+                    <div
+                      className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
+                      onClick={() => setActiveTab("following")}
+                    >
+                      <p className="text-muted-foreground text-sm">Following</p>
+                      <p className="text-2xl font-bold text-accent-foreground">
+                        {followingCount}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-6 p-4 bg-muted/30 rounded-lg text-center">
+                    <p className="text-muted-foreground text-sm">
+                      Music preferences and listening history are private and
+                      only visible to the profile owner.
+                    </p>
+                  </div>
                 </div>
-                <div
-                  className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
-                  onClick={() => setActiveTab("followers")}
-                >
-                  <p className="text-muted-foreground text-sm">
-                    TuneSpace Followers
-                  </p>
-                  <p className="text-2xl font-bold text-accent-foreground">
-                    {followerCount}
-                  </p>
-                </div>
-                <div
-                  className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
-                  onClick={() => setActiveTab("following")}
-                >
-                  <p className="text-muted-foreground text-sm">Following</p>
-                  <p className="text-2xl font-bold text-accent-foreground">
-                    {followingCount}
-                  </p>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </TabsContent>
-
           <TabsContent value="followers">
             <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-border">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-card-foreground">
@@ -411,7 +455,6 @@ const Profile = ({
               )}
             </div>
           </TabsContent>
-
           <TabsContent value="following">
             <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-border">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-card-foreground">
