@@ -3,16 +3,19 @@ import Auth from "@/interfaces/Auth";
 
 interface AuthState {
   auth: Partial<Auth>;
+  isLoggingOut: boolean;
   setAuth: (auth: Auth) => void;
   updateAuth: (updates: Partial<Auth>) => void;
   clearAuth: () => void;
+  setLoggingOut: (isLoggingOut: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   auth: {},
+  isLoggingOut: false,
 
   setAuth: (auth: Auth) => {
-    set({ auth });
+    set({ auth, isLoggingOut: false });
   },
 
   updateAuth: (updates: Partial<Auth>) => {
@@ -21,6 +24,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   clearAuth: () => {
-    set({ auth: {} });
+    set({ auth: {}, isLoggingOut: false });
+  },
+
+  setLoggingOut: (isLoggingOut: boolean) => {
+    set({ isLoggingOut });
   },
 }));

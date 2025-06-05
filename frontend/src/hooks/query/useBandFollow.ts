@@ -14,7 +14,7 @@ export const useBandFollow = (
   bandId: string,
   options?: { enableFollowers?: boolean }
 ) => {
-  const { auth } = useAuth();
+  const { auth, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
   const { enableFollowers = false } = options || {};
@@ -22,7 +22,7 @@ export const useBandFollow = (
   const { data: isFollowing = false, isLoading: isCheckingFollow } = useQuery({
     queryKey: ["bandFollow", bandId, auth?.id],
     queryFn: () => isFollowingBand(bandId),
-    enabled: !!auth?.id && !!bandId,
+    enabled: isAuthenticated && !!bandId,
   });
 
   const { data: followerCount = 0 } = useQuery({
@@ -81,9 +81,8 @@ export const useBandFollow = (
       toast.error("Failed to unfollow band");
     },
   });
-
   const toggleFollow = () => {
-    if (!auth?.id) {
+    if (!isAuthenticated) {
       toast.error("Please log in to follow bands");
       return;
     }

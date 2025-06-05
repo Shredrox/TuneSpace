@@ -6,7 +6,7 @@ import useAuth from "../auth/useAuth";
 
 const useMessages = (chatId: string | undefined) => {
   const queryClient = useQueryClient();
-  const { auth } = useAuth();
+  const { auth, isAuthenticated } = useAuth();
   const { sendMessage, setChatMessages, messages } = useSocket();
 
   const {
@@ -17,18 +17,17 @@ const useMessages = (chatId: string | undefined) => {
   } = useQuery({
     queryKey: ["messages", chatId],
     queryFn: () => getMessages(chatId),
-    enabled: !!chatId,
+    enabled: isAuthenticated && !!chatId,
   });
-
   useEffect(() => {
-    if (chatId && auth?.username) {
+    if (chatId && auth?.username && isAuthenticated) {
       markMessagesAsRead(chatId, auth.username).then(() => {
         queryClient.invalidateQueries({
           queryKey: ["chats"],
         });
       });
     }
-  }, [chatId, auth?.username]);
+  }, [chatId, auth?.username, isAuthenticated]);
 
   const { mutateAsync: sendMessageMutation } = useMutation({
     mutationFn: sendMessage,

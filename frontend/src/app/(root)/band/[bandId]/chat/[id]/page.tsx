@@ -21,7 +21,7 @@ export default function BandChatPage() {
   const bandId = params.bandId as string;
   const chatId = params.id as string;
 
-  const { auth } = useAuth();
+  const { auth, isAuthenticated } = useAuth();
 
   const {
     chatData,
@@ -100,7 +100,7 @@ export default function BandChatPage() {
     );
   }
 
-  if (!auth?.id) {
+  if (!isAuthenticated) {
     return (
       <div className="container max-w-4xl mx-auto py-8">
         <div className="flex items-center justify-center h-96">

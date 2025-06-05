@@ -3,9 +3,11 @@ import { fetchBandThreads } from "@/services/forum-service";
 import { getSpotifyArtist } from "@/services/spotify-service";
 import { isNullOrEmpty } from "@/utils/helpers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import useAuth from "@/hooks/auth/useAuth";
 
 const useBandData = (userId: string) => {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
 
   const {
     data: band,
@@ -15,7 +17,7 @@ const useBandData = (userId: string) => {
   } = useQuery({
     queryKey: ["band", userId],
     queryFn: () => getBand(userId),
-    enabled: !!userId,
+    enabled: isAuthenticated && !!userId,
   });
 
   const {

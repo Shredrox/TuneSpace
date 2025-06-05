@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import useSocket from "../useSocket";
 import { getChats } from "@/services/chat-service";
+import useAuth from "../auth/useAuth";
 
 const useChats = (user: string | undefined) => {
   const { createChat, setUserChats, chats } = useSocket();
+  const { isAuthenticated } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -16,7 +18,7 @@ const useChats = (user: string | undefined) => {
   } = useQuery({
     queryKey: ["chats", user],
     queryFn: () => getChats(user),
-    enabled: !!user,
+    enabled: isAuthenticated && !!user,
   });
 
   const { mutateAsync: addChatMutation } = useMutation({

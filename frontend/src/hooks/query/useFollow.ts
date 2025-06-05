@@ -12,10 +12,12 @@ import {
 import { toast } from "sonner";
 import { NotificationTypes } from "@/utils/constants";
 import useSocket from "../useSocket";
+import useAuth from "../auth/useAuth";
 
 const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   const queryClient = useQueryClient();
   const { sendNotification } = useSocket();
+  const { isAuthenticated } = useAuth();
 
   const {
     data: isFollowing,
@@ -24,7 +26,10 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   } = useQuery({
     queryKey: ["following-status", loggedInUsername, profileUsername],
     queryFn: () => checkFollowing(profileUsername),
-    enabled: !!loggedInUsername && loggedInUsername !== profileUsername,
+    enabled:
+      isAuthenticated &&
+      !!loggedInUsername &&
+      loggedInUsername !== profileUsername,
   });
 
   const {
@@ -34,6 +39,7 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   } = useQuery({
     queryKey: ["followers", profileUsername],
     queryFn: () => getUserFollowers(profileUsername),
+    enabled: isAuthenticated && !!profileUsername,
   });
 
   const {
@@ -43,6 +49,7 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   } = useQuery({
     queryKey: ["following", profileUsername],
     queryFn: () => getUserFollowing(profileUsername),
+    enabled: isAuthenticated && !!profileUsername,
   });
 
   const {
@@ -52,6 +59,7 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   } = useQuery({
     queryKey: ["follower-count", profileUsername],
     queryFn: () => getFollowerCount(profileUsername),
+    enabled: isAuthenticated && !!profileUsername,
   });
 
   const {
@@ -61,6 +69,7 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   } = useQuery({
     queryKey: ["following-count", profileUsername],
     queryFn: () => getFollowingCount(profileUsername),
+    enabled: isAuthenticated && !!profileUsername,
   });
 
   const invalidateFollowQueries = () => {
@@ -111,9 +120,8 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
       toast.error(`Failed to unfollow ${profileUsername}`);
     },
   });
-
   const handleFollow = () => {
-    if (!loggedInUsername) {
+    if (!isAuthenticated || !loggedInUsername) {
       toast.error("You must be logged in to follow users");
       return;
     }
@@ -125,7 +133,7 @@ const useFollow = (profileUsername: string, loggedInUsername?: string) => {
   };
 
   const handleUnfollow = () => {
-    if (!loggedInUsername) {
+    if (!isAuthenticated || !loggedInUsername) {
       toast.error("You must be logged in to unfollow users");
       return;
     }

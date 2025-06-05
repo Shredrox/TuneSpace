@@ -18,6 +18,7 @@ import {
 import { getBandById } from "@/services/band-service";
 import { useEffect, useMemo, useState } from "react";
 import useSocket from "../useSocket";
+import useAuth from "@/hooks/auth/useAuth";
 
 interface UseBandChatOptions {
   bandId?: string;
@@ -29,6 +30,7 @@ const useBandChat = (options: UseBandChatOptions) => {
   const { bandId, chatId, autoStart = false } = options;
   const queryClient = useQueryClient();
   const { bandMessages } = useSocket();
+  const { isAuthenticated } = useAuth();
 
   const [actualChatId, setActualChatId] = useState<string | null>(
     chatId || null
@@ -46,7 +48,7 @@ const useBandChat = (options: UseBandChatOptions) => {
   } = useQuery({
     queryKey: ["band", bandId],
     queryFn: () => getBandById(bandId!),
-    enabled: !!bandId,
+    enabled: isAuthenticated && !!bandId,
   });
 
   const {
@@ -57,6 +59,7 @@ const useBandChat = (options: UseBandChatOptions) => {
   } = useQuery({
     queryKey: ["bandChats", "user"],
     queryFn: () => getUserBandChats(),
+    enabled: isAuthenticated,
   });
 
   const {
@@ -67,7 +70,7 @@ const useBandChat = (options: UseBandChatOptions) => {
   } = useQuery({
     queryKey: ["bandChats", "band", bandId],
     queryFn: () => getBandChats(bandId!),
-    enabled: !!bandId,
+    enabled: isAuthenticated && !!bandId,
   });
 
   const {
@@ -86,7 +89,7 @@ const useBandChat = (options: UseBandChatOptions) => {
       }
       return null;
     },
-    enabled: !!bandId && (isSpecificChat || isNewChat),
+    enabled: isAuthenticated && !!bandId && (isSpecificChat || isNewChat),
     staleTime: 30 * 1000,
   });
 
@@ -105,7 +108,7 @@ const useBandChat = (options: UseBandChatOptions) => {
   } = useQuery({
     queryKey: ["bandChats", "messages", currentChatId],
     queryFn: () => getChatMessages(currentChatId!, 0, 50),
-    enabled: !!currentChatId && !isNewChat,
+    enabled: isAuthenticated && !!currentChatId && !isNewChat,
   });
 
   const {
@@ -116,7 +119,7 @@ const useBandChat = (options: UseBandChatOptions) => {
   } = useQuery({
     queryKey: ["bandChats", "unread", currentChatId],
     queryFn: () => getUnreadCount(currentChatId!),
-    enabled: !!currentChatId && !isNewChat,
+    enabled: isAuthenticated && !!currentChatId && !isNewChat,
   });
 
   const mergedMessages = useMemo(() => {

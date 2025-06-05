@@ -7,7 +7,7 @@ import { getUserNotifications } from "@/services/notification-service";
 
 const useNotifications = () => {
   const queryClient = useQueryClient();
-  const { auth } = useAuth();
+  const { auth, isAuthenticated } = useAuth();
   const { setUserNotifications } = useSocket();
 
   const [unreadCount, setUnreadCount] = useState(0);
@@ -21,7 +21,7 @@ const useNotifications = () => {
   } = useQuery({
     queryKey: ["notifications", auth.username],
     queryFn: () => getUserNotifications(auth.username!),
-    enabled: !!auth.username,
+    enabled: isAuthenticated && !!auth.username,
   });
 
   useEffect(() => {

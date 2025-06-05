@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import useAuth from "@/hooks/auth/useAuth";
 import useRefreshToken from "@/hooks/auth/useRefreshToken";
-import { isTokenExpired } from "@/lib/auth";
+import { checkCurrentUser } from "@/services/auth-service";
 
 /**
  * Custom hook to handle authentication initialization
  * Attempts to restore auth state from HTTP-only cookies on app load
  */
 const useAuthInitialization = () => {
-  const { auth, updateAuth } = useAuth();
+  const { auth, updateAuth, clearAuth, isLoggingOut } = useAuth();
   const { refresh, refreshSpotifyToken, isRefreshing, isRefreshingSpotify } =
     useRefreshToken();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -20,19 +20,60 @@ const useAuthInitialization = () => {
 
     const initializeAuth = async () => {
       try {
-        if (!auth?.accessToken || isTokenExpired(auth.accessToken)) {
-          await refresh();
+        if (auth?.accessToken && auth?.username) {
+          if (isMounted) {
+            setIsInitialized(true);
+          }
+          return;
         }
 
-        if (
-          auth?.accessToken &&
-          (!auth?.spotifyTokenExpiry ||
-            new Date(auth.spotifyTokenExpiry) <= new Date())
-        ) {
-          await refreshSpotifyToken();
+        const currentUser = await checkCurrentUser();
+
+        if (currentUser && currentUser.username) {
+          try {
+            const refreshResult = await refresh();
+            updateAuth({
+              id: currentUser.id,
+              username: currentUser.username,
+              accessToken: refreshResult.accessToken,
+              role: currentUser.role,
+            });
+
+            try {
+              await refreshSpotifyToken();
+            } catch (spotifyError) {
+              console.log(
+                "Spotify token refresh failed, continuing without it"
+              );
+            }
+          } catch (refreshError) {
+            console.error(
+              "Token refresh failed during initialization:",
+              refreshError
+            );
+            clearAuth();
+          }
+        } else {
+          try {
+            await refresh();
+
+            try {
+              await refreshSpotifyToken();
+            } catch (spotifyError) {
+              console.log(
+                "Spotify token refresh failed, continuing without it"
+              );
+            }
+          } catch (error) {
+            console.log(
+              "Authentication initialization failed, user needs to login"
+            );
+            clearAuth();
+          }
         }
       } catch (error) {
         console.error("Auth initialization failed:", error);
+        clearAuth();
       } finally {
         if (isMounted) {
           setIsInitialized(true);
@@ -47,19 +88,13 @@ const useAuthInitialization = () => {
     return () => {
       isMounted = false;
     };
-  }, [
-    auth?.accessToken,
-    auth?.spotifyTokenExpiry,
-    refresh,
-    refreshSpotifyToken,
-    isInitialized,
-    updateAuth,
-  ]);
+  }, [isInitialized]);
 
   return {
     isInitialized,
-    isInitializing: !isInitialized || isRefreshing || isRefreshingSpotify,
-    hasValidAuth: auth?.accessToken && !isTokenExpired(auth.accessToken),
+    isInitializing:
+      !isInitialized || isRefreshing || isRefreshingSpotify || isLoggingOut,
+    hasValidAuth: Boolean(auth?.accessToken && auth?.username && !isLoggingOut),
   };
 };
 

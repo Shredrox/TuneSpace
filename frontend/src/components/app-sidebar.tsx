@@ -65,7 +65,6 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -130,6 +129,7 @@ export function AppSidebar() {
   const allNavigationLinks = isBandAdmin
     ? [...navigationLinks, bandDashboardLink]
     : navigationLinks;
+
   const renderNavLinks = (group: "navigation" | "content") => {
     const links = group === "navigation" ? allNavigationLinks : contentLinks;
 
@@ -180,6 +180,7 @@ export function AppSidebar() {
       );
     });
   };
+
   return (
     <Sidebar
       collapsible="icon"
