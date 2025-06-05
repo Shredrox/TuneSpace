@@ -797,7 +797,6 @@
       "tunespace.infrastructure": {
         "type": "Project",
         "dependencies": {
-          "HtmlAgilityPack": "[1.12.1, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[9.0.2, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.2, )",
           "Microsoft.AspNetCore.Identity.UI": "[9.0.2, )",
@@ -811,12 +810,6 @@
           "Pgvector.EntityFrameworkCore": "[0.2.2, )",
           "TuneSpace.Core": "[1.0.0, )"
         }
-      },
-      "HtmlAgilityPack": {
-        "type": "CentralTransitive",
-        "requested": "[1.12.1, )",
-        "resolved": "1.12.1",
-        "contentHash": "SP6/2Y26CXtxjXn0Wwsom9Ek35SNWKHEu/IWhNEFejBSSVWWXPRSlpqpBSYWv1SQhYFnwMO01xVbEdK3iRR4hg=="
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "CentralTransitive",

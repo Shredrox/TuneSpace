@@ -2,12 +2,6 @@
   "version": 2,
   "dependencies": {
     "net9.0": {
-      "HtmlAgilityPack": {
-        "type": "Direct",
-        "requested": "[1.12.1, )",
-        "resolved": "1.12.1",
-        "contentHash": "SP6/2Y26CXtxjXn0Wwsom9Ek35SNWKHEu/IWhNEFejBSSVWWXPRSlpqpBSYWv1SQhYFnwMO01xVbEdK3iRR4hg=="
-      },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Direct",
         "requested": "[9.0.2, )",

@@ -18,7 +18,6 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageVersion Include="System.Net.Http.Json" Version="9.0.3" />
     <PackageVersion Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
-    <PackageVersion Include="HtmlAgilityPack" Version="1.12.1" />
     <PackageVersion Include="Microsoft.Extensions.VectorData.Abstractions" Version="9.5.0" />
     <PackageVersion Include="Microsoft.ML.OnnxRuntime" Version="1.22.0" />
     <PackageVersion Include="Microsoft.ML.Tokenizers" Version="1.0.2" />

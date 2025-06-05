@@ -16,7 +16,6 @@
       </PackageReference>
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
       <PackageReference Include="Pgvector.EntityFrameworkCore" />
-      <PackageReference Include="HtmlAgilityPack" />
       <PackageReference Include="Microsoft.Extensions.VectorData.Abstractions" />
       <PackageReference Include="Microsoft.ML.OnnxRuntime" />
       <PackageReference Include="Microsoft.ML.Tokenizers" />
