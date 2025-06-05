@@ -113,6 +113,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<ILastFmClient, LastFmClient>();
         services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
         services.AddHttpClient<ISpotifyClient, SpotifyClient>();
+        services.AddHttpClient<IBandcampClient, BandcampClient>();
 
         return services;
     }
