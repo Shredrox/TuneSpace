@@ -13,11 +13,13 @@ namespace TuneSpace.Application.Services;
 internal class SpotifyService(
     ISpotifyClient spotifyClient,
     ILogger<SpotifyService> logger,
-    IOptions<SpotifyOptions> spotifyOptions) : ISpotifyService
+    IOptions<SpotifyOptions> spotifyOptions,
+    IOAuthStateService oAuthStateService) : ISpotifyService
 {
     private readonly ISpotifyClient _spotifyClient = spotifyClient;
     private readonly ILogger<SpotifyService> _logger = logger;
     private readonly SpotifyOptions _spotifyOptions = spotifyOptions.Value;
+    private readonly IOAuthStateService _oAuthStateService = oAuthStateService;
 
     private const string SpotifyRedirectUri = "http://localhost:5053/api/Spotify/callback";
 
@@ -29,7 +31,7 @@ internal class SpotifyService(
 
     string ISpotifyService.GetSpotifyLoginUrl()
     {
-        var state = Helpers.GenerateRandomString(16);
+        var state = _oAuthStateService.GenerateAndStoreState();
         const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public user-read-recently-played user-follow-read";
 
         var redirectUrl = $"https://accounts.spotify.com/authorize?" +
@@ -98,6 +100,29 @@ internal class SpotifyService(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving Spotify user profile");
+            throw;
+        }
+    }
+
+    async Task<SpotifyApiProfileResponse> ISpotifyService.GetUserInfoAsync(string token)
+    {
+        try
+        {
+            var response = await _spotifyClient.GetUserInfo(token);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new SpotifyApiException("Error retrieving Spotify user info");
+            }
+
+            var userInfo = JsonSerializer.Deserialize<SpotifyApiProfileResponse>(await response.Content.ReadAsStringAsync())
+                ?? throw new SpotifyApiException("Failed to deserialize Spotify user info response");
+
+            return userInfo;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving Spotify user info");
             throw;
         }
     }

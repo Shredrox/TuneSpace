@@ -14,6 +14,12 @@ internal class UserRepository(UserManager<User> userManager) : IUserRepository
         return await _userManager.FindByIdAsync(id);
     }
 
+    async Task<User?> IUserRepository.GetUserByExternalIdAsync(string externalId, string provider)
+    {
+        return await _userManager.Users
+            .FirstOrDefaultAsync(u => u.SpotifyId == externalId && u.ExternalProvider == provider);
+    }
+
     async Task<User?> IUserRepository.GetUserByEmailAsync(string email)
     {
         return await _userManager.FindByEmailAsync(email);
@@ -35,6 +41,15 @@ internal class UserRepository(UserManager<User> userManager) : IUserRepository
     async Task IUserRepository.InsertUserAsync(User user, string password)
     {
         var result = await _userManager.CreateAsync(user, password);
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(user, user.Role.ToString());
+        }
+    }
+
+    async Task IUserRepository.InsertExternalUserAsync(User user)
+    {
+        var result = await _userManager.CreateAsync(user);
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(user, user.Role.ToString());

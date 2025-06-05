@@ -28,4 +28,18 @@ public interface IAuthService
     /// containing authentication tokens and user information upon successful login.
     /// </returns>
     Task<LoginResponse> LoginAsync(string email, string password);
+
+    /// <summary>
+    /// Authenticates or registers a user using external login provider (e.g., Spotify).
+    /// </summary>
+    /// <param name="externalId">The external provider's user ID.</param>
+    /// <param name="email">The user's email from the external provider.</param>
+    /// <param name="displayName">The user's display name from the external provider.</param>
+    /// <param name="provider">The name of the external provider (e.g., "Spotify").</param>
+    /// <param name="profilePictureUrl">Optional profile picture URL from the external provider.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation that returns a <see cref="LoginResponse"/>
+    /// containing authentication tokens and user information.
+    /// </returns>
+    Task<LoginResponse> ExternalLoginAsync(string externalId, string email, string displayName, string provider, string? profilePictureUrl);
 }

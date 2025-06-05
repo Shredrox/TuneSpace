@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using TuneSpace.Core.DTOs.Responses.Auth;
 using TuneSpace.Core.Entities;
@@ -8,7 +9,7 @@ using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Application.Services;
 
-internal class AuthService(
+internal partial class AuthService(
     IUserRepository userRepository,
     IPasswordHasher<User> passwordHasher,
     ITokenService tokenService) : IAuthService
@@ -51,6 +52,61 @@ internal class AuthService(
         return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
     }
 
+    async Task<LoginResponse> IAuthService.ExternalLoginAsync(string externalId, string email, string displayName, string provider, string? profilePictureUrl)
+    {
+        var user = await _userRepository.GetUserByExternalIdAsync(externalId, provider);
+
+        if (user is null)
+        {
+            user = await _userRepository.GetUserByEmailAsync(email);
+
+            if (user is not null)
+            {
+                user.SpotifyId = externalId;
+                user.ExternalProvider = provider;
+                user.ExternalLoginLinkedAt = DateTime.UtcNow;
+                await _userRepository.UpdateUserAsync(user);
+            }
+            else
+            {
+                var sanitizedUsername = SanitizeUsername(displayName);
+                user = new User
+                {
+                    UserName = sanitizedUsername,
+                    Email = email,
+                    EmailConfirmed = true,
+                    Role = Roles.Listener,
+                    SpotifyId = externalId,
+                    ExternalProvider = provider,
+                    ExternalLoginLinkedAt = DateTime.UtcNow
+                };
+
+                if (!string.IsNullOrEmpty(profilePictureUrl))
+                {
+                    try
+                    {
+                        using var httpClient = new HttpClient();
+                        var imageBytes = await httpClient.GetByteArrayAsync(profilePictureUrl);
+                        user.ProfilePicture = imageBytes;
+                    }
+                    catch
+                    {
+                        user.ProfilePicture = null;
+                    }
+                }
+
+                await _userRepository.InsertExternalUserAsync(user);
+            }
+        }
+
+        var accessToken = _tokenService.GenerateAccessToken(user);
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        await _tokenService.SaveRefreshTokenAsync(user, refreshToken);
+
+        return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
+    }
+
     private bool VerifyPassword(User user, string password)
     {
         if (user.PasswordHash is null)
@@ -60,4 +116,19 @@ internal class AuthService(
 
         return _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password) is PasswordVerificationResult.Success;
     }
+
+    private static string SanitizeUsername(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return string.Concat("user", Guid.NewGuid().ToString("N").AsSpan(0, 8));
+        }
+
+        var sanitized = SanitizeRegex().Replace(username, "_");
+
+        return sanitized.Length > 32 ? sanitized[..32] : sanitized;
+    }
+
+    [GeneratedRegex(@"[^\w\d]")]
+    private static partial Regex SanitizeRegex();
 }

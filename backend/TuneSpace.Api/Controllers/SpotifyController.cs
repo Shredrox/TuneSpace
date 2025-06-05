@@ -30,37 +30,23 @@ public class SpotifyController(
     }
 
     [HttpGet("callback")]
-    public async Task<IActionResult> Callback(string code, string state)
+    public IActionResult Callback(string code, string state)
     {
+        if (string.IsNullOrEmpty(state))
+        {
+            _logger.LogWarning("Invalid or missing OAuth state parameter");
+            return BadRequest("Invalid OAuth state parameter.");
+        }
+
+        if (string.IsNullOrEmpty(code))
+        {
+            _logger.LogWarning("Missing authorization code in Spotify callback");
+            return BadRequest("Missing authorization code");
+        }
+
         try
         {
-            var spotifyTokens = await _spotifyService.ExchangeCodeForTokenAsync(code);
-
-            var tokenExpiry = DateTime.Now.AddSeconds(spotifyTokens.ExpiresIn);
-
-            Response.Cookies.Append("SpotifyAccessToken", spotifyTokens.AccessToken, new CookieOptions
-            {
-                Expires = tokenExpiry,
-                HttpOnly = true,
-                Secure = true,
-                IsEssential = true,
-                Domain = "localhost",
-                SameSite = SameSiteMode.None
-            });
-
-            Response.Cookies.Append("SpotifyRefreshToken", spotifyTokens.RefreshToken, new CookieOptions
-            {
-                Expires = DateTime.Now.AddDays(30),
-                HttpOnly = true,
-                Secure = true,
-                IsEssential = true,
-                Domain = "localhost",
-                SameSite = SameSiteMode.None
-            });
-
-            var redirectUrl = $"http://localhost:5173/?" +
-                $"&tokenExpiryTime={Uri.EscapeDataString(tokenExpiry.ToString("o"))}";
-
+            var redirectUrl = $"http://localhost:5173/auth/spotify-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}";
             return Redirect(redirectUrl);
         }
         catch (Exception e)

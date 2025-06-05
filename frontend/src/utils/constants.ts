@@ -26,6 +26,7 @@ export const ENDPOINTS = {
   LOGIN: "Auth/login",
   LOGOUT: "Auth/logout",
   REGISTER: "Auth/register",
+  SPOTIFY_OAUTH: "Auth/spotify-oauth",
   BANDREGISTER: "Band/register",
   BANDUPDATE: "Band/update",
   BAND: "Band",

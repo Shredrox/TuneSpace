@@ -25,6 +25,13 @@ public interface ISpotifyService
     Task<SpotifyProfileDTO> GetUserSpotifyProfileAsync(string token);
 
     /// <summary>
+    /// Gets a user's detailed Spotify profile information including email
+    /// </summary>
+    /// <param name="token">Spotify access token</param>
+    /// <returns>User's detailed Spotify profile data</returns>
+    Task<SpotifyApiProfileResponse> GetUserInfoAsync(string token);
+
+    /// <summary>
     /// Gets a list of artists the user follows on Spotify
     /// </summary>
     /// <param name="token">Spotify access token</param>
