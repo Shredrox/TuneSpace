@@ -11,6 +11,7 @@ public class BandModel
     public int Listeners { get; set; }
     public int PlayCount { get; set; }
     public string ImageUrl { get; set; } = string.Empty;
+    public string ExternalUrl { get; set; } = string.Empty;
     public double Popularity { get; set; }
     public double RelevanceScore { get; set; }
     public double DiversityScore { get; set; }

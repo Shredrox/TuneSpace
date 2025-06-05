@@ -32,6 +32,7 @@ internal class LastFmClient(
         var name = artist.Name ?? bandName;
         var listeners = int.TryParse(artist.Listeners, out var l) ? l : 0;
         var playCount = int.TryParse(artist.Stats?.PlayCount, out var pc) ? pc : 0;
+        var externalUrl = artist.Url ?? "";
 
         string imageUrl = "";
         var images = artist.Images;
@@ -67,7 +68,8 @@ internal class LastFmClient(
             Name = name,
             Listeners = listeners,
             PlayCount = playCount,
-            ImageUrl = imageUrl,
+            ImageUrl = "",
+            ExternalUrl = externalUrl,
             Genres = genres
         };
     }
