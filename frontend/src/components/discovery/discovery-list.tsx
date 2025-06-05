@@ -19,6 +19,8 @@ import {
   Radio,
   Disc3,
   Waves,
+  Earth,
+  AudioWaveform,
 } from "lucide-react";
 import { Badge } from "../shadcn/badge";
 import { Button } from "../shadcn/button";
@@ -38,6 +40,8 @@ interface DiscoveryArtist {
   listeners: number;
   playCount: number;
   imageUrl: string;
+  externalUrl?: string;
+  coverImage?: Uint8Array;
   popularity: number;
   relevanceScore: number;
   similarArtists: string[];
@@ -336,14 +340,30 @@ const DiscoveryList = () => {
                         />
                       </svg>
                     </div>
-                  </div>
-
+                  </div>{" "}
                   <div className="absolute top-4 left-4 z-10">
-                    <div className="p-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50">
-                      {getGenreIcon(artist.genres)}
-                    </div>
+                    {(artist.isRegistered && artist.coverImage) ||
+                    artist.imageUrl ? (
+                      <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg bg-card/80 backdrop-blur-sm">
+                        <img
+                          src={
+                            artist.isRegistered && artist.coverImage
+                              ? `data:image/jpeg;base64,${artist.coverImage}`
+                              : artist.imageUrl
+                          }
+                          alt={artist.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="fallback-icon hidden w-full h-full items-center justify-center bg-card/80 backdrop-blur-sm rounded-lg border border-border/50">
+                          {getGenreIcon(artist.genres)}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-2 bg-card/80 backdrop-blur-sm rounded-full border border-border/50">
+                        {getGenreIcon(artist.genres)}
+                      </div>
+                    )}
                   </div>
-
                   {artist.relevanceScore > 75 && (
                     <div className="absolute top-4 right-4 z-10">
                       <Badge
@@ -354,33 +374,55 @@ const DiscoveryList = () => {
                         Rising
                       </Badge>
                     </div>
-                  )}
-
-                  <div className="absolute bottom-4 right-4 z-10">
+                  )}{" "}
+                  <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
                     <Tooltip>
                       <TooltipTrigger>
                         <div
-                          className={`p-1.5 rounded-full ${
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded-full ${
                             artist.isRegistered
                               ? "bg-green-500"
                               : "bg-orange-500"
                           } shadow-lg`}
                         >
                           {artist.isRegistered ? (
-                            <Music className="w-3 h-3 text-white" />
+                            <AudioWaveform className="w-3 h-3 text-white" />
                           ) : (
-                            <ExternalLink className="w-3 h-3 text-white" />
+                            <Earth className="w-3 h-3 text-white" />
                           )}
+                          <span className="text-xs text-white font-medium">
+                            {artist.isRegistered
+                              ? "TuneSpace Artist"
+                              : "External Artist"}
+                          </span>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
                           {artist.isRegistered
-                            ? "TuneSpace Artist"
-                            : "External Artist"}
+                            ? "Registered on TuneSpace platform"
+                            : "Found from external sources"}
                         </p>
                       </TooltipContent>
                     </Tooltip>
+                    {artist.externalUrl && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a
+                            href={artist.externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="w-3 h-3 text-white" />
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Visit External Link</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </div>
                 </div>{" "}
                 <div className="p-5 space-y-4 flex-1 flex flex-col">
@@ -471,7 +513,7 @@ const DiscoveryList = () => {
                         ) : (
                           <>
                             <ExternalLink className="w-4 h-4" />
-                            <span>View External</span>
+                            <span>Find in Spotify</span>
                           </>
                         )}
                       </div>
