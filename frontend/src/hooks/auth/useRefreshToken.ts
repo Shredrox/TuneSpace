@@ -35,13 +35,10 @@ const useRefreshToken = () => {
       return data;
     },
     onSuccess: (data) => {
-      updateAuth({
-        spotifyTokenExpiry: data.spotifyTokenExpiry,
-      });
+      console.log("Spotify token refreshed successfully");
     },
     onError: (error) => {
       console.error("Failed to refresh Spotify token:", error);
-      throw error;
     },
   });
 

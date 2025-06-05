@@ -1,5 +1,5 @@
 import httpClient from "./http-client";
-import { BASE_URL, ENDPOINTS } from "@/utils/constants";
+import { ENDPOINTS } from "@/utils/constants";
 
 export interface LoginData {
   email: string;
@@ -18,21 +18,19 @@ export interface AuthResponse {
   username: string;
   accessToken: string;
   role: string;
-  spotifyTokenExpiry?: string;
 }
 
 export const checkCurrentUser = async (): Promise<AuthResponse | null> => {
   try {
-    const response = await httpClient.get("Auth/current-user", {
+    const response = await httpClient.get(ENDPOINTS.CURRENT_USER, {
       withCredentials: true,
     });
 
     return {
       id: response.data.id,
       username: response.data.username,
-      accessToken: response.data.accessToken,
+      accessToken: "",
       role: response.data.role,
-      spotifyTokenExpiry: response.data.spotifyTokenExpiry,
     };
   } catch (error) {
     return null;
@@ -41,7 +39,7 @@ export const checkCurrentUser = async (): Promise<AuthResponse | null> => {
 
 export const login = async (data: LoginData): Promise<AuthResponse> => {
   const response = await httpClient.post(
-    `${BASE_URL}/${ENDPOINTS.LOGIN}`,
+    ENDPOINTS.LOGIN,
     JSON.stringify(data),
     {
       headers: { "Content-Type": "application/json" },
@@ -58,7 +56,7 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
 
 export const register = async (data: RegisterData): Promise<{ id: string }> => {
   const response = await httpClient.post(
-    `${BASE_URL}/${ENDPOINTS.REGISTER}`,
+    ENDPOINTS.REGISTER,
     JSON.stringify(data),
     {
       headers: { "Content-Type": "application/json" },
@@ -72,7 +70,7 @@ export const register = async (data: RegisterData): Promise<{ id: string }> => {
 
 export const refreshToken = async (): Promise<AuthResponse> => {
   const response = await httpClient.post(
-    "Auth/refresh-token",
+    ENDPOINTS.REFRESH_TOKEN,
     {},
     {
       withCredentials: true,
@@ -89,7 +87,13 @@ export const refreshToken = async (): Promise<AuthResponse> => {
 
 export const logout = async (): Promise<void> => {
   try {
-    await httpClient.post(`${ENDPOINTS.LOGOUT}`, {});
+    await httpClient.post(
+      ENDPOINTS.LOGOUT,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
   } catch (error) {
     console.log(error);
   }

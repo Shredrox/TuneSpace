@@ -65,11 +65,16 @@ export const getFollowedArtists = async (): Promise<SpotifyArtist[]> => {
 
 export const refreshSpotifyToken = async () => {
   const response = await httpClient.post(
-    "Spotify/refresh",
+    SPOTIFY_ENDPOINTS.REFRESH,
     {},
     {
       withCredentials: true,
     }
   );
+  return response.data;
+};
+
+export const getSpotifyConnectionStatus = async () => {
+  const response = await httpClient.get(SPOTIFY_ENDPOINTS.CONNECTION_STATUS);
   return response.data;
 };

@@ -56,6 +56,21 @@ public class SpotifyController(
         }
     }
 
+    [HttpGet("connection-status")]
+    public IActionResult GetConnectionStatus()
+    {
+        var accessToken = Request.Cookies["SpotifyAccessToken"];
+        var refreshToken = Request.Cookies["SpotifyRefreshToken"];
+
+        var isConnected = !string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken);
+
+        return Ok(new
+        {
+            isConnected,
+            hasTokens = isConnected
+        });
+    }
+
     [HttpGet("profile")]
     public async Task<IActionResult> GetUserSpotifyProfile()
     {
@@ -330,7 +345,10 @@ public class SpotifyController(
 
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return Unauthorized("Refresh token is required");
+            return Ok(new
+            {
+                isConnected = false
+            });
         }
 
         try
@@ -364,13 +382,21 @@ public class SpotifyController(
 
             return Ok(new
             {
-                spotifyTokenExpiry = tokenExpiry,
+                isConnected = true
             });
         }
         catch (SpotifyApiException ex)
         {
             _logger.LogError(ex, "Error refreshing Spotify access token");
-            return StatusCode(500, ex.Message);
+
+            Response.Cookies.Delete("SpotifyAccessToken");
+            Response.Cookies.Delete("SpotifyRefreshToken");
+
+            return Ok(new
+            {
+                isConnected = false,
+                error = "Spotify connection expired. Please reconnect."
+            });
         }
     }
 }
