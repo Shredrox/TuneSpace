@@ -30,6 +30,8 @@ import {
 } from "@/components/shadcn/avatar";
 import Link from "next/link";
 import { Disc, User as LucideUser } from "lucide-react";
+import SpotifyConnectionStatus from "@/components/spotify/spotify-connection-status";
+import SpotifyFallback from "@/components/spotify/spotify-fallback";
 
 interface ProfileProps {
   username: string;
@@ -219,6 +221,7 @@ const Profile = ({
           <TabsContent value="activity" className="space-y-6">
             {isOwnProfile ? (
               <>
+                <SpotifyConnectionStatus />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
                     <div className="p-5 border-b border-border">
@@ -227,27 +230,38 @@ const Profile = ({
                       </h2>
                     </div>
                     <div className="p-5">
-                      {spotifyProfileData?.topArtists?.map((artist, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
-                        >
-                          <Avatar className="h-16 w-16 border-2 border-background shadow-md">
-                            <AvatarImage src={artist.image} alt={artist.name} />
-                            <AvatarFallback>
-                              <LucideUser className="w-6 h-6 text-muted-foreground" />
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium text-lg text-card-foreground">
-                              {artist.name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Artist
-                            </p>
+                      {spotifyProfileData?.topArtists?.length ? (
+                        spotifyProfileData.topArtists.map((artist, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
+                          >
+                            <Avatar className="h-16 w-16 border-2 border-background shadow-md">
+                              <AvatarImage
+                                src={artist.image}
+                                alt={artist.name}
+                              />
+                              <AvatarFallback>
+                                <LucideUser className="w-6 h-6 text-muted-foreground" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium text-lg text-card-foreground">
+                                {artist.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Artist
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <SpotifyFallback
+                          variant="artists"
+                          title="No Top Artists"
+                          description="Connect your Spotify account to see your top artists"
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -258,46 +272,52 @@ const Profile = ({
                       </h2>
                     </div>
                     <div className="p-5">
-                      {spotifyProfileData?.topSongs?.map((song, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
-                        >
-                          {song.image ? (
-                            <img
-                              className="rounded-md w-16 h-16 object-cover shadow-md"
-                              src={song.image}
-                              alt={song.name}
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center rounded-md w-16 h-16 bg-muted shadow-md">
-                              <Disc className="w-8 h-8 text-muted-foreground" />
+                      {spotifyProfileData?.topSongs?.length ? (
+                        spotifyProfileData.topSongs.map((song, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
+                          >
+                            {song.image ? (
+                              <img
+                                className="rounded-md w-16 h-16 object-cover shadow-md"
+                                src={song.image}
+                                alt={song.name}
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center rounded-md w-16 h-16 bg-muted shadow-md">
+                                <Disc className="w-8 h-8 text-muted-foreground" />
+                              </div>
+                            )}
+                            <div className="flex flex-col">
+                              <p className="font-medium text-lg text-card-foreground">
+                                {song.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {song.artist}
+                              </p>
                             </div>
-                          )}
-                          <div className="flex flex-col">
-                            <p className="font-medium text-lg text-card-foreground">
-                              {song.name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {song.artist}
-                            </p>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <SpotifyFallback
+                          variant="tracks"
+                          title="No Top Songs"
+                          description="Connect your Spotify account to see your top songs"
+                        />
+                      )}
                     </div>
                   </div>
                 </div>
-
                 <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl overflow-hidden shadow-lg border border-border">
                   <div className="p-5 border-b border-border">
                     <h2 className="text-xl font-bold flex items-center gap-2 text-card-foreground">
                       <FaHistory className="text-primary" /> Recently Played
                     </h2>
                   </div>
-
                   <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {recentlyPlayedTracks.length > 0 ? (
+                      {recentlyPlayedTracks?.length > 0 ? (
                         recentlyPlayedTracks.map((track, index) => (
                           <div
                             key={`${track.trackName}-${index}`}
@@ -328,48 +348,61 @@ const Profile = ({
                           </div>
                         ))
                       ) : (
-                        <div className="col-span-full text-center py-8 text-muted-foreground">
-                          No recently played tracks found
+                        <div className="col-span-full">
+                          <SpotifyFallback
+                            variant="recent"
+                            title="No Recently Played Tracks"
+                            description="Connect your Spotify account to see your listening history"
+                          />
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-
                 <div className="bg-card bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg border border-border">
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-card-foreground">
                     <FaSpotify className="text-[#1ed760]" /> Spotify Profile
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-accent p-4 rounded-lg text-center">
-                      <p className="text-muted-foreground text-sm">
-                        Spotify Followers
-                      </p>
-                      <p className="text-2xl font-bold text-accent-foreground">
-                        {spotifyProfileData?.profile?.followerCount || 0}
-                      </p>
+                  {spotifyProfileData?.profile ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-accent p-4 rounded-lg text-center">
+                        <p className="text-muted-foreground text-sm">
+                          Spotify Followers
+                        </p>
+                        <p className="text-2xl font-bold text-accent-foreground">
+                          {spotifyProfileData.profile.followerCount || 0}
+                        </p>
+                      </div>
+                      <div
+                        className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
+                        onClick={() => setActiveTab("followers")}
+                      >
+                        <p className="text-muted-foreground text-sm">
+                          TuneSpace Followers
+                        </p>
+                        <p className="text-2xl font-bold text-accent-foreground">
+                          {followerCount}
+                        </p>
+                      </div>
+                      <div
+                        className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
+                        onClick={() => setActiveTab("following")}
+                      >
+                        <p className="text-muted-foreground text-sm">
+                          Following
+                        </p>
+                        <p className="text-2xl font-bold text-accent-foreground">
+                          {followingCount}
+                        </p>
+                      </div>
                     </div>
-                    <div
-                      className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
-                      onClick={() => setActiveTab("followers")}
-                    >
-                      <p className="text-muted-foreground text-sm">
-                        TuneSpace Followers
-                      </p>
-                      <p className="text-2xl font-bold text-accent-foreground">
-                        {followerCount}
-                      </p>
-                    </div>
-                    <div
-                      className="bg-accent p-4 rounded-lg text-center cursor-pointer hover:bg-accent/80 transition-colors"
-                      onClick={() => setActiveTab("following")}
-                    >
-                      <p className="text-muted-foreground text-sm">Following</p>
-                      <p className="text-2xl font-bold text-accent-foreground">
-                        {followingCount}
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    <SpotifyFallback
+                      variant="stats"
+                      title="Spotify Not Connected"
+                      description="Connect your Spotify account to see your profile stats and music data"
+                    />
+                  )}
                 </div>
               </>
             ) : (

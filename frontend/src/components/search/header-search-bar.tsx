@@ -22,6 +22,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getUsersByNameSearch } from "@/services/user-service";
 import { getSpotifySongsBySearch } from "@/services/spotify-service";
 import Loading from "../fallback/loading";
+import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
+import { BASE_URL, SPOTIFY_ENDPOINTS } from "@/utils/constants";
 
 const HeaderSearchBar = () => {
   const [search, setSearch] = useState("");
@@ -30,6 +32,9 @@ const HeaderSearchBar = () => {
   const router = useRouter();
   const resultsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { parseSpotifyErrorSilent, isSpotifyConnected } =
+    useSpotifyErrorHandler();
 
   const {
     data: searchSongs,
@@ -41,7 +46,10 @@ const HeaderSearchBar = () => {
     queryKey: ["searchSongs", search],
     queryFn: () => getSpotifySongsBySearch(search),
     enabled: false,
-    retry: 1,
+    retry: (failureCount, error) => {
+      const spotifyError = parseSpotifyErrorSilent(error);
+      return spotifyError.type === "NETWORK_ERROR" && failureCount < 1;
+    },
   });
 
   const {
@@ -199,8 +207,38 @@ const HeaderSearchBar = () => {
                     No songs found for "{search}"
                   </div>
                 ) : isSongsError ? (
-                  <div className="p-4 text-center text-red-500">
-                    Error: {songsError.message}
+                  <div className="p-4 text-center">
+                    {!isSpotifyConnected() ? (
+                      <div className="text-amber-600">
+                        <p className="font-medium">Spotify not connected</p>
+                        <p className="text-sm text-muted-foreground">
+                          Connect Spotify to search for songs
+                        </p>
+                        <Button
+                          size="sm"
+                          className="mt-2"
+                          onClick={() =>
+                            router.push(
+                              `${BASE_URL}/${SPOTIFY_ENDPOINTS.CONNECT}`
+                            )
+                          }
+                        >
+                          Connect Spotify
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-red-500">
+                        <p>Error searching songs</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2"
+                          onClick={() => refetchSongs()}
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ) : null}
               </div>

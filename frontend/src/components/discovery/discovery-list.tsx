@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ENDPOINTS } from "@/utils/constants";
+import { BASE_URL, ENDPOINTS, SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import Loading from "../fallback/loading";
 import { useState } from "react";
 import httpClient from "@/services/http-client";
@@ -31,6 +31,9 @@ import {
   TooltipTrigger,
 } from "../shadcn/tooltip";
 import ExternalArtistModal from "./external-artist-modal";
+import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
+import useAuth from "@/hooks/auth/useAuth";
+import useAuthInitialization from "@/hooks/auth/useAuthInitialization";
 
 interface DiscoveryArtist {
   id?: string;
@@ -73,6 +76,12 @@ const DiscoveryList = () => {
     useState<string>("");
   const router = useRouter();
 
+  const { handleSpotifyError, parseSpotifyErrorSilent } =
+    useSpotifyErrorHandler();
+
+  const { isAuthenticated, isLoggingOut } = useAuth();
+  const { isInitializing } = useAuthInitialization();
+
   const getGenreColor = (genres: string[]) => {
     const primaryGenre = genres[0]?.toLowerCase() || "";
 
@@ -107,6 +116,7 @@ const DiscoveryList = () => {
 
     return <Music className="w-5 h-5" />;
   };
+
   const handleExploreClick = (artist: DiscoveryArtist) => {
     if (artist.isRegistered && artist.id) {
       router.push(`/band/${artist.id}`);
@@ -127,14 +137,83 @@ const DiscoveryList = () => {
       const genreSet = new Set(["metal", "rock"]);
       return fetchDiscover(genreSet, useLocation);
     },
+    enabled: !isInitializing && isAuthenticated && !isLoggingOut,
     refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      const spotifyError = parseSpotifyErrorSilent(error);
+      return spotifyError.type === "NETWORK_ERROR" && failureCount < 2;
+    },
   });
 
   const handleLocationToggle = () => {
     setUseLocation(!useLocation);
   };
 
-  if (isLoading)
+  if (isInitializing) {
+    return (
+      <div className="flex items-center justify-center p-12 min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
+              <Headphones className="w-8 h-8 text-primary animate-pulse" />
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-xl font-semibold text-primary/90 mb-2">
+              Initializing...
+            </div>
+          </div>
+          <Loading />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && !isLoggingOut) {
+    return (
+      <div className="p-8 bg-secondary/20 rounded-2xl text-center my-6 border border-border/50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
+            <Headphones className="w-8 h-8 text-primary/60" />
+          </div>
+          <div className="text-center max-w-md">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Authentication Required
+            </h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              Sign in to discover new artists based on your musical preferences
+              and listening history.
+            </p>
+            <Button onClick={() => (window.location.href = "/login")}>
+              Sign In
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoggingOut) {
+    return (
+      <div className="flex items-center justify-center p-12 min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
+              <Headphones className="w-8 h-8 text-primary animate-pulse" />
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-xl font-semibold text-primary/90 mb-2">
+              Logging out...
+            </div>
+          </div>
+          <Loading />
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12 min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
@@ -156,8 +235,11 @@ const DiscoveryList = () => {
         </div>
       </div>
     );
+  }
 
-  if (error)
+  if (error && !isLoggingOut) {
+    const spotifyError = handleSpotifyError(error, undefined, false);
+
     return (
       <div className="p-8 text-destructive bg-destructive/10 rounded-2xl text-center my-6 border border-destructive/20">
         <div className="flex flex-col items-center gap-3">
@@ -166,15 +248,39 @@ const DiscoveryList = () => {
           </div>
           <div>
             <div className="font-semibold mb-1">
-              Unable to load recommendations
+              {spotifyError.type === "UNAUTHORIZED" ||
+              spotifyError.type === "NOT_CONNECTED"
+                ? "Spotify Authentication Required"
+                : "Unable to load recommendations"}
             </div>
             <div className="text-sm text-muted-foreground">
-              Please try again later.
+              {spotifyError.type === "UNAUTHORIZED" ||
+              spotifyError.type === "NOT_CONNECTED"
+                ? "Connect your Spotify account to discover new artists based on your music taste"
+                : spotifyError.message}
             </div>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+            {(spotifyError.type === "UNAUTHORIZED" ||
+              spotifyError.type === "NOT_CONNECTED") && (
+              <Button
+                size="sm"
+                onClick={() =>
+                  router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.CONNECT}`)
+                }
+              >
+                Connect Spotify
+              </Button>
+            )}
           </div>
         </div>
       </div>
     );
+  }
 
   return (
     <div className="w-full py-8">
@@ -195,7 +301,7 @@ const DiscoveryList = () => {
                 </p>
               </div>
             </div>
-          </div>{" "}
+          </div>
           <div className="flex items-center gap-3">
             {discovery && Array.isArray(discovery) && (
               <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
@@ -340,7 +446,7 @@ const DiscoveryList = () => {
                         />
                       </svg>
                     </div>
-                  </div>{" "}
+                  </div>
                   <div className="absolute top-4 left-4 z-10">
                     {(artist.isRegistered && artist.coverImage) ||
                     artist.imageUrl ? (
@@ -374,7 +480,7 @@ const DiscoveryList = () => {
                         Rising
                       </Badge>
                     </div>
-                  )}{" "}
+                  )}
                   <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
                     <Tooltip>
                       <TooltipTrigger>
@@ -424,7 +530,7 @@ const DiscoveryList = () => {
                       </Tooltip>
                     )}
                   </div>
-                </div>{" "}
+                </div>
                 <div className="p-5 space-y-4 flex-1 flex flex-col">
                   <div className="flex-1 space-y-4">
                     <div className="space-y-2">
@@ -561,9 +667,9 @@ const DiscoveryList = () => {
               <TrendingUp className="w-4 h-4 mr-2" />
               Try Again
             </Button>
-          </div>{" "}
+          </div>
         </div>
-      )}{" "}
+      )}
       <ExternalArtistModal
         isOpen={isExternalModalOpen}
         onClose={() => setIsExternalModalOpen(false)}

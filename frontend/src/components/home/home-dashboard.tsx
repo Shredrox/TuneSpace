@@ -26,9 +26,13 @@ import Link from "next/link";
 import useAuth from "@/hooks/auth/useAuth";
 import useSpotify from "@/hooks/query/useSpotify";
 import SpotifyArtist from "@/interfaces/spotify/SpotifyArtist";
+import SpotifyConnectionStatus from "../spotify/spotify-connection-status";
+import SpotifyFallback from "../spotify/spotify-fallback";
+import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
 
 const HomeDashboard = () => {
   const { auth } = useAuth();
+
   const {
     spotifyProfileData,
     todayStats,
@@ -36,10 +40,13 @@ const HomeDashboard = () => {
     isTodayStatsLoading,
     isThisWeekStatsLoading,
     recentlyPlayedTracks,
-    isRecentlyPlayedLoading,
     followedArtists,
     isFollowedArtistsLoading,
+    hasSpotifyConnectionError,
+    isSpotifyDataAvailable,
   } = useSpotify();
+
+  const { isSpotifyConnected } = useSpotifyErrorHandler();
 
   //TODO: Add more data summary from app
   const getTodayHours = () => todayStats?.totalHoursPlayed || 0;
@@ -49,7 +56,6 @@ const HomeDashboard = () => {
 
   return (
     <div className="flex flex-col py-8 gap-6">
-      {" "}
       <div className="bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-green-500/10 rounded-xl p-6 border border-purple-200/30 dark:border-purple-800/30">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 bg-clip-text text-transparent">
           Welcome back, {auth.username}! 🎵
@@ -81,6 +87,7 @@ const HomeDashboard = () => {
           </div>
         )}
       </div>
+      <SpotifyConnectionStatus showFullCard={false} />
       <Tabs defaultValue="overview">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -93,7 +100,7 @@ const HomeDashboard = () => {
             <Card className="group hover:shadow-lg hover:scale-105 transition-all duration-300 border-green-200/50 bg-gradient-to-br from-green-50/80 to-emerald-50/80 dark:from-green-950/50 dark:to-emerald-950/50">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <Headphones className="h-4 w-4 text-green-600 group-hover:animate-pulse" />{" "}
+                  <Headphones className="h-4 w-4 text-green-600 group-hover:animate-pulse" />
                   Today's Listening
                 </CardTitle>
               </CardHeader>
@@ -119,7 +126,7 @@ const HomeDashboard = () => {
             <Card className="group hover:shadow-lg hover:scale-105 transition-all duration-300 border-purple-200/50 bg-gradient-to-br from-purple-50/80 to-violet-50/80 dark:from-purple-950/50 dark:to-violet-950/50">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <BarChart3 className="h-4 w-4 text-purple-600 group-hover:animate-pulse" />{" "}
+                  <BarChart3 className="h-4 w-4 text-purple-600 group-hover:animate-pulse" />
                   This Week
                 </CardTitle>
               </CardHeader>
@@ -145,7 +152,7 @@ const HomeDashboard = () => {
             <Card className="group hover:shadow-lg hover:scale-105 transition-all duration-300 border-blue-200/50 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 dark:from-blue-950/50 dark:to-cyan-950/50">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <Heart className="h-4 w-4 text-blue-600 group-hover:animate-pulse" />{" "}
+                  <Heart className="h-4 w-4 text-blue-600 group-hover:animate-pulse" />
                   Following
                 </CardTitle>
               </CardHeader>
@@ -171,7 +178,7 @@ const HomeDashboard = () => {
             <Card className="group hover:shadow-lg hover:scale-105 transition-all duration-300 border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-orange-50/80 dark:from-amber-950/50 dark:to-orange-950/50">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <Activity className="h-4 w-4 text-amber-600 group-hover:animate-pulse" />{" "}
+                  <Activity className="h-4 w-4 text-amber-600 group-hover:animate-pulse" />
                   Spotify Profile
                 </CardTitle>
               </CardHeader>
@@ -187,7 +194,7 @@ const HomeDashboard = () => {
                 </>
               </CardContent>
             </Card>
-          </div>{" "}
+          </div>
           <div className="flex flex-wrap gap-3">
             <Button
               asChild
@@ -209,60 +216,72 @@ const HomeDashboard = () => {
               </Link>
             </Button>
           </div>
-          {spotifyProfileData?.topArtists &&
-            spotifyProfileData.topArtists.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <Star className="h-5 w-5 text-yellow-500" />
-                    Your Top Artists
-                  </h2>
-                  <Badge variant="secondary" className="text-xs animate-pulse">
-                    Based on recent listening
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                  {spotifyProfileData.topArtists
-                    .slice(0, 5)
-                    .map((artist: SpotifyArtist, index: number) => (
-                      <div key={index} className="group cursor-pointer">
-                        <div className="relative aspect-square rounded-xl overflow-hidden mb-3 shadow-md group-hover:shadow-xl transition-all duration-300">
-                          {artist.images && artist.images.length > 0 ? (
-                            <img
-                              src={artist.images[0]?.url}
-                              alt={artist.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                              <UserPlus className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <PlayCircle className="text-white h-10 w-10 drop-shadow-lg" />
-                          </div>
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <Badge className="bg-yellow-500 text-yellow-900 text-xs">
-                              #{index + 1}
-                            </Badge>
-                          </div>
-                        </div>
-                        <h3 className="font-medium text-sm text-center truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
-                          {artist.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground text-center">
-                          {artist.followers?.total
-                            ? `${(artist.followers.total / 1000000).toFixed(
-                                1
-                              )}M followers`
-                            : "Popular artist"}
-                        </p>
-                      </div>
-                    ))}
-                </div>
+          {hasSpotifyConnectionError || !isSpotifyConnected() ? (
+            <SpotifyFallback variant="artists" className="mt-6" />
+          ) : spotifyProfileData?.topArtists &&
+            spotifyProfileData.topArtists.length > 0 ? (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  Your Top Artists
+                </h2>
+                <Badge variant="secondary" className="text-xs animate-pulse">
+                  Based on recent listening
+                </Badge>
               </div>
-            )}
-          {followedArtists && followedArtists.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {spotifyProfileData.topArtists
+                  .slice(0, 5)
+                  .map((artist: SpotifyArtist, index: number) => (
+                    <div key={index} className="group cursor-pointer">
+                      <div className="relative aspect-square rounded-xl overflow-hidden mb-3 shadow-md group-hover:shadow-xl transition-all duration-300">
+                        {artist.images && artist.images.length > 0 ? (
+                          <img
+                            src={artist.images[0]?.url}
+                            alt={artist.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <UserPlus className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <PlayCircle className="text-white h-10 w-10 drop-shadow-lg" />
+                        </div>
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Badge className="bg-yellow-500 text-yellow-900 text-xs">
+                            #{index + 1}
+                          </Badge>
+                        </div>
+                      </div>
+                      <h3 className="font-medium text-sm text-center truncate group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                        {artist.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground text-center">
+                        {artist.followers?.total
+                          ? `${(artist.followers.total / 1000000).toFixed(
+                              1
+                            )}M followers`
+                          : "Popular artist"}
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ) : isSpotifyDataAvailable &&
+            (!spotifyProfileData?.topArtists ||
+              spotifyProfileData.topArtists.length === 0) ? (
+            <SpotifyFallback variant="artists" className="mt-6" />
+          ) : null}
+          {hasSpotifyConnectionError || !isSpotifyConnected() ? (
+            <SpotifyFallback
+              variant="artists"
+              className="mt-6"
+              title="Artists You Follow"
+            />
+          ) : followedArtists && followedArtists.length > 0 ? (
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -312,57 +331,70 @@ const HomeDashboard = () => {
                 </div>
               )}
             </div>
-          )}
-          {spotifyProfileData?.topSongs &&
-            spotifyProfileData.topSongs.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold flex items-center gap-2">
-                    <Volume2 className="h-5 w-5 text-green-500" />
-                    Your Top Tracks
-                  </h2>
-                  <Badge variant="secondary" className="text-xs">
-                    Most played recently
-                  </Badge>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                  {spotifyProfileData.topSongs
-                    .slice(0, 5)
-                    .map((song, index) => (
-                      <Card
-                        key={index}
-                        className="group cursor-pointer hover:shadow-md transition-all duration-300"
-                      >
-                        <CardContent className="p-3">
-                          <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
-                            {song.image ? (
-                              <img
-                                src={song.image}
-                                alt={song.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center">
-                                <Music className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Play className="text-white h-8 w-8" />
-                            </div>
-                          </div>
-                          <h3 className="font-medium text-sm truncate mb-1">
-                            {song.name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {song.artist}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                </div>
+          ) : isSpotifyDataAvailable &&
+            (!followedArtists || followedArtists.length === 0) ? (
+            <SpotifyFallback
+              variant="artists"
+              className="mt-6"
+              title="Artists You Follow"
+            />
+          ) : null}
+          {hasSpotifyConnectionError || !isSpotifyConnected() ? (
+            <SpotifyFallback variant="tracks" className="mt-6" />
+          ) : spotifyProfileData?.topSongs &&
+            spotifyProfileData.topSongs.length > 0 ? (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Volume2 className="h-5 w-5 text-green-500" />
+                  Your Top Tracks
+                </h2>
+                <Badge variant="secondary" className="text-xs">
+                  Most played recently
+                </Badge>
               </div>
-            )}{" "}
-          {recentlyPlayedTracks && recentlyPlayedTracks.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {spotifyProfileData.topSongs.slice(0, 5).map((song, index) => (
+                  <Card
+                    key={index}
+                    className="group cursor-pointer hover:shadow-md transition-all duration-300"
+                  >
+                    <CardContent className="p-3">
+                      <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
+                        {song.image ? (
+                          <img
+                            src={song.image}
+                            alt={song.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center">
+                            <Music className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="text-white h-8 w-8" />
+                        </div>
+                      </div>
+                      <h3 className="font-medium text-sm truncate mb-1">
+                        {song.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {song.artist}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : isSpotifyDataAvailable &&
+            (!spotifyProfileData?.topSongs ||
+              spotifyProfileData.topSongs.length === 0) ? (
+            <SpotifyFallback variant="tracks" className="mt-6" />
+          ) : null}
+          {hasSpotifyConnectionError || !isSpotifyConnected() ? (
+            <SpotifyFallback variant="recent" className="mt-6" />
+          ) : recentlyPlayedTracks && recentlyPlayedTracks.length > 0 ? (
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -427,12 +459,15 @@ const HomeDashboard = () => {
                 </div>
               )}
             </div>
-          )}{" "}
+          ) : isSpotifyDataAvailable &&
+            (!recentlyPlayedTracks || recentlyPlayedTracks.length === 0) ? (
+            <SpotifyFallback variant="recent" className="mt-6" />
+          ) : null}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Play className="h-5 w-5 text-green-500" />
-                Continue Listening
+                Today's Listening
               </h2>
               {getTodayTracks().length > 0 && (
                 <Badge
