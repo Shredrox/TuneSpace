@@ -21,7 +21,9 @@
     <PackageVersion Include="Microsoft.Extensions.VectorData.Abstractions" Version="9.5.0" />
     <PackageVersion Include="Microsoft.ML.OnnxRuntime" Version="1.22.0" />
     <PackageVersion Include="Microsoft.ML.Tokenizers" Version="1.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.5.0" />
+    <PackageVersion Include="FluentEmail.Core" Version="3.0.2" />
+    <PackageVersion Include="FluentEmail.Smtp" Version="3.0.2" />
 
     <!-- Test packages -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
