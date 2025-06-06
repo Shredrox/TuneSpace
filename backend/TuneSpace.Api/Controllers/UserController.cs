@@ -145,10 +145,15 @@ public class UserController(
             return BadRequest("No file uploaded");
         }
 
-        string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Username cannot be null or empty");
+        }
+
+        string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"];
         if (!allowedFileTypes.Contains(file.ContentType.ToLower()))
         {
-            return BadRequest("Invalid file type. Only JPEG, PNG, JPG and GIF are allowed.");
+            return BadRequest("Invalid file type. Only JPEG, PNG, JPG, GIF and WEBP are allowed.");
         }
 
         if (file.Length > 5 * 1024 * 1024)
