@@ -23,4 +23,9 @@
       <PackageReference Include="FluentEmail.Core" />
       <PackageReference Include="FluentEmail.Smtp" />
     </ItemGroup>
+    <ItemGroup>
+		  <None Include="Email\Templates\*.html">
+		  	<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  </None>
+	  </ItemGroup>
 </Project>
