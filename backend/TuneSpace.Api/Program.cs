@@ -40,6 +40,7 @@ builder.Services.AddRepositoryServices();
 builder.Services.AddCachingServices();
 builder.Services.AddIdentityServices();
 builder.Services.AddHttpClientServices();
+builder.Services.AddEmailService();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationBackgroundServices();

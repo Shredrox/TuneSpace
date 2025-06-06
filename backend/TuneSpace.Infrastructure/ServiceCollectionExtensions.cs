@@ -5,9 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using TuneSpace.Infrastructure.Clients;
 using TuneSpace.Infrastructure.Data;
 using TuneSpace.Infrastructure.Repositories;
+using TuneSpace.Infrastructure.Services;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IRepositories;
+using TuneSpace.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +19,7 @@ using Microsoft.Extensions.Options;
 using Polly;
 using Microsoft.Extensions.Http.Resilience;
 using TuneSpace.Core.Exceptions;
+using System.Net.Mail;
 
 namespace TuneSpace.Infrastructure;
 
@@ -87,6 +90,28 @@ public static class ServiceCollectionExtensions
         }).AddRoles<ApplicationRole>()
         .AddEntityFrameworkStores<TuneSpaceDbContext>()
         .AddDefaultTokenProviders();
+
+        return services;
+    }
+
+    public static IServiceCollection AddEmailService(this IServiceCollection services)
+    {
+        var emailOptions = services.BuildServiceProvider().GetRequiredService<IOptionsSnapshot<EmailOptions>>().Value;
+
+        services.AddFluentEmail(emailOptions.FromEmail, emailOptions.FromName)
+            .AddSmtpSender(() =>
+            {
+                return new SmtpClient(emailOptions?.SmtpHost ?? "localhost")
+                {
+                    //TODO: Set up gmail SMTP
+                    //local emails for now
+                    DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory,
+                    PickupDirectoryLocation = @"C:\Emails",
+                    EnableSsl = false,
+                };
+            });
+
+        services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
         return services;
     }
@@ -192,6 +217,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        services.Configure<EmailOptions>(configuration.GetSection("Email"));
         services.Configure<DatabaseOptions>(configuration.GetSection("ConnectionStrings"));
         services.Configure<SpotifyOptions>(configuration.GetSection("Spotify"));
         services.Configure<LastFmOptions>(configuration.GetSection("LastFm"));

@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IArtistDiscoveryService, ArtistDiscoveryService>();
         services.AddScoped<IRecommendationScoringService, RecommendationScoringService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISpotifyService, SpotifyService>();
         services.AddScoped<ITokenService, TokenService>();
