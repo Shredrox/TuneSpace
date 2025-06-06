@@ -116,6 +116,13 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUrlBuilderService, UrlBuilderService>();
+
+        return services;
+    }
+
     public static IServiceCollection AddRepositoryServices(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
@@ -218,6 +225,7 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
+        services.Configure<FrontendOptions>(configuration.GetSection("Frontend"));
         services.Configure<DatabaseOptions>(configuration.GetSection("ConnectionStrings"));
         services.Configure<SpotifyOptions>(configuration.GetSection("Spotify"));
         services.Configure<LastFmOptions>(configuration.GetSection("LastFm"));
