@@ -27,6 +27,7 @@ export const ENDPOINTS = {
   LOGOUT: "Auth/logout",
   REFRESH_TOKEN: "Auth/refresh-token",
   CURRENT_USER: "Auth/current-user",
+  CONNECT_SPOTIFY: "Auth/connect-spotify",
   REGISTER: "Auth/register",
   SPOTIFY_OAUTH: "Auth/spotify-oauth",
   BANDREGISTER: "Band/register",
@@ -42,6 +43,7 @@ export const ENDPOINTS = {
 export const SPOTIFY_ENDPOINTS = {
   LOGIN: "Spotify/login",
   CONNECTION_STATUS: "Spotify/connection-status",
+  CONNECT: "Spotify/connect",
   REFRESH: "Spotify/refresh",
   SEARCH: "Spotify/search",
   SEARCH_ARTISTS: "Spotify/search-artists",

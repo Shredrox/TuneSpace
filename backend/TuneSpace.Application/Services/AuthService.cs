@@ -107,6 +107,42 @@ internal partial class AuthService(
         return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
     }
 
+    async Task<bool> IAuthService.ConnectExternalAccountAsync(string userId, string externalId, string email, string displayName, string provider, string? profilePictureUrl)
+    {
+        var existingUser = await _userRepository.GetUserByExternalIdAsync(externalId, provider);
+        if (existingUser is not null)
+        {
+            throw new InvalidOperationException("This Spotify account is already linked to another user.");
+        }
+
+        var user = await _userRepository.GetUserByIdAsync(userId) ?? throw new InvalidOperationException("User not found.");
+
+        if (!string.IsNullOrEmpty(user.SpotifyId))
+        {
+            throw new InvalidOperationException("User already has a Spotify account linked.");
+        }
+
+        user.SpotifyId = externalId;
+        user.ExternalProvider = provider;
+        user.ExternalLoginLinkedAt = DateTime.UtcNow;
+
+        if (!string.IsNullOrEmpty(profilePictureUrl) && user.ProfilePicture is null)
+        {
+            try
+            {
+                using var httpClient = new HttpClient();
+                var imageBytes = await httpClient.GetByteArrayAsync(profilePictureUrl);
+                user.ProfilePicture = imageBytes;
+            }
+            catch
+            {
+            }
+        }
+
+        await _userRepository.UpdateUserAsync(user);
+        return true;
+    }
+
     private bool VerifyPassword(User user, string password)
     {
         if (user.PasswordHash is null)

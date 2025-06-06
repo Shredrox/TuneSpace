@@ -42,4 +42,19 @@ public interface IAuthService
     /// containing authentication tokens and user information.
     /// </returns>
     Task<LoginResponse> ExternalLoginAsync(string externalId, string email, string displayName, string provider, string? profilePictureUrl);
+
+    /// <summary>
+    /// Connects a Spotify account to an existing authenticated user.
+    /// </summary>
+    /// <param name="userId">The ID of the currently authenticated user.</param>
+    /// <param name="externalId">The Spotify user ID.</param>
+    /// <param name="email">The user's email from Spotify.</param>
+    /// <param name="displayName">The user's display name from Spotify.</param>
+    /// <param name="provider">The name of the external provider (should be "Spotify").</param>
+    /// <param name="profilePictureUrl">Optional profile picture URL from Spotify.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation that returns true if the connection was successful.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Thrown when the Spotify account is already linked to another user.</exception>
+    Task<bool> ConnectExternalAccountAsync(string userId, string externalId, string email, string displayName, string provider, string? profilePictureUrl);
 }

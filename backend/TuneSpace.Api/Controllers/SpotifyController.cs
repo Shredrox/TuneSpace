@@ -29,6 +29,21 @@ public class SpotifyController(
         }
     }
 
+    [HttpGet("connect")]
+    public IActionResult SpotifyConnect()
+    {
+        try
+        {
+            var redirectUrl = _spotifyService.GetSpotifyLoginUrl("connect");
+            return Redirect(redirectUrl);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error generating Spotify connect URL");
+            return BadRequest("Error generating Spotify connect URL");
+        }
+    }
+
     [HttpGet("callback")]
     public IActionResult Callback(string code, string state)
     {
@@ -46,7 +61,22 @@ public class SpotifyController(
 
         try
         {
-            var redirectUrl = $"http://localhost:5173/auth/spotify-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}";
+            var flowType = "login";
+            if (state.Contains(':'))
+            {
+                var parts = state.Split(':', 2);
+                if (parts.Length == 2 && (parts[0] == "login" || parts[0] == "connect"))
+                {
+                    flowType = parts[0];
+                }
+            }
+
+            var redirectUrl = flowType switch
+            {
+                "connect" => $"http://localhost:5173/auth/spotify-connect-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}",
+                _ => $"http://localhost:5173/auth/spotify-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}"
+            };
+
             return Redirect(redirectUrl);
         }
         catch (Exception e)

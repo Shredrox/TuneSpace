@@ -31,7 +31,14 @@ internal class SpotifyService(
 
     string ISpotifyService.GetSpotifyLoginUrl()
     {
-        var state = _oAuthStateService.GenerateAndStoreState();
+        return ((ISpotifyService)this).GetSpotifyLoginUrl("login");
+    }
+
+    string ISpotifyService.GetSpotifyLoginUrl(string flowType)
+    {
+        var baseState = _oAuthStateService.GenerateAndStoreState();
+        var state = $"{flowType}:{baseState}";
+
         const string scope = "user-read-private user-read-email user-top-read playlist-modify-private playlist-modify-public user-read-recently-played user-follow-read";
 
         var redirectUrl = $"https://accounts.spotify.com/authorize?" +

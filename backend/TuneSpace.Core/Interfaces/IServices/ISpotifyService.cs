@@ -11,6 +11,13 @@ public interface ISpotifyService
     string GetSpotifyLoginUrl();
 
     /// <summary>
+    /// Generates a Spotify login URL with flow type support
+    /// </summary>
+    /// <param name="flowType">The type of OAuth flow ('login' or 'connect')</param>
+    /// <returns>Spotify login URL to redirect the user to</returns>
+    string GetSpotifyLoginUrl(string flowType);
+
+    /// <summary>
     /// Exchanges an authorization code for a Spotify access token
     /// </summary>
     /// <param name="code">Authorization code received from Spotify callback</param>

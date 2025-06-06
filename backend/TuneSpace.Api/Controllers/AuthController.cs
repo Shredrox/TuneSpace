@@ -234,10 +234,26 @@ public class AuthController(
             return BadRequest("Authorization code is required.");
         }
 
-        if (string.IsNullOrEmpty(request.State) || !_oAuthStateService.ValidateAndConsumeState(request.State))
+        if (string.IsNullOrEmpty(request.State))
         {
-            _logger.LogWarning("Invalid or missing OAuth state parameter in Spotify OAuth request");
-            return BadRequest("Invalid OAuth state parameter. This may indicate a CSRF attack.");
+            _logger.LogWarning("Missing OAuth state parameter in Spotify OAuth request");
+            return BadRequest("Missing OAuth state parameter.");
+        }
+
+        var actualState = request.State;
+        if (request.State.Contains(':'))
+        {
+            var parts = request.State.Split(':', 2);
+            if (parts.Length == 2)
+            {
+                actualState = parts[1];
+            }
+        }
+
+        if (!_oAuthStateService.ValidateAndConsumeState(actualState))
+        {
+            _logger.LogWarning("Invalid OAuth state parameter in Spotify OAuth request");
+            return BadRequest("Invalid OAuth state parameter.");
         }
 
         try
@@ -292,6 +308,110 @@ public class AuthController(
         {
             _logger.LogError(e, "Error during Spotify OAuth authentication");
             return StatusCode(500, "An error occurred during Spotify authentication.");
+        }
+    }
+
+    [HttpPost("connect-spotify")]
+    public async Task<IActionResult> ConnectSpotify([FromBody] SpotifyOAuthRequest request)
+    {
+        if (request is null || string.IsNullOrEmpty(request.Code))
+        {
+            return BadRequest("Authorization code is required.");
+        }
+
+        if (string.IsNullOrEmpty(request.State))
+        {
+            _logger.LogWarning("Missing OAuth state parameter in Spotify connect request");
+            return BadRequest("Missing OAuth state parameter.");
+        }
+
+        var actualState = request.State;
+        if (request.State.Contains(':'))
+        {
+            var parts = request.State.Split(':', 2);
+            if (parts.Length == 2)
+            {
+                actualState = parts[1];
+            }
+        }
+
+        if (!_oAuthStateService.ValidateAndConsumeState(actualState))
+        {
+            _logger.LogWarning("Invalid OAuth state parameter in Spotify connect request");
+            return BadRequest("Invalid OAuth state parameter.");
+        }
+
+        try
+        {
+            var accessToken = CookieHelper.GetAccessToken(Request);
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return Unauthorized("No access token provided");
+            }
+
+            var principal = await _tokenService.ValidateAccessTokenAsync(accessToken);
+            if (principal is null)
+            {
+                return Unauthorized("Invalid access token");
+            }
+
+            var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token claims");
+            }
+
+            var spotifyTokens = await _spotifyService.ExchangeCodeForTokenAsync(request.Code);
+
+            var spotifyProfile = await _spotifyService.GetUserSpotifyProfileAsync(spotifyTokens.AccessToken);
+            var response = await _spotifyService.GetUserInfoAsync(spotifyTokens.AccessToken);
+
+            await _authService.ConnectExternalAccountAsync(
+                userId,
+                response.Id,
+                response.Email,
+                spotifyProfile.Username,
+                ExternalProviders.Spotify,
+                spotifyProfile.ProfilePicture
+            );
+
+            var tokenExpiry = DateTime.Now.AddSeconds(spotifyTokens.ExpiresIn);
+
+            Response.Cookies.Append("SpotifyAccessToken", spotifyTokens.AccessToken, new CookieOptions
+            {
+                Expires = tokenExpiry,
+                HttpOnly = true,
+                Secure = true,
+                IsEssential = true,
+                Domain = "localhost",
+                SameSite = SameSiteMode.None
+            });
+
+            Response.Cookies.Append("SpotifyRefreshToken", spotifyTokens.RefreshToken, new CookieOptions
+            {
+                Expires = DateTime.Now.AddDays(30),
+                HttpOnly = true,
+                Secure = true,
+                IsEssential = true,
+                Domain = "localhost",
+                SameSite = SameSiteMode.None
+            });
+
+            return Ok(new
+            {
+                success = true,
+                message = "Spotify account connected successfully"
+            });
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogWarning(e, "Failed to connect Spotify account for user");
+            return Conflict(e.Message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error during Spotify account connection");
+            return StatusCode(500, "An error occurred while connecting your Spotify account.");
         }
     }
 }

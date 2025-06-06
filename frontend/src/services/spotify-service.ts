@@ -1,6 +1,6 @@
 import SearchSong from "@/interfaces/spotify/SearchSong";
 import SpotifyProfile from "../interfaces/spotify/SpotifyProfile";
-import { SPOTIFY_ENDPOINTS } from "@/utils/constants";
+import { ENDPOINTS, SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import SpotifyArtist from "@/interfaces/spotify/SpotifyArtist";
 import httpClient from "./http-client";
 import RecentlyPlayedStats from "@/interfaces/spotify/RecentlyPlayedStats";
@@ -76,5 +76,16 @@ export const refreshSpotifyToken = async () => {
 
 export const getSpotifyConnectionStatus = async () => {
   const response = await httpClient.get(SPOTIFY_ENDPOINTS.CONNECTION_STATUS);
+  return response.data;
+};
+
+export const connectSpotifyAccount = async (code: string, state: string) => {
+  const response = await httpClient.post(
+    ENDPOINTS.CONNECT_SPOTIFY,
+    { code, state },
+    {
+      withCredentials: true,
+    }
+  );
   return response.data;
 };
