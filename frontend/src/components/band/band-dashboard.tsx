@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "../shadcn/card";
 import { FaSpotify, FaYoutube } from "react-icons/fa";
 import { SiTidal, SiApplemusic } from "react-icons/si";
+import { IoMdPhotos } from "react-icons/io";
 import YouTubeEmbedDialog from "./youtube-embed-dialog";
 import {
   Carousel,
@@ -19,6 +20,8 @@ import Loading from "../fallback/loading";
 import useToast from "@/hooks/useToast";
 import ConnectSpotifyDialog from "./connect-spotify-dialog";
 import EditBandDialog from "./edit-band-dialog";
+import AppleMusicFallback from "../fallback/apple-music-fallback";
+import TidalFallback from "../fallback/tidal-fallback";
 import { Users, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import CreateDiscussionDialog from "../social/create-discussion-dialog";
@@ -33,6 +36,8 @@ import BandFollowers from "./band-followers";
 import BandMessagingDashboard from "./band-messaging-dashboard";
 import { useBandFollow } from "@/hooks/query/useBandFollow";
 import useBandChat from "@/hooks/query/useBandChat";
+import { useSpotifyErrorHandler } from "@/hooks/error/useSpotifyErrorHandler";
+import SpotifyFallback from "@/components/spotify/spotify-fallback";
 
 const BandDashboard = () => {
   const { auth } = useAuth();
@@ -49,6 +54,8 @@ const BandDashboard = () => {
   } = useMerchandise(bandData?.band?.id || "");
 
   const { followerCount } = useBandFollow(bandData?.band?.id || "");
+
+  const { isSpotifyConnected } = useSpotifyErrorHandler();
 
   const { chatData } = useBandChat({
     bandId: bandData?.band?.id || "",
@@ -92,19 +99,7 @@ const BandDashboard = () => {
       ? Math.round((totalBandResponses / totalUserMessages) * 100)
       : 0;
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      // useToast(
-      //   "Welcome to the Band Dashboard! Here you can manage your band activities as well as add additional info for your band."
-      // );
-    }
-  }, [mounted]);
+  const [isSpotifyDialogOpen, setIsSpotifyDialogOpen] = useState(false);
 
   const handleSpotifyIdUpdate = async (spotifyId: string) => {
     try {
@@ -115,6 +110,7 @@ const BandDashboard = () => {
       await mutations.updateBandMutation(formData);
 
       useToast("Spotify connection successful", 5000);
+      setIsSpotifyDialogOpen(false);
     } catch (error) {
       useToast(
         `Failed to connect Spotify: ${
@@ -257,7 +253,6 @@ const BandDashboard = () => {
           handleBandUpdate={handleBandUpdate}
         />
       </div>
-
       <Card className="w-full shadow-md border-2 border-muted/20">
         <CardHeader className="pb-0">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -271,78 +266,103 @@ const BandDashboard = () => {
                   {bandData.band?.name?.substring(0, 2) || "BP"}
                 </AvatarFallback>
               </Avatar>
-            </div>{" "}
-            <div className="flex flex-col gap-4 flex-1">
-              <div>
-                <h2 className="text-3xl font-bold mb-1">
+            </div>
+            <div className="flex flex-col gap-4 flex-1 min-w-0">
+              <div className="max-w-full">
+                <h2 className="text-3xl font-bold mb-1 break-words">
                   {bandData.band?.name || "Unknown Band"}
                 </h2>
-                <p className="text-xl font-medium text-muted-foreground">
+                <p className="text-xl font-medium text-muted-foreground break-words">
                   {bandData.band?.genre || "No genre specified"}
                 </p>
-                <p className="text-muted-foreground mt-1">
+                <p className="text-muted-foreground mt-1 break-words">
                   {bandData.band?.country && bandData.band?.city
                     ? `${bandData.band.country}, ${bandData.band.city}`
                     : "Location not specified"}
                 </p>
-                <p className="mt-4 text-lg">
+                <p className="mt-4 text-lg break-words whitespace-pre-wrap overflow-hidden text-ellipsis max-w-full">
                   {bandData.band?.description || "No description available"}
                 </p>
               </div>
-
-              <div className="mt-auto">
-                {bandData.band?.youTubeEmbedId ? (
-                  <div className="mt-4">
-                    <h3 className="text-lg font-medium flex items-center gap-2 mb-2">
-                      <FaYoutube className="text-red-600" />
-                      Featured Video
-                    </h3>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-8">
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6">Media & Gallery</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="overflow-hidden h-full">
+                <CardHeader className="bg-gradient-to-r from-red-900/20 to-transparent">
+                  <CardTitle className="flex items-center gap-2">
+                    <FaYoutube className="text-red-600" size={24} />
+                    <span>Featured Video</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {bandData.band?.youTubeEmbedId ? (
                     <iframe
-                      className="w-full max-w-[560px] aspect-video rounded-md shadow-sm"
+                      className="w-full aspect-video rounded-md shadow-sm"
                       src={`https://www.youtube.com/embed/${bandData.band?.youTubeEmbedId}`}
                       title="YouTube video"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       referrerPolicy="strict-origin-when-cross-origin"
                       allowFullScreen
                     ></iframe>
+                  ) : (
+                    <div className="h-[180px] flex flex-col items-center justify-center bg-muted/20 rounded-md">
+                      <FaYoutube className="text-red-600 mb-2" size={32} />
+                      <p className="text-muted-foreground mb-4">
+                        No video added yet
+                      </p>
+                      <YouTubeEmbedDialog
+                        handleYouTubeEmbedIdUpdate={handleYouTubeEmbedIdUpdate}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="overflow-hidden h-full">
+                <CardHeader className="bg-gradient-to-r from-slate-900/20 to-transparent">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <IoMdPhotos size={24} />
+                      <span>Band Gallery</span>
+                    </CardTitle>
+                    <button className="text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
+                      Add Photos
+                    </button>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-3 mt-4">
-                    <FaYoutube className="text-red-600" size={24} />
-                    <YouTubeEmbedDialog
-                      handleYouTubeEmbedIdUpdate={handleYouTubeEmbedIdUpdate}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="lg:max-w-[320px] w-full">
-              <h3 className="text-lg font-medium mb-3">Band Gallery</h3>
-              <Carousel className="w-full">
-                <CarouselContent>
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <CarouselItem key={index} className="basis-full">
-                      <Card>
-                        <CardContent className="flex aspect-square items-center justify-center p-2 bg-muted/20">
-                          Image {index + 1}
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="flex justify-center gap-2 mt-2">
-                  <CarouselPrevious className="relative transform-none w-8 h-8" />
-                  <CarouselNext className="relative transform-none w-8 h-8" />
-                </div>
-              </Carousel>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <CarouselItem key={index} className="basis-full">
+                          <Card>
+                            <CardContent className="flex aspect-video items-center justify-center p-2 bg-muted/20">
+                              <div className="text-center text-muted-foreground">
+                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                                  <span className="text-2xl">📷</span>
+                                </div>
+                                <p className="text-sm">Image {index + 1}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="flex justify-center gap-2 mt-3">
+                      <CarouselPrevious className="relative transform-none w-8 h-8" />
+                      <CarouselNext className="relative transform-none w-8 h-8" />
+                    </div>
+                  </Carousel>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </CardHeader>
-
-        <CardContent className="pt-8">
-          {/* Music Stats Section */}
           <div className="mb-10">
             <h2 className="text-2xl font-bold mb-6">Music Stats</h2>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="overflow-hidden h-full">
                 <CardHeader className="bg-gradient-to-r from-green-900/20 to-transparent">
@@ -350,9 +370,9 @@ const BandDashboard = () => {
                     <FaSpotify className="text-[#1DB954]" size={28} />
                     <h3 className="font-semibold text-2xl">Spotify Stats</h3>
                   </div>
-                </CardHeader>{" "}
+                </CardHeader>
                 <CardContent className="p-4">
-                  {bandData.spotifyProfile ? (
+                  {bandData.spotifyProfile && isSpotifyConnected() ? (
                     <div className="flex flex-col gap-4">
                       <div className="flex gap-4 items-center">
                         <Avatar className="w-[100px] h-[100px]">
@@ -362,6 +382,7 @@ const BandDashboard = () => {
                               console.error("Failed to load Spotify image");
                               e.currentTarget.style.display = "none";
                             }}
+                            className="object-cover"
                           />
                           <AvatarFallback>SP</AvatarFallback>
                         </Avatar>
@@ -401,13 +422,41 @@ const BandDashboard = () => {
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
-                      <p className="mb-4 text-muted-foreground">
-                        Connect your band's Spotify profile
-                      </p>
-                      <ConnectSpotifyDialog
-                        handleSpotifyIdUpdate={handleSpotifyIdUpdate}
-                      />
+                    <div className="h-[200px]">
+                      {!isSpotifyConnected() && (
+                        <>
+                          <SpotifyFallback
+                            variant="stats"
+                            title={`${
+                              bandData.band?.spotifyId
+                                ? "Spotify Stats"
+                                : "Spotify Not Connected"
+                            }`}
+                            description={`${
+                              !bandData.band?.spotifyId
+                                ? "Connect your Spotify account to see band statistics and embed content"
+                                : "Spotify artist profile added. Connect your Spotify account to view stats."
+                            }`}
+                            labelText={`${
+                              bandData.band?.spotifyId ? "Connected" : ""
+                            }`}
+                            showExploreButton={false}
+                            connectButtonDisabled={
+                              !isSpotifyConnected() && bandData.band?.spotifyId
+                                ? true
+                                : false
+                            }
+                            onConnectSpotify={() =>
+                              setIsSpotifyDialogOpen(true)
+                            }
+                          />
+                          <ConnectSpotifyDialog
+                            handleSpotifyIdUpdate={handleSpotifyIdUpdate}
+                            open={isSpotifyDialogOpen}
+                            onOpenChange={setIsSpotifyDialogOpen}
+                          />
+                        </>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -422,13 +471,16 @@ const BandDashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
-                    <p className="mb-4 text-muted-foreground">
-                      Connect your Apple Music account
-                    </p>
-                    <button className="bg-black text-white px-4 py-2 rounded-full hover:bg-black/80">
-                      Connect Apple Music
-                    </button>
+                  <div className="h-[200px]">
+                    <AppleMusicFallback
+                      variant="stats"
+                      title="Apple Music Not Connected"
+                      description="Connect your Apple Music account to see band statistics and embed content"
+                      showExploreButton={false}
+                      onConnectAppleMusic={() =>
+                        console.log("Apple Music integration coming soon!")
+                      }
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -440,19 +492,21 @@ const BandDashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="flex flex-col items-center justify-center p-6 text-center h-[200px]">
-                    <p className="mb-4 text-muted-foreground">
-                      Connect your Tidal account
-                    </p>
-                    <button className="bg-black text-white px-4 py-2 rounded-full hover:bg-black/80">
-                      Connect Tidal
-                    </button>
+                  <div className="h-[200px]">
+                    <TidalFallback
+                      variant="stats"
+                      title="Tidal Not Connected"
+                      description="Connect your Tidal account to see band statistics and embed content"
+                      showExploreButton={false}
+                      onConnectTidal={() =>
+                        console.log("Tidal integration coming soon!")
+                      }
+                    />
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
-
           <div className="mb-10">
             <h2 className="text-2xl font-bold mb-6">Fan Community</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -527,7 +581,7 @@ const BandDashboard = () => {
                       <Users className="h-5 w-5" />
                       <span>Fan Engagement</span>
                     </CardTitle>
-                  </CardHeader>{" "}
+                  </CardHeader>
                   <CardContent className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Card className="bg-accent/30">
@@ -568,7 +622,6 @@ const BandDashboard = () => {
               </div>
             </div>
           </div>
-
           <div className="mb-10">
             <h2 className="text-2xl font-bold mb-6">Events</h2>
             <Card className="mb-6 overflow-hidden border-muted/20">
@@ -682,7 +735,6 @@ const BandDashboard = () => {
               </CardContent>
             </Card>
             <Card className="overflow-hidden border-muted/20">
-              {" "}
               <CardHeader className="bg-muted/10 pb-2">
                 <CardTitle className="flex items-center gap-2">
                   <span>Merchandise</span>
