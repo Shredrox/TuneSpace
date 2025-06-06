@@ -16,10 +16,16 @@ import { extractArtistIdFromSpotifyLink } from "@/utils/helpers";
 
 interface ConnectSpotifyDialogProps {
   handleSpotifyIdUpdate: (spotifyId: string) => Promise<void>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 const ConnectSpotifyDialog = ({
   handleSpotifyIdUpdate,
+  open,
+  onOpenChange,
+  trigger,
 }: ConnectSpotifyDialogProps) => {
   const [spotifyArtistLink, setSpotifyArtistLink] = useState("");
 
@@ -31,14 +37,20 @@ const ConnectSpotifyDialog = ({
     const spotifyId = extractArtistIdFromSpotifyLink(spotifyArtistLink);
     if (spotifyId) {
       await handleSpotifyIdUpdate(spotifyId);
+      setSpotifyArtistLink("");
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setSpotifyArtistLink("");
+    }
+    onOpenChange?.(newOpen);
+  };
+
   return (
-    <Dialog onOpenChange={() => setSpotifyArtistLink("")}>
-      <DialogTrigger asChild>
-        <Button variant="outline">Connect</Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Connect Spotify Artist</DialogTitle>
