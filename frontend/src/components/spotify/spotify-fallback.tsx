@@ -23,7 +23,9 @@ interface SpotifyFallbackProps {
   className?: string;
   title?: string;
   description?: string;
+  labelText?: string;
   showExploreButton?: boolean;
+  connectButtonDisabled?: boolean;
   onConnectSpotify?: () => void;
 }
 
@@ -32,7 +34,9 @@ const SpotifyFallback = ({
   className = "",
   title,
   description,
+  labelText,
   showExploreButton = true,
+  connectButtonDisabled = false,
   onConnectSpotify,
 }: SpotifyFallbackProps) => {
   const router = useRouter();
@@ -151,6 +155,7 @@ const SpotifyFallback = ({
             <div className="flex gap-3">
               <Button
                 onClick={handleSpotifyConnect}
+                disabled={connectButtonDisabled}
                 className="bg-[#1ed760] hover:bg-[#1db954] text-white flex items-center gap-2"
               >
                 <FaSpotify className="h-4 w-4" />
@@ -182,7 +187,7 @@ const SpotifyFallback = ({
           {content.title}
           <Badge variant="outline" className="ml-auto text-xs">
             <FaSpotify className="h-3 w-3 mr-1" />
-            Connect Required
+            {labelText ? labelText : "Connect Required"}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -233,6 +238,7 @@ const SpotifyFallback = ({
         <div className="flex gap-2 pt-2">
           <Button
             onClick={handleSpotifyConnect}
+            disabled={connectButtonDisabled}
             size="sm"
             className="flex items-center gap-2"
           >
