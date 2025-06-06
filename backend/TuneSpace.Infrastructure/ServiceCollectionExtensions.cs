@@ -14,6 +14,9 @@ using Microsoft.IdentityModel.Tokens;
 using TuneSpace.Infrastructure.Identity;
 using TuneSpace.Infrastructure.Options;
 using Microsoft.Extensions.Options;
+using Polly;
+using Microsoft.Extensions.Http.Resilience;
+using TuneSpace.Core.Exceptions;
 
 namespace TuneSpace.Infrastructure;
 
@@ -112,7 +115,75 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IOllamaClient, OllamaClient>();
         services.AddHttpClient<ILastFmClient, LastFmClient>();
         services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
-        services.AddHttpClient<ISpotifyClient, SpotifyClient>();
+
+        services.AddHttpClient<ISpotifyClient, SpotifyClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.spotify.com/v1/");
+            client.DefaultRequestHeaders.Add("User-Agent", "TuneSpace/1.0");
+        })
+        .ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            return new SocketsHttpHandler
+            {
+                MaxConnectionsPerServer = 10,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(15)
+            };
+        })
+        .AddResilienceHandler(
+            "spotifyResiliencePipeline", pipeline =>
+            {
+                pipeline.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    ShouldHandle = args =>
+                    {
+                        if (args.Outcome.Exception is SpotifyApiException)
+                        {
+                            return ValueTask.FromResult(false);
+                        }
+
+                        if (args.Outcome.Exception is HttpRequestException or TaskCanceledException)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        if (args.Outcome.Result?.StatusCode is
+                            System.Net.HttpStatusCode.TooManyRequests or
+                            System.Net.HttpStatusCode.InternalServerError or
+                            System.Net.HttpStatusCode.BadGateway or
+                            System.Net.HttpStatusCode.ServiceUnavailable or
+                            System.Net.HttpStatusCode.GatewayTimeout)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        return ValueTask.FromResult(false);
+                    },
+                    OnRetry = async args =>
+                    {
+                        if (args.Outcome.Result?.StatusCode == System.Net.HttpStatusCode.TooManyRequests &&
+                            args.Outcome.Result.Headers.RetryAfter?.Delta is TimeSpan retryAfter)
+                        {
+                            await Task.Delay(retryAfter);
+                        }
+                    }
+                });
+
+                pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+                {
+                    FailureRatio = 0.5,
+                    SamplingDuration = TimeSpan.FromMinutes(2),
+                    MinimumThroughput = 10,
+                    BreakDuration = TimeSpan.FromSeconds(30)
+                });
+
+                pipeline.AddTimeout(TimeSpan.FromSeconds(30));
+            }
+        );
+
         services.AddHttpClient<IBandcampClient, BandcampClient>();
 
         return services;

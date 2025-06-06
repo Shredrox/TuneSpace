@@ -7,7 +7,6 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
 {
     private readonly HttpClient _httpClient = httpClient;
 
-    private const string BaseApiUrl = "https://api.spotify.com/v1";
     private const string AuthUrl = "https://accounts.spotify.com/api/token";
 
     async Task<HttpResponseMessage> ISpotifyClient.GetToken(FormUrlEncodedContent parameters)
@@ -17,15 +16,14 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserInfo(string token)
     {
-        SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/me");
+        var request = new HttpRequestMessage(HttpMethod.Get, "me");
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserRecentlyPlayedTracks(string token, long? after, long? before, int limit)
     {
-        SetAuthorizationHeader(token);
-
-        var url = $"{BaseApiUrl}/me/player/recently-played?limit={limit}";
+        var url = $"me/player/recently-played?limit={limit}";
 
         if (after.HasValue)
         {
@@ -36,56 +34,57 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
             url += $"&before={before.Value}";
         }
 
-        return await _httpClient.GetAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserFollowedArtists(string token, string? after)
     {
-        SetAuthorizationHeader(token);
-
-        var url = $"{BaseApiUrl}/me/following?type=artist&limit=50";
+        var url = "me/following?type=artist&limit=50";
         if (!string.IsNullOrEmpty(after))
         {
             url += $"&after={after}";
         }
 
-        return await _httpClient.GetAsync(url);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserTopArtists(string token)
     {
-        SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/me/top/artists?time_range=short_term&limit=5&offset=0");
+        var request = new HttpRequestMessage(HttpMethod.Get, "me/top/artists?time_range=short_term&limit=5&offset=0");
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetUserTopSongs(string token)
     {
-        SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/me/top/tracks?time_range=short_term&limit=5&offset=0");
+        var request = new HttpRequestMessage(HttpMethod.Get, "me/top/tracks?time_range=short_term&limit=5&offset=0");
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetSongsBySearch(string token, string search)
     {
-        SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/search?q={Uri.EscapeDataString(search)}&type=track&limit=5");
-    }
-
-    async Task<HttpResponseMessage> ISpotifyClient.CreatePlaylist(string token, string userId, StringContent requestContent)
-    {
-        SetAuthorizationHeader(token);
-        return await _httpClient.PostAsync($"{BaseApiUrl}/users/{userId}/playlists", requestContent);
+        var request = new HttpRequestMessage(HttpMethod.Get, $"search?q={Uri.EscapeDataString(search)}&type=track&limit=5");
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetArtist(string token, string artistId)
     {
-        SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/artists/{artistId}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"artists/{artistId}");
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.GetSeveralArtists(string token, string artistIds)
     {
-        SetAuthorizationHeader(token);
-        return await _httpClient.GetAsync($"{BaseApiUrl}/artists?ids={artistIds}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"artists?ids={artistIds}");
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
     async Task<HttpResponseMessage> ISpotifyClient.RefreshAccessToken(FormUrlEncodedContent parameters)
@@ -98,30 +97,20 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
 
     async Task<HttpResponseMessage> ISpotifyClient.Search(string token, string query, string types, int limit)
     {
-        SetAuthorizationHeader(token);
-
-        var requestUrl = $"{BaseApiUrl}/search?q={Uri.EscapeDataString(query)}&type={types}";
+        var requestUrl = $"search?q={Uri.EscapeDataString(query)}&type={types}";
 
         if (limit > 0)
         {
             requestUrl += $"&limit={limit}";
         }
 
-        // if (offset > 0)
-        // {
-        //     requestUrl += $"&offset={offset}";
-        // }
-
-        // if (!string.IsNullOrEmpty(market))
-        // {
-        //     requestUrl += $"&market={market}";
-        // }
-
-        return await _httpClient.GetAsync(requestUrl);
+        var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+        SetAuthorizationHeader(request, token);
+        return await _httpClient.SendAsync(request);
     }
 
-    private void SetAuthorizationHeader(string token)
+    private static void SetAuthorizationHeader(HttpRequestMessage request, string token)
     {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 }
