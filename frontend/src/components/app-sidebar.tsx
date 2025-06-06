@@ -55,8 +55,9 @@ export function AppSidebar() {
     auth?.username || ""
   );
 
-  const isBandAdmin =
-    auth?.role?.toLowerCase() === UserRole.BandAdmin.toLowerCase();
+  const isBandMember =
+    auth?.role?.toLowerCase() === UserRole.BandAdmin.toLowerCase() ||
+    auth?.role?.toLowerCase() === UserRole.BandMember.toLowerCase();
 
   const userInitials = auth?.username
     ? auth.username.substring(0, 2).toUpperCase()
@@ -126,7 +127,7 @@ export function AppSidebar() {
     },
   ];
 
-  const allNavigationLinks = isBandAdmin
+  const allNavigationLinks = isBandMember
     ? [...navigationLinks, bandDashboardLink]
     : navigationLinks;
 
