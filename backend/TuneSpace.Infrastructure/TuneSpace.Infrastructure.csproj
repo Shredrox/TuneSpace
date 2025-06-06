@@ -19,5 +19,6 @@
       <PackageReference Include="Microsoft.Extensions.VectorData.Abstractions" />
       <PackageReference Include="Microsoft.ML.OnnxRuntime" />
       <PackageReference Include="Microsoft.ML.Tokenizers" />
+      <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
     </ItemGroup>
 </Project>
