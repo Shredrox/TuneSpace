@@ -35,8 +35,10 @@ const useAuthInitialization = () => {
             updateAuth({
               id: currentUser.id,
               username: currentUser.username,
+              email: currentUser.email,
               accessToken: refreshResult.accessToken,
               role: currentUser.role,
+              isExternalProvider: currentUser.isExternalProvider,
             });
 
             try {

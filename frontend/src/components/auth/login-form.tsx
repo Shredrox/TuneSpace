@@ -47,8 +47,10 @@ const Login = () => {
       updateAuth({
         id: userData.id,
         username: userData.username,
+        email: userData.email,
         accessToken: userData.accessToken,
         role: userData.role,
+        isExternalProvider: userData.isExternalProvider,
       });
 
       router.push("/home");
@@ -63,7 +65,18 @@ const Login = () => {
     } else {
       switch (error.response.status) {
         case 401:
-          setError("Incorrect email or password");
+          const errorMessage =
+            error.response.data?.message || error.response.data;
+          if (
+            typeof errorMessage === "string" &&
+            errorMessage.includes("confirm your email")
+          ) {
+            setError(
+              "Please confirm your email address before logging in. Check your inbox for the confirmation link."
+            );
+          } else {
+            setError("Incorrect email or password");
+          }
           break;
         case 400:
           setError("An error occurred");
@@ -97,6 +110,14 @@ const Login = () => {
           name="password"
           error={errors.password?.message}
         />
+        <div className="text-left">
+          <Link
+            href="/auth/forgot-password"
+            className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
+          >
+            Forgot your password?
+          </Link>
+        </div>
         <Button type="submit" className="w-full">
           Login
         </Button>

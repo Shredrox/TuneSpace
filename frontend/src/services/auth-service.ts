@@ -16,8 +16,30 @@ export interface RegisterData {
 export interface AuthResponse {
   id: string;
   username: string;
+  email?: string;
   accessToken: string;
   role: string;
+  isExternalProvider?: boolean;
+}
+
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  userId: string;
+  token: string;
+  newPassword: string;
+}
+
+export interface ChangeEmailData {
+  newEmail: string;
+}
+
+export interface ConfirmEmailChangeData {
+  userId: string;
+  token: string;
+  newEmail: string;
 }
 
 export const checkCurrentUser = async (): Promise<AuthResponse | null> => {
@@ -29,8 +51,10 @@ export const checkCurrentUser = async (): Promise<AuthResponse | null> => {
     return {
       id: response.data.id,
       username: response.data.username,
+      email: response.data.email,
       accessToken: "",
       role: response.data.role,
+      isExternalProvider: !!response.data.externalProvider,
     };
   } catch (error) {
     return null;
@@ -49,8 +73,10 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
   return {
     id: response?.data?.id,
     username: response?.data?.username,
+    email: response?.data?.email,
     accessToken: response?.data?.accessToken,
     role: response?.data?.role,
+    isExternalProvider: !!response?.data?.externalProvider,
   };
 };
 
@@ -97,4 +123,87 @@ export const logout = async (): Promise<void> => {
   } catch (error) {
     console.log(error);
   }
+};
+
+export const confirmEmail = async (
+  userId: string,
+  token: string
+): Promise<{ message: string }> => {
+  const response = await httpClient.get(
+    `${ENDPOINTS.CONFIRM_EMAIL}?userId=${encodeURIComponent(
+      userId
+    )}&token=${encodeURIComponent(token)}`
+  );
+
+  return response.data;
+};
+
+export const resendEmailConfirmation = async (
+  email: string
+): Promise<{ message: string }> => {
+  const response = await httpClient.post(
+    ENDPOINTS.RESEND_CONFIRMATION,
+    JSON.stringify({ email }),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  return response.data;
+};
+
+export const forgotPassword = async (
+  data: ForgotPasswordData
+): Promise<{ message: string }> => {
+  const response = await httpClient.post(
+    ENDPOINTS.FORGOT_PASSWORD,
+    JSON.stringify(data),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  return response.data;
+};
+
+export const resetPassword = async (
+  data: ResetPasswordData
+): Promise<{ message: string }> => {
+  const response = await httpClient.post(
+    ENDPOINTS.RESET_PASSWORD,
+    JSON.stringify(data),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  return response.data;
+};
+
+export const changeEmail = async (
+  data: ChangeEmailData
+): Promise<{ message: string }> => {
+  const response = await httpClient.post(
+    ENDPOINTS.REQUEST_EMAIL_CHANGE,
+    JSON.stringify(data),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  return response.data;
+};
+
+export const confirmEmailChange = async (
+  data: ConfirmEmailChangeData
+): Promise<{ message: string }> => {
+  const response = await httpClient.post(
+    ENDPOINTS.CONFIRM_EMAIL_CHANGE,
+    JSON.stringify(data),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  return response.data;
 };

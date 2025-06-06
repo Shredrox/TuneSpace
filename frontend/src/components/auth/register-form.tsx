@@ -53,9 +53,11 @@ const Register = ({
     const requestData: RegisterData = { ...rest, role: UserRole.Listener };
 
     try {
-      const userData = await registerUser(requestData);
-      updateAuth({ id: userData.id });
-      setFormStep(1);
+      await registerUser(requestData);
+      //TODO: Handle band registration flow after email confirmation
+      router.push(
+        `/auth/email-confirmation-sent?email=${encodeURIComponent(data.email)}`
+      );
     } catch (error: any) {
       handleRequestError(error);
     }

@@ -38,6 +38,7 @@ builder.Services.AddOptions(builder.Configuration);
 builder.Services.AddDatabaseServices();
 builder.Services.AddRepositoryServices();
 builder.Services.AddCachingServices();
+builder.Services.AddInfrastructureServices();
 builder.Services.AddIdentityServices();
 builder.Services.AddHttpClientServices();
 builder.Services.AddEmailService();

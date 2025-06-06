@@ -14,6 +14,7 @@ import {
 import { IoMusicalNote } from "react-icons/io5";
 import ProfilePictureUpload from "./profile-picture-upload";
 import ProfileSkeleton from "./profile-skeleton";
+import ProfileSettings from "./profile-settings";
 import useFollow from "@/hooks/query/useFollow";
 import { Button } from "@/components/shadcn/button";
 import { useState } from "react";
@@ -29,7 +30,7 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import Link from "next/link";
-import { Disc, User as LucideUser } from "lucide-react";
+import { Disc, User as LucideUser, Settings } from "lucide-react";
 import SpotifyConnectionStatus from "@/components/spotify/spotify-connection-status";
 import SpotifyFallback from "@/components/spotify/spotify-fallback";
 
@@ -213,10 +214,20 @@ const Profile = ({
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList
+            className={`grid w-full ${
+              isOwnProfile ? "grid-cols-4" : "grid-cols-3"
+            } mb-8`}
+          >
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="followers">Followers</TabsTrigger>
             <TabsTrigger value="following">Following</TabsTrigger>
+            {isOwnProfile && (
+              <TabsTrigger value="settings">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </TabsTrigger>
+            )}
           </TabsList>
           <TabsContent value="activity" className="space-y-6">
             {isOwnProfile ? (
@@ -534,6 +545,14 @@ const Profile = ({
               )}
             </div>
           </TabsContent>
+          {isOwnProfile && (
+            <TabsContent value="settings">
+              <ProfileSettings
+                userEmail={auth?.email || ""}
+                isExternalProvider={auth?.isExternalProvider || false}
+              />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

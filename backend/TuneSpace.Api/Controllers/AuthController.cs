@@ -64,7 +64,8 @@ public class AuthController(
                 username = user.UserName,
                 email = user.Email,
                 role = user.Role.ToString(),
-                profilePicture = profilePictureBase64
+                profilePicture = profilePictureBase64,
+                externalProvider = user.ExternalProvider
             });
         }
         catch (Exception e)
@@ -127,10 +128,14 @@ public class AuthController(
         {
             var response = await _authService.LoginAsync(request.Email, request.Password);
 
+            var user = await _userService.GetUserByIdAsync(response.Id);
+
             var username = response.Username;
             var accessToken = response.AccessToken;
             var role = response.Role;
             var id = response.Id;
+            var email = user?.Email;
+            var externalProvider = user?.ExternalProvider;
 
             CookieHelper.SetAuthTokens(Response, response.AccessToken, response.RefreshToken);
 
@@ -138,8 +143,10 @@ public class AuthController(
             {
                 id,
                 username,
+                email,
                 accessToken,
-                role
+                role,
+                externalProvider
             });
         }
         catch (UnauthorizedException e)
@@ -412,6 +419,192 @@ public class AuthController(
         {
             _logger.LogError(e, "Error during Spotify account connection");
             return StatusCode(500, "An error occurred while connecting your Spotify account.");
+        }
+    }
+
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            return BadRequest("User ID and token are required.");
+        }
+
+        try
+        {
+            var result = await _authService.ConfirmEmailAsync(userId, token);
+            if (result)
+            {
+                return Ok(new { message = "Email confirmed successfully. You can now log in." });
+            }
+            else
+            {
+                return BadRequest("Invalid or expired confirmation token.");
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error confirming email for user: {UserId}", userId);
+            return StatusCode(500, "An error occurred while confirming your email.");
+        }
+    }
+
+    [HttpPost("resend-confirmation")]
+    public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendConfirmationRequest request)
+    {
+        if (request is null || string.IsNullOrEmpty(request.Email))
+        {
+            return BadRequest("Email is required.");
+        }
+
+        try
+        {
+            await _authService.ResendEmailConfirmationAsync(request.Email);
+            return Ok(new { message = "Confirmation email sent. Please check your inbox." });
+        }
+        catch (ArgumentException e)
+        {
+            _logger.LogWarning(e, "Failed to resend confirmation for email: {Email}", request.Email);
+            return NotFound(e.Message);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogWarning(e, "Email already confirmed for: {Email}", request.Email);
+            return BadRequest(e.Message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error resending confirmation email for: {Email}", request.Email);
+            return StatusCode(500, "An error occurred while sending the confirmation email.");
+        }
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        if (request is null || string.IsNullOrEmpty(request.Email))
+        {
+            return BadRequest("Email is required.");
+        }
+
+        try
+        {
+            await _authService.RequestPasswordResetAsync(request.Email);
+            return Ok(new { message = "Password reset email sent. Please check your inbox." });
+        }
+        catch (ArgumentException e)
+        {
+            _logger.LogWarning(e, "Password reset requested for non-existent email: {Email}", request.Email);
+            return Ok(new { message = "Password reset email sent. Please check your inbox." });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error sending password reset email for: {Email}", request.Email);
+            return StatusCode(500, "An error occurred while sending the password reset email.");
+        }
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        if (request is null || string.IsNullOrEmpty(request.UserId) ||
+            string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.NewPassword))
+        {
+            return BadRequest("User ID, token, and new password are required.");
+        }
+
+        try
+        {
+            var result = await _authService.ResetPasswordAsync(request.UserId, request.Token, request.NewPassword);
+            if (result)
+            {
+                return Ok(new { message = "Password reset successfully. You can now log in with your new password." });
+            }
+            else
+            {
+                return BadRequest("Invalid or expired reset token.");
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error resetting password for user: {UserId}", request.UserId);
+            return StatusCode(500, "An error occurred while resetting your password.");
+        }
+    }
+
+    [HttpPost("request-email-change")]
+    public async Task<IActionResult> RequestEmailChange([FromBody] ChangeEmailRequest request)
+    {
+        if (request is null || string.IsNullOrEmpty(request.NewEmail))
+        {
+            return BadRequest("New email is required.");
+        }
+
+        try
+        {
+            var accessToken = CookieHelper.GetAccessToken(Request);
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return Unauthorized("No access token provided");
+            }
+
+            var principal = await _tokenService.ValidateAccessTokenAsync(accessToken);
+            if (principal is null)
+            {
+                return Unauthorized("Invalid access token");
+            }
+
+            var userId = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token claims");
+            }
+
+            await _authService.RequestEmailChangeAsync(userId, request.NewEmail);
+            return Ok(new { message = "Email change confirmation sent to your new email address. Please check your inbox." });
+        }
+        catch (ArgumentException e)
+        {
+            _logger.LogWarning(e, "Email change request failed for user: {UserId}", request.NewEmail);
+            return BadRequest(e.Message);
+        }
+        catch (InvalidOperationException e)
+        {
+            _logger.LogWarning(e, "Email change request failed for user: {UserId}", request.NewEmail);
+            return BadRequest(e.Message);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error requesting email change for user");
+            return StatusCode(500, "An error occurred while requesting the email change.");
+        }
+    }
+
+    [HttpPost("confirm-email-change")]
+    public async Task<IActionResult> ConfirmEmailChange([FromBody] ConfirmEmailChangeRequest request)
+    {
+        if (request is null || string.IsNullOrEmpty(request.UserId) ||
+            string.IsNullOrEmpty(request.Token) || string.IsNullOrEmpty(request.NewEmail))
+        {
+            return BadRequest("User ID, token, and new email are required.");
+        }
+
+        try
+        {
+            var result = await _authService.ConfirmEmailChangeAsync(request.UserId, request.Token, request.NewEmail);
+            if (result)
+            {
+                return Ok(new { message = "Email address changed successfully. Please log in again with your new email." });
+            }
+            else
+            {
+                return BadRequest("Invalid or expired confirmation token.");
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error confirming email change for user: {UserId}", request.UserId);
+            return StatusCode(500, "An error occurred while confirming the email change.");
         }
     }
 }

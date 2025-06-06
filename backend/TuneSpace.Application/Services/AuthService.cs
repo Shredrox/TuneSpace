@@ -12,11 +12,17 @@ namespace TuneSpace.Application.Services;
 internal partial class AuthService(
     IUserRepository userRepository,
     IPasswordHasher<User> passwordHasher,
-    ITokenService tokenService) : IAuthService
+    ITokenService tokenService,
+    IEmailService emailService,
+    IUrlBuilderService urlBuilderService,
+    UserManager<User> userManager) : IAuthService
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
     private readonly ITokenService _tokenService = tokenService;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IUrlBuilderService _urlBuilderService = urlBuilderService;
+    private readonly UserManager<User> _userManager = userManager;
 
     async Task IAuthService.RegisterAsync(string name, string email, string password, Roles role)
     {
@@ -29,10 +35,20 @@ internal partial class AuthService(
         {
             UserName = name,
             Email = email,
+            EmailConfirmed = false,
             Role = role
         };
 
         await _userRepository.InsertUserAsync(user, password);
+
+        var insertedUser = await _userRepository.GetUserByEmailAsync(email);
+        if (insertedUser is not null)
+        {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(insertedUser);
+            var confirmationUrl = _urlBuilderService.BuildEmailConfirmationUrl(insertedUser.Id.ToString(), token);
+
+            await _emailService.SendEmailConfirmationAsync(insertedUser, token, confirmationUrl);
+        }
     }
 
     async Task<LoginResponse> IAuthService.LoginAsync(string email, string password)
@@ -42,6 +58,11 @@ internal partial class AuthService(
         if (user is null || VerifyPassword(user, password) is false)
         {
             throw new UnauthorizedException("Incorrect email or password");
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+        {
+            throw new UnauthorizedException("Please confirm your email address before logging in. Check your inbox for the confirmation link.");
         }
 
         var accessToken = _tokenService.GenerateAccessToken(user);
@@ -167,4 +188,107 @@ internal partial class AuthService(
 
     [GeneratedRegex(@"[^\w\d]")]
     private static partial Regex SanitizeRegex();
+
+    async Task<bool> IAuthService.ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null)
+        {
+            return false;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            await _emailService.SendWelcomeEmailAsync(user);
+            return true;
+        }
+
+        return false;
+    }
+
+    async Task IAuthService.ResendEmailConfirmationAsync(string email)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email) ?? throw new ArgumentException("User not found");
+        if (user.EmailConfirmed)
+        {
+            throw new InvalidOperationException("Email is already confirmed");
+        }
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationUrl = _urlBuilderService.BuildEmailConfirmationUrl(user.Id.ToString(), token);
+
+        await _emailService.SendEmailConfirmationAsync(user, token, confirmationUrl);
+    }
+
+    async Task<string> IAuthService.GenerateEmailConfirmationTokenAsync(string userId)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId) ?? throw new ArgumentException("User not found");
+        return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    async Task IAuthService.RequestPasswordResetAsync(string email)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email) ?? throw new ArgumentException("User not found");
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var resetUrl = _urlBuilderService.BuildPasswordResetUrl(user.Id.ToString(), token);
+
+        await _emailService.SendPasswordResetEmailAsync(user, token, resetUrl);
+    }
+
+    async Task<bool> IAuthService.ResetPasswordAsync(string userId, string token, string newPassword)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null)
+        {
+            return false;
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+        return result.Succeeded;
+    }
+
+    async Task IAuthService.RequestEmailChangeAsync(string userId, string newEmail)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId) ?? throw new ArgumentException("User not found");
+
+        if (!string.IsNullOrEmpty(user.ExternalProvider))
+        {
+            throw new InvalidOperationException("External provider users cannot change their email address");
+        }
+
+        var existingUser = await _userRepository.GetUserByEmailAsync(newEmail);
+        if (existingUser is not null)
+        {
+            throw new ArgumentException("Email address is already in use");
+        }
+
+        var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+        var confirmationUrl = _urlBuilderService.BuildEmailChangeConfirmationUrl(user.Id.ToString(), token, newEmail);
+
+        await _emailService.SendEmailChangeConfirmationAsync(user, newEmail, token, confirmationUrl);
+    }
+
+    async Task<bool> IAuthService.ConfirmEmailChangeAsync(string userId, string token, string newEmail)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(user.ExternalProvider))
+        {
+            return false;
+        }
+
+        var result = await _userManager.ChangeEmailAsync(user, newEmail, token);
+        if (result.Succeeded)
+        {
+            return true;
+        }
+
+        return false;
+    }
 }
