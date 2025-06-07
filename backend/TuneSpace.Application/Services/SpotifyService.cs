@@ -97,7 +97,7 @@ internal class SpotifyService(
             {
                 Username = user.Display_Name,
                 FollowerCount = user.Followers.Total,
-                ProfilePicture = user.Images.Count > 1 ? user.Images[1].Url ?? string.Empty :
+                ProfilePicture = user.Images.Count > 0 ? user.Images[0].Url ?? string.Empty :
                                 user.Images.FirstOrDefault()?.Url ?? string.Empty,
                 SpotifyPlan = user.Product
             };
