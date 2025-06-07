@@ -9,10 +9,12 @@ namespace TuneSpace.Api.Controllers;
 [ApiController]
 public class SpotifyController(
     ISpotifyService spotifyService,
-    ILogger<SpotifyController> logger) : ControllerBase
+    ILogger<SpotifyController> logger,
+    IUrlBuilderService urlBuilderService) : ControllerBase
 {
     private readonly ISpotifyService _spotifyService = spotifyService;
     private readonly ILogger<SpotifyController> _logger = logger;
+    private readonly IUrlBuilderService _urlBuilderService = urlBuilderService;
 
     [HttpGet("login")]
     public IActionResult SpotifyLogin()
@@ -73,8 +75,8 @@ public class SpotifyController(
 
             var redirectUrl = flowType switch
             {
-                "connect" => $"http://localhost:5173/auth/spotify-connect-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}",
-                _ => $"http://localhost:5173/auth/spotify-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}"
+                "connect" => _urlBuilderService.BuildSpotifyConnectCallbackUrl(code, state),
+                _ => _urlBuilderService.BuildSpotifyLoginCallbackUrl(code, state)
             };
 
             return Redirect(redirectUrl);

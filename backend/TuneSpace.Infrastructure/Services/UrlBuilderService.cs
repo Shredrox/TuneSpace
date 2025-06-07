@@ -25,4 +25,16 @@ internal class UrlBuilderService(IOptions<FrontendOptions> frontendOptions) : IU
         var baseUrl = _frontendOptions.BaseUrl.TrimEnd('/');
         return $"{baseUrl}/auth/confirm-email-change?userId={userId}&token={Uri.EscapeDataString(token)}&newEmail={Uri.EscapeDataString(newEmail)}";
     }
+
+    string IUrlBuilderService.BuildSpotifyLoginCallbackUrl(string code, string state)
+    {
+        var baseUrl = _frontendOptions.BaseUrl.TrimEnd('/');
+        return $"{baseUrl}/auth/spotify-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}";
+    }
+
+    string IUrlBuilderService.BuildSpotifyConnectCallbackUrl(string code, string state)
+    {
+        var baseUrl = _frontendOptions.BaseUrl.TrimEnd('/');
+        return $"{baseUrl}/auth/spotify-connect-callback?code={Uri.EscapeDataString(code)}&state={Uri.EscapeDataString(state)}";
+    }
 }

@@ -29,4 +29,20 @@ public interface IUrlBuilderService
     /// <param name="newEmail">The new email address</param>
     /// <returns>The complete email change confirmation URL</returns>
     string BuildEmailChangeConfirmationUrl(string userId, string token, string newEmail);
+
+    /// <summary>
+    /// Builds a complete URL for Spotify login callback
+    /// </summary>
+    /// <param name="code">The authorization code from Spotify</param>
+    /// <param name="state">The state parameter from Spotify</param>
+    /// <returns>The complete Spotify login callback URL</returns>
+    string BuildSpotifyLoginCallbackUrl(string code, string state);
+
+    /// <summary>
+    /// Builds a complete URL for Spotify connect callback
+    /// </summary>
+    /// <param name="code">The authorization code from Spotify</param>
+    /// <param name="state">The state parameter from Spotify</param>
+    /// <returns>The complete Spotify connect callback URL</returns>
+    string BuildSpotifyConnectCallbackUrl(string code, string state);
 }
