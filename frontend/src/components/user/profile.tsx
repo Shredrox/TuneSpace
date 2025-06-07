@@ -123,13 +123,33 @@ const Profile = ({
   return (
     <div className="text-foreground min-h-screen bg-gradient-to-b dark:from-gray-900 dark:to-black from-gray-100 to-white">
       <div className="relative">
-        <div className="h-48 w-full overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r dark:from-blue-900/40 dark:to-purple-900/40 from-blue-500/20 to-purple-500/20 z-10"></div>
-          <img
-            src="https://picsum.photos/1600/400"
-            alt="Profile banner"
-            className="w-full h-full object-cover"
-          />
+        <div className="h-64 w-full overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br dark:from-indigo-900 dark:via-purple-900 dark:to-pink-800 from-blue-400 via-purple-500 to-pink-500 animate-gradient-x"></div>
+
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-8 left-8 w-4 h-4 bg-white/20 rounded-full animate-pulse"></div>
+            <div className="absolute top-16 right-16 w-6 h-6 bg-white/15 rounded-full animate-bounce delay-100"></div>
+            <div className="absolute bottom-12 left-1/4 w-3 h-3 bg-white/25 rounded-full animate-ping delay-200"></div>
+            <div className="absolute bottom-8 right-1/3 w-5 h-5 bg-white/20 rounded-full animate-pulse delay-300"></div>
+            <div className="absolute top-12 left-1/3 w-2 h-2 bg-white/30 rounded-full animate-bounce delay-500"></div>
+            <div className="absolute top-20 right-1/4 w-4 h-4 bg-white/15 rounded-full animate-ping delay-700"></div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 h-16 flex items-end justify-center space-x-1 opacity-30">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="w-1 bg-white/40 rounded-t-full animate-pulse"
+                style={{
+                  height: `${Math.random() * 40 + 20}px`,
+                  animationDelay: `${i * 0.1}s`,
+                  animationDuration: `${Math.random() * 1 + 0.5}s`,
+                }}
+              ></div>
+            ))}
+          </div>
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10"></div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center md:items-end px-6 -mt-16 relative z-20">
@@ -185,7 +205,16 @@ const Profile = ({
               {spotifyProfileData?.profile?.spotifyPlan && (
                 <>
                   <FaSpotify className="text-[#1ed760]" />
-                  <span>Premium: {spotifyProfileData.profile.spotifyPlan}</span>
+                  {spotifyProfileData.profile.spotifyPlan === "premium" ? (
+                    <span className="text-green-500">Premium</span>
+                  ) : (
+                    <span className="text-yellow-500">
+                      {spotifyProfileData.profile.spotifyPlan
+                        .charAt(0)
+                        .toUpperCase() +
+                        spotifyProfileData.profile.spotifyPlan.slice(1)}
+                    </span>
+                  )}
                   <span className="mx-2">•</span>
                 </>
               )}
