@@ -25,6 +25,7 @@ export const createPost = async (data: CreatePost) => {
   const response = await httpClient.post(`${ENDPOINTS.FORUM}/posts`, {
     content: data.content,
     threadId: data.threadId,
+    parentPostId: data.parentPostId || null,
   });
   return response.data;
 };

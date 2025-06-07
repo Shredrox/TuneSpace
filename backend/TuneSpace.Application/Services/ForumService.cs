@@ -76,18 +76,8 @@ internal class ForumService(
             return null;
         }
 
-        var postResponses = thread.Posts.OrderBy(p => p.CreatedAt).Select(p => new ForumPostResponse(
-            p.Id,
-            p.Content,
-            p.Author.Id,
-            p.Author.UserName ?? "Unknown",
-            p.Author.ProfilePicture ?? [],
-            p.Author.Role.ToString(),
-            p.CreatedAt,
-            p.UpdatedAt,
-            p.Likes.Count,
-            p.Likes.Any(l => l.UserId == userId)
-        )).ToList();
+        var posts = thread.Posts.OrderBy(p => p.CreatedAt).ToList();
+        var postResponses = BuildNestedPostStructure(posts, userId, null);
 
         return new ThreadDetailResponse(
             thread.Id,
@@ -104,6 +94,27 @@ internal class ForumService(
             thread.IsLocked,
             postResponses
         );
+    }
+
+    private static List<ForumPostResponse> BuildNestedPostStructure(List<ForumPost> posts, Guid userId, Guid? parentId)
+    {
+        return posts
+            .Where(p => p.ParentPostId == parentId)
+            .Select(p => new ForumPostResponse(
+                p.Id,
+                p.Content,
+                p.Author.Id,
+                p.Author.UserName ?? "Unknown",
+                p.Author.ProfilePicture ?? [],
+                p.Author.Role.ToString(),
+                p.CreatedAt,
+                p.UpdatedAt,
+                p.Likes.Count,
+                p.Likes.Any(l => l.UserId == userId),
+                p.ParentPostId,
+                BuildNestedPostStructure(posts, userId, p.Id)
+            ))
+            .ToList();
     }
 
     async Task<List<ThreadResponse>?> IForumService.GetBandThreads(Guid bandId)
@@ -164,7 +175,8 @@ internal class ForumService(
             post.CreatedAt,
             post.UpdatedAt,
             post.Likes.Count,
-            hasLiked
+            hasLiked,
+            post.ParentPostId
         );
     }
 
@@ -246,6 +258,7 @@ internal class ForumService(
         {
             Content = request.Content,
             ThreadId = request.ThreadId,
+            ParentPostId = request.ParentPostId,
             AuthorId = userId,
             CreatedAt = now,
         };
@@ -264,7 +277,8 @@ internal class ForumService(
             createdPost.CreatedAt,
             null,
             0,
-            false
+            false,
+            createdPost.ParentPostId
         );
     }
 

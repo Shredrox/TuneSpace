@@ -8,4 +8,6 @@ export default interface ThreadPost {
   createdAt: Date;
   likesCount: number;
   userHasLiked: boolean;
+  parentPostId?: string | null;
+  replies?: ThreadPost[];
 }
