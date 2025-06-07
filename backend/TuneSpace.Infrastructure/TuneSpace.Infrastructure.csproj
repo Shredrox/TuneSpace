@@ -24,6 +24,6 @@
       <PackageReference Include="FluentEmail.Smtp" />
     </ItemGroup>
     <ItemGroup>
-      <EmbeddedResource Include="Email\Templates\*.html" />
+      <EmbeddedResource Include="Templates\Email\*.html" />
     </ItemGroup>
 </Project>

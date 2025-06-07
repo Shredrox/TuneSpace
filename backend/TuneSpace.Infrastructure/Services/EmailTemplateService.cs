@@ -44,7 +44,7 @@ internal class EmailTemplateService(
     private static string LoadTemplateFromEmbeddedResource(string templateName)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = $"TuneSpace.Infrastructure.Email.Templates.{templateName}";
+        var resourceName = $"TuneSpace.Infrastructure.Templates.Email.{templateName}";
 
         using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException($"Email template not found as embedded resource: {templateName}");
         using var reader = new StreamReader(stream);
