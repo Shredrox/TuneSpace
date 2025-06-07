@@ -48,6 +48,7 @@ export default function SpotifyCallbackPage() {
           username: userData.username,
           accessToken: userData.accessToken,
           role: userData.role,
+          isExternalProvider: true,
         });
 
         router.push("/home");
