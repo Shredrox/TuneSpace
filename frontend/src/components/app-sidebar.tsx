@@ -28,7 +28,7 @@ import {
 } from "@/components/shadcn/avatar";
 import { usePathname, useRouter } from "next/navigation";
 import useAuth from "@/hooks/auth/useAuth";
-import { ROUTES, UserRole } from "@/utils/constants";
+import { ROUTES } from "@/utils/constants";
 import Link from "next/link";
 import useLogout from "@/hooks/auth/useLogout";
 import { cn } from "@/lib/utils";
@@ -54,10 +54,6 @@ export function AppSidebar() {
     auth?.username || "",
     auth?.username || ""
   );
-
-  const isBandMember =
-    auth?.role?.toLowerCase() === UserRole.BandAdmin.toLowerCase() ||
-    auth?.role?.toLowerCase() === UserRole.BandMember.toLowerCase();
 
   const userInitials = auth?.username
     ? auth.username.substring(0, 2).toUpperCase()
@@ -127,9 +123,7 @@ export function AppSidebar() {
     },
   ];
 
-  const allNavigationLinks = isBandMember
-    ? [...navigationLinks, bandDashboardLink]
-    : navigationLinks;
+  const allNavigationLinks = [...navigationLinks, bandDashboardLink];
 
   const renderNavLinks = (group: "navigation" | "content") => {
     const links = group === "navigation" ? allNavigationLinks : contentLinks;

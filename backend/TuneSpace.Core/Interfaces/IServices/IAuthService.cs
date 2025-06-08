@@ -67,6 +67,14 @@ public interface IAuthService
     Task<bool> ConfirmEmailAsync(string userId, string token);
 
     /// <summary>
+    /// Confirms a user's email address and automatically logs them in.
+    /// </summary>
+    /// <param name="userId">The user's ID.</param>
+    /// <param name="token">The email confirmation token.</param>
+    /// <returns>A task representing the asynchronous operation that returns login credentials if successful, or null if failed.</returns>
+    Task<LoginResponse?> ConfirmEmailAndLoginAsync(string userId, string token);
+
+    /// <summary>
     /// Resends the email confirmation to a user.
     /// </summary>
     /// <param name="email">The user's email address.</param>

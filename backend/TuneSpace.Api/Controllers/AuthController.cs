@@ -432,10 +432,26 @@ public class AuthController(
 
         try
         {
-            var result = await _authService.ConfirmEmailAsync(userId, token);
-            if (result)
+            var loginResponse = await _authService.ConfirmEmailAndLoginAsync(userId, token);
+            if (loginResponse != null)
             {
-                return Ok(new { message = "Email confirmed successfully. You can now log in." });
+                var user = await _userService.GetUserByIdAsync(loginResponse.Id);
+
+                CookieHelper.SetAuthTokens(Response, loginResponse.AccessToken, loginResponse.RefreshToken);
+
+                return Ok(new
+                {
+                    message = "Email confirmed successfully. You are now logged in.",
+                    user = new
+                    {
+                        id = loginResponse.Id,
+                        username = loginResponse.Username,
+                        email = user?.Email,
+                        accessToken = loginResponse.AccessToken,
+                        role = loginResponse.Role,
+                        isExternalProvider = !string.IsNullOrEmpty(user?.ExternalProvider)
+                    }
+                });
             }
             else
             {

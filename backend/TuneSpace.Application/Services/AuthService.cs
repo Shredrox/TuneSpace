@@ -207,6 +207,30 @@ internal partial class AuthService(
         return false;
     }
 
+    async Task<LoginResponse?> IAuthService.ConfirmEmailAndLoginAsync(string userId, string token)
+    {
+        var user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null)
+        {
+            return null;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            await _emailService.SendWelcomeEmailAsync(user);
+
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            await _tokenService.SaveRefreshTokenAsync(user, refreshToken);
+
+            return new LoginResponse(user.Id.ToString(), user.UserName, user.Role.ToString(), accessToken, refreshToken);
+        }
+
+        return null;
+    }
+
     async Task IAuthService.ResendEmailConfirmationAsync(string email)
     {
         var user = await _userRepository.GetUserByEmailAsync(email) ?? throw new ArgumentException("User not found");

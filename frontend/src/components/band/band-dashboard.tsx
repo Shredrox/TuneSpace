@@ -11,7 +11,7 @@ import Loading from "../fallback/loading";
 import useToast from "@/hooks/useToast";
 import ConnectSpotifyDialog from "./connect-spotify-dialog";
 import EditBandDialog from "./edit-band-dialog";
-import { Users, CalendarDays } from "lucide-react";
+import { Users, CalendarDays, Music, Guitar } from "lucide-react";
 import Link from "next/link";
 import CreateDiscussionDialog from "../social/create-discussion-dialog";
 import AddEventDialog from "../events/add-event-dialog";
@@ -217,18 +217,62 @@ const BandDashboard = () => {
 
   if (!bandData?.band) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">No Band Found</h2>
-          <p className="text-muted-foreground mt-2">
-            You don't have a band associated with your account yet.
-          </p>
-          <Link href="/band/register">
-            <button className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/80">
-              Create a Band
-            </button>
-          </Link>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[600px] gap-8 p-8">
+        <Card className="w-full max-w-2xl shadow-lg border-2 border-muted/20 bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-950/20 dark:to-blue-950/20">
+          <CardContent className="p-12 text-center">
+            <div className="mb-8 flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full blur-xl opacity-20 animate-pulse"></div>
+                <div className="relative bg-gradient-to-r from-purple-500 to-blue-500 p-6 rounded-full">
+                  <Music className="h-16 w-16 text-white" />
+                </div>
+              </div>
+            </div>
+
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Start Your Musical Journey
+            </h2>
+
+            <p className="text-xl text-muted-foreground mb-2">
+              No band found in your account yet
+            </p>
+
+            <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
+              Create your band profile to connect with fans, share your music,
+              manage events, and build your musical community on TuneSpace.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-8">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-purple-500" />
+                  <span>Connect with fans</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Guitar className="h-4 w-4 text-blue-500" />
+                  <span>Share your music</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-green-500" />
+                  <span>Manage events</span>
+                </div>
+              </div>
+            </div>
+
+            <Link href="/band/register">
+              <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg transform transition-all duration-200 hover:shadow-xl">
+                <div className="flex items-center gap-2">
+                  <Music className="h-5 w-5" />
+                  Create Your Band
+                </div>
+              </button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }

@@ -5,14 +5,18 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { confirmEmail } from "@/services/auth-service";
 import { ROUTES } from "@/utils/constants";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import BandChoice from "@/components/auth/band-choice";
+import useAuth from "@/hooks/auth/useAuth";
 
 export default function ConfirmEmailPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
   const [message, setMessage] = useState("");
+  const [showBandChoice, setShowBandChoice] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { updateAuth } = useAuth();
 
   useEffect(() => {
     const confirmUserEmail = async () => {
@@ -32,9 +36,20 @@ export default function ConfirmEmailPage() {
         setStatus("success");
         setMessage(response.message);
 
+        if (response.user) {
+          updateAuth({
+            id: response.user.id,
+            username: response.user.username,
+            email: response.user.email,
+            accessToken: response.user.accessToken,
+            role: response.user.role,
+            isExternalProvider: response.user.isExternalProvider,
+          });
+        }
+
         setTimeout(() => {
-          router.push(ROUTES.LOGIN);
-        }, 3000);
+          setShowBandChoice(true);
+        }, 2000);
       } catch (error: any) {
         setStatus("error");
         if (error?.response?.data?.message) {
@@ -52,56 +67,62 @@ export default function ConfirmEmailPage() {
     };
 
     confirmUserEmail();
-  }, [searchParams, router]);
+  }, [searchParams, router, updateAuth]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
-        <div className="text-center">
-          <div className="mb-6">
-            {status === "loading" && (
-              <Loader2 className="w-16 h-16 text-indigo-400 animate-spin mx-auto" />
-            )}
+      {showBandChoice ? (
+        <div className="max-w-2xl w-full">
+          <BandChoice title="Email Confirmed Successfully! Welcome to TuneSpace!" />
+        </div>
+      ) : (
+        <div className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
+          <div className="text-center">
+            <div className="mb-6">
+              {status === "loading" && (
+                <Loader2 className="w-16 h-16 text-indigo-400 animate-spin mx-auto" />
+              )}
+              {status === "success" && (
+                <CheckCircle className="w-16 h-16 text-green-400 mx-auto" />
+              )}
+              {status === "error" && (
+                <XCircle className="w-16 h-16 text-red-400 mx-auto" />
+              )}
+            </div>
+
+            <h1 className="text-2xl font-bold text-white mb-4">
+              {status === "loading" && "Confirming your email..."}
+              {status === "success" && "Email Confirmed!"}
+              {status === "error" && "Confirmation Failed"}
+            </h1>
+
+            <p className="text-gray-300 mb-6">{message}</p>
+
             {status === "success" && (
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto" />
+              <p className="text-sm text-gray-400">
+                Setting up your next step...
+              </p>
             )}
+
             {status === "error" && (
-              <XCircle className="w-16 h-16 text-red-400 mx-auto" />
+              <div className="space-y-3">
+                <button
+                  onClick={() => router.push(ROUTES.LOGIN)}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Go to Login
+                </button>
+                <button
+                  onClick={() => router.push(ROUTES.SIGNUP)}
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Back to Registration
+                </button>
+              </div>
             )}
           </div>
-
-          <h1 className="text-2xl font-bold text-white mb-4">
-            {status === "loading" && "Confirming your email..."}
-            {status === "success" && "Email Confirmed!"}
-            {status === "error" && "Confirmation Failed"}
-          </h1>
-
-          <p className="text-gray-300 mb-6">{message}</p>
-
-          {status === "success" && (
-            <p className="text-sm text-gray-400">
-              Redirecting you to login in a few seconds...
-            </p>
-          )}
-
-          {status === "error" && (
-            <div className="space-y-3">
-              <button
-                onClick={() => router.push(ROUTES.LOGIN)}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Go to Login
-              </button>
-              <button
-                onClick={() => router.push(ROUTES.SIGNUP)}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Back to Registration
-              </button>
-            </div>
-          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

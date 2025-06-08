@@ -128,12 +128,29 @@ export const logout = async (): Promise<void> => {
 export const confirmEmail = async (
   userId: string,
   token: string
-): Promise<{ message: string }> => {
+): Promise<{ message: string; user?: AuthResponse }> => {
   const response = await httpClient.get(
     `${ENDPOINTS.CONFIRM_EMAIL}?userId=${encodeURIComponent(
       userId
-    )}&token=${encodeURIComponent(token)}`
+    )}&token=${encodeURIComponent(token)}`,
+    {
+      withCredentials: true,
+    }
   );
+
+  if (response.data.user) {
+    return {
+      message: response.data.message,
+      user: {
+        id: response.data.user.id,
+        username: response.data.user.username,
+        email: response.data.user.email,
+        accessToken: response.data.user.accessToken,
+        role: response.data.user.role,
+        isExternalProvider: response.data.user.isExternalProvider,
+      },
+    };
+  }
 
   return response.data;
 };

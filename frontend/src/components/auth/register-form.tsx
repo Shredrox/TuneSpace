@@ -2,29 +2,22 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import FormInput from "@/components/form-input";
 import { RegisterInputs, registerSchema } from "@/schemas/register.schema";
 import { BASE_URL, SPOTIFY_ENDPOINTS, UserRole } from "@/utils/constants";
 import { FaSpotify } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { Button } from "../shadcn/button";
-import useAuth from "@/hooks/auth/useAuth";
 import {
   register as registerUser,
   RegisterData,
 } from "@/services/auth-service";
 import Link from "next/link";
 
-const Register = ({
-  setFormStep,
-}: {
-  setFormStep: Dispatch<SetStateAction<number>>;
-}) => {
+const Register = () => {
   const [error, setError] = useState("");
   const router = useRouter();
-
-  const { updateAuth } = useAuth();
 
   const handleSpotifyLogin = () => {
     router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.LOGIN}`);
@@ -54,7 +47,6 @@ const Register = ({
 
     try {
       await registerUser(requestData);
-      //TODO: Handle band registration flow after email confirmation
       router.push(
         `/auth/email-confirmation-sent?email=${encodeURIComponent(data.email)}`
       );
