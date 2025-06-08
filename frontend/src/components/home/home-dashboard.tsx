@@ -527,6 +527,7 @@ const HomeDashboard = () => {
                           {new Date(track.playedAt).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
+                            hour12: false,
                           })}
                         </Badge>
                       </div>
