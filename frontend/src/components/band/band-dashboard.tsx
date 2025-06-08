@@ -4,24 +4,13 @@ import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../shadcn/avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "../shadcn/card";
 import { FaSpotify, FaYoutube } from "react-icons/fa";
-import { SiTidal, SiApplemusic } from "react-icons/si";
-import { IoMdPhotos } from "react-icons/io";
 import YouTubeEmbedDialog from "./youtube-embed-dialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "../shadcn/carousel";
 import useAuth from "@/hooks/auth/useAuth";
 import useBandData from "@/hooks/query/useBandData";
 import Loading from "../fallback/loading";
 import useToast from "@/hooks/useToast";
 import ConnectSpotifyDialog from "./connect-spotify-dialog";
 import EditBandDialog from "./edit-band-dialog";
-import AppleMusicFallback from "../fallback/apple-music-fallback";
-import TidalFallback from "../fallback/tidal-fallback";
 import { Users, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import CreateDiscussionDialog from "../social/create-discussion-dialog";
@@ -289,7 +278,7 @@ const BandDashboard = () => {
         </CardHeader>
         <CardContent className="pt-8">
           <div className="mb-10">
-            <h2 className="text-2xl font-bold mb-6">Media & Gallery</h2>
+            <h2 className="text-2xl font-bold mb-6">Media & Music</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="overflow-hidden h-full">
                 <CardHeader className="bg-gradient-to-r from-red-900/20 to-transparent">
@@ -321,49 +310,6 @@ const BandDashboard = () => {
                   )}
                 </CardContent>
               </Card>
-              <Card className="overflow-hidden h-full">
-                <CardHeader className="bg-gradient-to-r from-slate-900/20 to-transparent">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <IoMdPhotos size={24} />
-                      <span>Band Gallery</span>
-                    </CardTitle>
-                    <button className="text-sm px-3 py-1 bg-primary hover:bg-primary/80 text-primary-foreground rounded-md">
-                      Add Photos
-                    </button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <Carousel className="w-full">
-                    <CarouselContent>
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <CarouselItem key={index} className="basis-full">
-                          <Card>
-                            <CardContent className="flex aspect-video items-center justify-center p-2 bg-muted/20">
-                              <div className="text-center text-muted-foreground">
-                                <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
-                                  <span className="text-2xl">📷</span>
-                                </div>
-                                <p className="text-sm">Image {index + 1}</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <div className="flex justify-center gap-2 mt-3">
-                      <CarouselPrevious className="relative transform-none w-8 h-8" />
-                      <CarouselNext className="relative transform-none w-8 h-8" />
-                    </div>
-                  </Carousel>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-          <div className="mb-10">
-            <h2 className="text-2xl font-bold mb-6">Music Stats</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="overflow-hidden h-full">
                 <CardHeader className="bg-gradient-to-r from-green-900/20 to-transparent">
                   <div className="flex items-center gap-3">
@@ -459,50 +405,6 @@ const BandDashboard = () => {
                       )}
                     </div>
                   )}
-                </CardContent>
-              </Card>
-              <Card className="overflow-hidden h-full">
-                <CardHeader className="bg-gradient-to-r from-pink-900/20 to-transparent">
-                  <div className="flex items-center gap-3">
-                    <SiApplemusic size={28} />
-                    <h3 className="font-semibold text-2xl">
-                      Apple Music Stats
-                    </h3>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-[200px]">
-                    <AppleMusicFallback
-                      variant="stats"
-                      title="Apple Music Not Connected"
-                      description="Connect your Apple Music account to see band statistics and embed content"
-                      showExploreButton={false}
-                      onConnectAppleMusic={() =>
-                        console.log("Apple Music integration coming soon!")
-                      }
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="overflow-hidden h-full">
-                <CardHeader className="bg-gradient-to-r from-blue-900/20 to-transparent">
-                  <div className="flex items-center gap-3">
-                    <SiTidal size={28} />
-                    <h3 className="font-semibold text-2xl">Tidal Stats</h3>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="h-[200px]">
-                    <TidalFallback
-                      variant="stats"
-                      title="Tidal Not Connected"
-                      description="Connect your Tidal account to see band statistics and embed content"
-                      showExploreButton={false}
-                      onConnectTidal={() =>
-                        console.log("Tidal integration coming soon!")
-                      }
-                    />
-                  </div>
                 </CardContent>
               </Card>
             </div>
