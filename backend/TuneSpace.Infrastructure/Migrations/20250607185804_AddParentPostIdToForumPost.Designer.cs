@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using TuneSpace.Infrastructure.Data;
 namespace TuneSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(TuneSpaceDbContext))]
-    partial class TuneSpaceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250607185804_AddParentPostIdToForumPost")]
+    partial class AddParentPostIdToForumPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -982,9 +985,6 @@ namespace TuneSpace.Infrastructure.Migrations
 
                     b.Property<string>("ExternalProvider")
                         .HasColumnType("text");
-
-                    b.Property<DateTime>("LastActiveDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");

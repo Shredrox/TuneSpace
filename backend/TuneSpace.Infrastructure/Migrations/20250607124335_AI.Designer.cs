@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using TuneSpace.Infrastructure.Data;
 namespace TuneSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(TuneSpaceDbContext))]
-    partial class TuneSpaceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250607124335_AI")]
+    partial class AI
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -495,9 +498,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("ParentPostId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("ThreadId")
                         .HasColumnType("uuid");
 
@@ -507,8 +507,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
-
-                    b.HasIndex("ParentPostId");
 
                     b.HasIndex("ThreadId");
 
@@ -983,9 +981,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<string>("ExternalProvider")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("LastActiveDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -1227,10 +1222,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TuneSpace.Core.Entities.ForumPost", "ParentPost")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentPostId");
-
                     b.HasOne("TuneSpace.Core.Entities.ForumThread", "Thread")
                         .WithMany("Posts")
                         .HasForeignKey("ThreadId")
@@ -1238,8 +1229,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
-
-                    b.Navigation("ParentPost");
 
                     b.Navigation("Thread");
                 });
@@ -1388,8 +1377,6 @@ namespace TuneSpace.Infrastructure.Migrations
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumPost", b =>
                 {
                     b.Navigation("Likes");
-
-                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumThread", b =>
