@@ -134,7 +134,7 @@ internal class SpotifyService(
         }
     }
 
-    async Task<List<TopArtistDTO>> ISpotifyService.GetUserTopArtistsAsync(string token)
+    async Task<List<SpotifyArtistDTO>> ISpotifyService.GetUserTopArtistsAsync(string token)
     {
         try
         {
@@ -148,11 +148,13 @@ internal class SpotifyService(
             var rootObject = JsonSerializer.Deserialize<UserTopArtistsResponse>(await response.Content.ReadAsStringAsync());
 
             var artistDtos = rootObject?.Items.Select(item =>
-                new TopArtistDTO(
-                    item.Name,
-                    item.Popularity,
-                    item.Images.OrderByDescending(img => img.Width * img.Height).FirstOrDefault()?.Url ?? string.Empty
-                )
+                new SpotifyArtistDTO
+                {
+                    Name = item.Name,
+                    Popularity = item.Popularity,
+                    Followers = item.Followers,
+                    Images = [new() { Url = item.Images.OrderByDescending(img => img.Width * img.Height).FirstOrDefault()?.Url ?? string.Empty }]
+                }
             ).ToList();
 
             return artistDtos ?? throw new JsonException();

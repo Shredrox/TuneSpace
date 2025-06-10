@@ -2,5 +2,5 @@ namespace TuneSpace.Core.DTOs.Responses.Spotify;
 
 public record SpotifyStatsResponse(
     SpotifyProfileDTO Profile,
-    List<TopArtistDTO> TopArtists,
+    List<SpotifyArtistDTO> TopArtists,
     List<TopSongDTO> TopSongs);

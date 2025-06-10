@@ -50,7 +50,7 @@ public interface ISpotifyService
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>List of user's top artists</returns>
-    Task<List<TopArtistDTO>> GetUserTopArtistsAsync(string token);
+    Task<List<SpotifyArtistDTO>> GetUserTopArtistsAsync(string token);
 
     /// <summary>
     /// Gets a user's recently played tracks on Spotify
