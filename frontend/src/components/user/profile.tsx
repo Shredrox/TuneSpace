@@ -33,6 +33,7 @@ import Link from "next/link";
 import { Disc, User as LucideUser, Settings } from "lucide-react";
 import SpotifyConnectionStatus from "@/components/spotify/spotify-connection-status";
 import SpotifyFallback from "@/components/spotify/spotify-fallback";
+import SpotifyArtist from "@/interfaces/spotify/SpotifyArtist";
 
 interface ProfileProps {
   username: string;
@@ -42,10 +43,7 @@ interface ProfileProps {
       spotifyPlan: string;
       profilePicture?: string;
     };
-    topArtists?: Array<{
-      name: string;
-      image: string;
-    }>;
+    topArtists?: Array<SpotifyArtist>;
     topSongs?: Array<{
       name: string;
       artist: string;
@@ -278,8 +276,9 @@ const Profile = ({
                           >
                             <Avatar className="h-16 w-16 border-2 border-background shadow-md">
                               <AvatarImage
-                                src={artist.image}
+                                src={artist.images?.[0]?.url || ""}
                                 alt={artist.name}
+                                className="object-cover"
                               />
                               <AvatarFallback>
                                 <LucideUser className="w-6 h-6 text-muted-foreground" />
