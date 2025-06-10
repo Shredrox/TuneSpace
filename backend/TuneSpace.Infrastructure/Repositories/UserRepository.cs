@@ -60,4 +60,22 @@ internal class UserRepository(UserManager<User> userManager) : IUserRepository
     {
         await _userManager.UpdateAsync(user);
     }
+
+    async Task<List<User>> IUserRepository.GetActiveUsersAsync(int daysBack)
+    {
+        var cutoffDate = DateTime.UtcNow.AddDays(-daysBack);
+        return await _userManager.Users
+            .Where(u => u.LastActiveDate >= cutoffDate)
+            .ToListAsync();
+    }
+
+    async Task IUserRepository.UpdateUserLastActiveDateAsync(string userId, DateTime lastActiveDate)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user != null)
+        {
+            user.LastActiveDate = lastActiveDate;
+            await _userManager.UpdateAsync(user);
+        }
+    }
 }

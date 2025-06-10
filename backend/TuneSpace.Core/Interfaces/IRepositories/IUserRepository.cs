@@ -64,4 +64,19 @@ public interface IUserRepository
     /// <param name="user">The user entity with updated information.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateUserAsync(User user);
+
+    /// <summary>
+    /// Retrieves users who have been active within the specified number of days.
+    /// </summary>
+    /// <param name="daysBack">The number of days to look back for activity.</param>
+    /// <returns>A task representing the asynchronous operation, containing a list of active user entities.</returns>
+    Task<List<User>> GetActiveUsersAsync(int daysBack);
+
+    /// <summary>
+    /// Updates the last active date for a user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="lastActiveDate">The new last active date.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task UpdateUserLastActiveDateAsync(string userId, DateTime lastActiveDate);
 }

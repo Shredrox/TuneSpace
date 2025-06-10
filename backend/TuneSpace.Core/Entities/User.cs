@@ -10,4 +10,5 @@ public class User : IdentityUser<Guid>
     public string? SpotifyId { get; set; }
     public string? ExternalProvider { get; set; }
     public DateTime? ExternalLoginLinkedAt { get; set; }
+    public DateTime LastActiveDate { get; set; } = DateTime.UtcNow;
 }

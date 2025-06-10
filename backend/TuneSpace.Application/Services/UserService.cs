@@ -69,4 +69,34 @@ internal class UserService(
 
         _logger.LogInformation("Profile picture updated for user: {Username}", username);
     }
+
+    async Task<List<string>> IUserService.GetActiveUserIdsAsync(int daysBack)
+    {
+        try
+        {
+            var activeUsers = await _userRepository.GetActiveUsersAsync(daysBack);
+            var userIds = activeUsers.Select(u => u.Id.ToString()).ToList();
+
+            _logger.LogInformation("Found {Count} active users in the last {Days} days", userIds.Count, daysBack);
+            return userIds;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving active users for the last {Days} days", daysBack);
+            return [];
+        }
+    }
+
+    async Task IUserService.UpdateUserActivityAsync(string userId)
+    {
+        try
+        {
+            await _userRepository.UpdateUserLastActiveDateAsync(userId, DateTime.UtcNow);
+            _logger.LogDebug("Updated last active date for user: {UserId}", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to update last active date for user: {UserId}", userId);
+        }
+    }
 }

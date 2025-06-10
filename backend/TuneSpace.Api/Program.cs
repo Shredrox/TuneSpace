@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using TuneSpace.Api.Infrastructure;
+using TuneSpace.Api.Middleware;
 using TuneSpace.Application;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
@@ -77,6 +78,8 @@ app.UseExceptionHandler();
 app.UseCors("AllowOrigin");
 
 app.UseAuthentication();
+
+app.UseMiddleware<UserActivityMiddleware>();
 
 app.UseAuthorization();
 

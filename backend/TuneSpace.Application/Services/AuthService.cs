@@ -65,6 +65,9 @@ internal partial class AuthService(
             throw new UnauthorizedException("Please confirm your email address before logging in. Check your inbox for the confirmation link.");
         }
 
+        user.LastActiveDate = DateTime.UtcNow;
+        await _userRepository.UpdateUserAsync(user);
+
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
 
@@ -119,6 +122,9 @@ internal partial class AuthService(
                 await _userRepository.InsertExternalUserAsync(user);
             }
         }
+
+        user.LastActiveDate = DateTime.UtcNow;
+        await _userRepository.UpdateUserAsync(user);
 
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
