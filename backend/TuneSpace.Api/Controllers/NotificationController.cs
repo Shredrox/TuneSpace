@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Requests.Notification;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IServices;
@@ -34,7 +35,7 @@ public class NotificationController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting notifications for user: {Username}", username);
+            _logger.LogError(ex, "Error getting notifications for user: {Username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while retrieving notifications.");
         }
     }
@@ -90,7 +91,7 @@ public class NotificationController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking all notifications as read for user: {Username}", username);
+            _logger.LogError(ex, "Error marking all notifications as read for user: {Username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while marking all notifications as read.");
         }
     }

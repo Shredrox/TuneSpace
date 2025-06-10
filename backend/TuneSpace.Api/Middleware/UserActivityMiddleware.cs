@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.Interfaces.IServices;
 
 namespace TuneSpace.Api.Middleware;
@@ -34,13 +35,13 @@ public class UserActivityMiddleware(RequestDelegate next, ILogger<UserActivityMi
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "Failed to update user activity for user {UserId}", userIdClaim);
+                            _logger.LogWarning(ex, "Failed to update user activity for user {UserId}", userIdClaim.SanitizeUserIdForLogging());
                         }
                     });
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Error initiating user activity update for user {UserId}", userIdClaim);
+                    _logger.LogWarning(ex, "Error initiating user activity update for user {UserId}", userIdClaim.SanitizeUserIdForLogging());
                 }
             }
         }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Requests.Chat;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IServices;
@@ -72,7 +73,7 @@ public class ChatController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in GetUserChats for username {Username}", username);
+            _logger.LogError(ex, "Error in GetUserChats for username {Username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while retrieving user chats.");
         }
     }
@@ -123,7 +124,7 @@ public class ChatController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in MarkMessagesAsRead for chatId {ChatId} and username {Username}", request.ChatId, request.Username);
+            _logger.LogError(ex, "Error in MarkMessagesAsRead for chatId {ChatId} and username {Username}", request.ChatId, request.Username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while marking messages as read.");
         }
     }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Responses.User;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -45,7 +46,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting followers for user {username}", username);
+            _logger.LogError(ex, "Error getting followers for user {username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while retrieving followers");
         }
     }
@@ -77,7 +78,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting following for user {username}", username);
+            _logger.LogError(ex, "Error getting following for user {username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while retrieving following");
         }
     }
@@ -109,7 +110,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting follower count for user {username}", username);
+            _logger.LogError(ex, "Error getting follower count for user {username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while retrieving follower count");
         }
     }
@@ -141,7 +142,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting following count for user {username}", username);
+            _logger.LogError(ex, "Error getting following count for user {username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while retrieving following count");
         }
     }
@@ -180,7 +181,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if user is following {UserId}", username);
+            _logger.LogError(ex, "Error checking if user is following {UserId}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while checking follow status");
         }
     }
@@ -224,7 +225,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error following user {username}", username);
+            _logger.LogError(ex, "Error following user {username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while following the user");
         }
     }
@@ -263,7 +264,7 @@ public class FollowController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error unfollowing user {username}", username);
+            _logger.LogError(ex, "Error unfollowing user {username}", username.SanitizeForLogging());
             return StatusCode(500, "An error occurred while unfollowing the user");
         }
     }
