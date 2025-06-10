@@ -15,7 +15,7 @@ internal class RecommendationScoringService : IRecommendationScoringService
         List<BandModel> bands,
         List<string> userGenres,
         string location,
-        List<TopArtistDTO> topArtists,
+        List<SpotifyArtistDTO> topArtists,
         bool isRegistered,
         bool isFromSearch)
     {
@@ -192,7 +192,7 @@ internal class RecommendationScoringService : IRecommendationScoringService
         return result;
     }
 
-    private void CalculateDiversityScores(List<BandModel> bands, Dictionary<string, int> genreCounters, DateTime now, ConcurrentDictionary<string, DateTime> previouslyRecommendedBands)
+    private static void CalculateDiversityScores(List<BandModel> bands, Dictionary<string, int> genreCounters, DateTime now, ConcurrentDictionary<string, DateTime> previouslyRecommendedBands)
     {
         foreach (var band in bands)
         {

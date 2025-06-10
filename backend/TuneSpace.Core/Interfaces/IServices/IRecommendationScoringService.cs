@@ -23,7 +23,7 @@ public interface IRecommendationScoringService
         List<BandModel> bands,
         List<string> userGenres,
         string location,
-        List<TopArtistDTO> topArtists,
+        List<SpotifyArtistDTO> topArtists,
         bool isRegistered,
         bool isFromSearch = false);
 

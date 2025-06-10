@@ -43,6 +43,7 @@ builder.Services.AddInfrastructureServices();
 builder.Services.AddIdentityServices();
 builder.Services.AddHttpClientServices();
 builder.Services.AddEmailService();
+builder.Services.AddRecommendationServices();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationBackgroundServices();

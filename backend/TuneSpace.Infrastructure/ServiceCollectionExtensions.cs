@@ -28,7 +28,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDatabaseServices(this IServiceCollection services)
     {
         services.AddDbContext<TuneSpaceDbContext>((provider, options) =>
-            options.UseNpgsql(provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value.DefaultConnection));
+            options.UseNpgsql(provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value.DefaultConnection,
+            o => o.UseVector()));
 
         return services;
     }
@@ -138,6 +139,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBandChatRepository, BandChatRepository>();
         services.AddScoped<IBandMessageRepository, BandMessageRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IArtistEmbeddingRepository, ArtistEmbeddingRepository>();
+        services.AddScoped<IRecommendationContextRepository, RecommendationContextRepository>();
+        services.AddScoped<IRecommendationFeedbackRepository, RecommendationFeedbackRepository>();
 
         return services;
     }

@@ -83,36 +83,51 @@ internal class ArtistDiscoveryService(
                 if (!_cachingService.TryGetCachedItem(cacheKey, out List<BandModel>? cachedResults))
                 {
                     var batchQuery = BuildBatchQuery(queryTemplate, genreBatch);
-                    var albumSearchResponse = await _apiThrottler.ThrottledApiCall(() => _spotifyService.SearchAsync(token, batchQuery, "album", limit: 50));
+                    var artistSearchResponse = await _apiThrottler.ThrottledApiCall(() => _spotifyService.SearchAsync(token, batchQuery, "artist", limit: 50));
 
-                    if (albumSearchResponse?.Albums?.Items == null)
+                    if (artistSearchResponse?.Artists?.Items == null)
                     {
                         continue;
                     }
 
-                    var artistIds = albumSearchResponse.Albums.Items
-                        .SelectMany(album => album.Artists)
-                        .Select(artist => artist.Id)
-                        .Distinct()
-                        .ToList();
+                    var artistDetails = artistSearchResponse.Artists.Items;
 
                     var artistAlbums = new Dictionary<string, SpotifyAlbumDTO>();
-                    foreach (var album in albumSearchResponse.Albums.Items)
+                    if (isNewRelease)
                     {
-                        foreach (var artist in album.Artists)
+                        var currentYear = DateTime.Now.Year;
+                        var lastYear = currentYear - 1;
+                        var yearRange = $"{lastYear}-{currentYear}";
+
+                        foreach (var artist in artistDetails.Take(10))
                         {
-                            if (!artistAlbums.ContainsKey(artist.Id))
+                            try
                             {
-                                artistAlbums[artist.Id] = album;
+                                var albumQuery = $"artist:\"{artist.Name}\" year:{yearRange}";
+                                var albumSearchResponse = await _apiThrottler.ThrottledApiCall(() =>
+                                    _spotifyService.SearchAsync(token, albumQuery, "album", limit: 5));
+
+                                if (albumSearchResponse?.Albums?.Items != null && albumSearchResponse.Albums.Items.Any())
+                                {
+                                    var latestAlbum = albumSearchResponse.Albums.Items
+                                        .OrderByDescending(a => a.ReleaseDate)
+                                        .FirstOrDefault();
+
+                                    if (latestAlbum != null)
+                                    {
+                                        artistAlbums[artist.Id] = latestAlbum;
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Error fetching albums for artist {ArtistName}", artist.Name);
                             }
                         }
                     }
 
-                    var artistDetails = await GetArtistDetailsInBatchesAsync(token, artistIds);
-
                     var undergroundArtists = artistDetails?
                         .Where(artist => artist.Popularity <= MusicDiscoveryConstants.MaxPopularityForUnderground)
-                        .Take(limit / genreBatches.Count)
                         .ToList() ?? [];
 
                     var batchResults = new List<BandModel>();
@@ -135,7 +150,7 @@ internal class ArtistDiscoveryService(
                             IsFromSearch = true,
                             IsNewRelease = isNewRelease,
                             Popularity = artist.Popularity,
-                            SearchTags = new List<string> { isNewRelease ? "new" : "hipster" },
+                            SearchTags = [isNewRelease ? "new" : "hipster"],
                             LatestAlbum = relatedAlbum?.Name,
                             LatestAlbumReleaseDate = relatedAlbum?.ReleaseDate
                         };
@@ -174,46 +189,40 @@ internal class ArtistDiscoveryService(
         {
             try
             {
-                var currentYear = DateTime.Now.Year;
-                var sixMonthsAgo = DateTime.Now.AddMonths(-6);
-                var yearRange = sixMonthsAgo.Year == currentYear
-                    ? currentYear.ToString()
-                    : $"{sixMonthsAgo.Year}-{currentYear}";
-
                 foreach (var genre in genres.Take(2))
                 {
-                    var yearQuery = $"genre:{genre} year:{yearRange}";
-                    var recentAlbumSearchResponse = await _apiThrottler.ThrottledApiCall(() =>
-                        _spotifyService.SearchAsync(token, yearQuery, "album", limit: 30));
+                    var newAlbumQuery = $"genre:\"{genre}\" tag:new";
+                    var newAlbumSearchResponse = await _apiThrottler.ThrottledApiCall(() =>
+                        _spotifyService.SearchAsync(token, newAlbumQuery, "album", limit: 20));
 
-                    if (recentAlbumSearchResponse?.Albums?.Items != null)
+                    if (newAlbumSearchResponse?.Albums?.Items != null)
                     {
-                        var yearArtistIds = recentAlbumSearchResponse.Albums.Items
+                        var newArtistIds = newAlbumSearchResponse.Albums.Items
                             .SelectMany(album => album.Artists)
                             .Select(artist => artist.Id)
                             .Distinct()
                             .ToList();
 
-                        var yearArtistAlbums = new Dictionary<string, SpotifyAlbumDTO>();
-                        foreach (var album in recentAlbumSearchResponse.Albums.Items)
+                        var newArtistAlbums = new Dictionary<string, SpotifyAlbumDTO>();
+                        foreach (var album in newAlbumSearchResponse.Albums.Items)
                         {
                             foreach (var artist in album.Artists)
                             {
-                                if (!yearArtistAlbums.ContainsKey(artist.Id))
+                                if (!newArtistAlbums.ContainsKey(artist.Id))
                                 {
-                                    yearArtistAlbums[artist.Id] = album;
+                                    newArtistAlbums[artist.Id] = album;
                                 }
                             }
                         }
 
-                        var yearArtistDetails = await GetArtistDetailsInBatchesAsync(token, yearArtistIds);
+                        var newArtistDetails = await GetArtistDetailsInBatchesAsync(token, newArtistIds);
 
-                        var recentUndergroundArtists = yearArtistDetails?
+                        var newUndergroundArtists = newArtistDetails?
                             .Where(artist => artist.Popularity <= MusicDiscoveryConstants.MaxPopularityForUnderground)
                             .Take(limit / 4)
                             .ToList() ?? [];
 
-                        foreach (var artist in recentUndergroundArtists)
+                        foreach (var artist in newUndergroundArtists)
                         {
                             if (processedArtistNames.Contains(artist.Name))
                             {
@@ -221,7 +230,7 @@ internal class ArtistDiscoveryService(
                             }
                             processedArtistNames.Add(artist.Name);
 
-                            var relatedAlbum = yearArtistAlbums.TryGetValue(artist.Id, out var album) ? album : null;
+                            var relatedAlbum = newArtistAlbums.TryGetValue(artist.Id, out var album) ? album : null;
 
                             var bandModel = new BandModel
                             {
@@ -232,7 +241,7 @@ internal class ArtistDiscoveryService(
                                 IsFromSearch = true,
                                 IsNewRelease = true,
                                 Popularity = artist.Popularity,
-                                SearchTags = new List<string> { "new", "recent" },
+                                SearchTags = ["new", "recent"],
                                 LatestAlbum = relatedAlbum?.Name,
                                 LatestAlbumReleaseDate = relatedAlbum?.ReleaseDate
                             };
@@ -240,18 +249,118 @@ internal class ArtistDiscoveryService(
                             result.Add(bandModel);
                         }
 
-                        string recentCacheKey = $"recent-releases:{genre}:{yearRange}";
+                        string recentCacheKey = $"new-releases:{genre}";
                         _cachingService.CacheItem(recentCacheKey, result.Where(b => b.SearchTags.Contains("recent")).ToList(), TimeSpan.FromHours(1));
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error searching for recent releases with year range");
+                _logger.LogError(ex, "Error searching for new releases with tag:new filter");
             }
         }
 
         return result;
+    }
+
+    async Task<List<BandModel>> IArtistDiscoveryService.FindHipsterAndNewArtistsAsync(string token, string queryTemplate, int limit)
+    {
+        var result = new List<BandModel>();
+        var processedArtistNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            var hipsterCacheKey = "hipster-artists";
+            if (!_cachingService.TryGetCachedItem(hipsterCacheKey, out List<BandModel>? cachedHipsterArtists))
+            {
+                var hipsterQuery = "tag:hipster";
+                var hipsterSearchResponse = await _apiThrottler.ThrottledApiCall(() =>
+                    _spotifyService.SearchAsync(token, hipsterQuery, "album", limit / 2));
+
+                if (hipsterSearchResponse?.Albums?.Items != null)
+                {
+                    foreach (var album in hipsterSearchResponse.Albums.Items)
+                    {
+                        foreach (var artist in album.Artists)
+                        {
+                            if (!string.IsNullOrEmpty(artist.Name) &&
+                                !processedArtistNames.Contains(artist.Name) &&
+                                processedArtistNames.Count < limit)
+                            {
+                                processedArtistNames.Add(artist.Name);
+                                var bandModel = new BandModel
+                                {
+                                    Id = artist.Id,
+                                    Name = artist.Name,
+                                    ImageUrl = artist.Images?.FirstOrDefault()?.Url ?? album.Images?.FirstOrDefault()?.Url ?? string.Empty,
+                                    SearchTags = new List<string> { "hipster" },
+                                    LatestAlbum = album.Name,
+                                    LatestAlbumReleaseDate = album.ReleaseDate
+                                };
+                                result.Add(bandModel);
+                            }
+                        }
+                    }
+                }
+
+                _cachingService.CacheItem(hipsterCacheKey, result.Where(b => b.SearchTags.Contains("hipster")).ToList(), TimeSpan.FromHours(2));
+            }
+            else if (cachedHipsterArtists != null)
+            {
+                result.AddRange(cachedHipsterArtists);
+                foreach (var artist in cachedHipsterArtists)
+                {
+                    processedArtistNames.Add(artist.Name);
+                }
+            }
+
+            var newCacheKey = "new-artists";
+            if (!_cachingService.TryGetCachedItem(newCacheKey, out List<BandModel>? cachedNewArtists))
+            {
+                var newQuery = "tag:new";
+                var newSearchResponse = await _apiThrottler.ThrottledApiCall(() =>
+                    _spotifyService.SearchAsync(token, newQuery, "album", limit / 2));
+
+                if (newSearchResponse?.Albums?.Items != null)
+                {
+                    var newArtists = new List<BandModel>();
+                    foreach (var album in newSearchResponse.Albums.Items)
+                    {
+                        foreach (var artist in album.Artists)
+                        {
+                            if (!string.IsNullOrEmpty(artist.Name) &&
+                                !processedArtistNames.Contains(artist.Name) &&
+                                result.Count < limit)
+                            {
+                                processedArtistNames.Add(artist.Name);
+                                var bandModel = new BandModel
+                                {
+                                    Id = artist.Id,
+                                    Name = artist.Name,
+                                    ImageUrl = artist.Images?.FirstOrDefault()?.Url ?? album.Images?.FirstOrDefault()?.Url ?? string.Empty,
+                                    SearchTags = new List<string> { "new" },
+                                    LatestAlbum = album.Name,
+                                    LatestAlbumReleaseDate = album.ReleaseDate
+                                };
+                                newArtists.Add(bandModel);
+                            }
+                        }
+                    }
+                    result.AddRange(newArtists);
+                    _cachingService.CacheItem(newCacheKey, newArtists, TimeSpan.FromHours(1));
+                }
+            }
+            else if (cachedNewArtists != null)
+            {
+                result.AddRange(cachedNewArtists.Where(a => !processedArtistNames.Contains(a.Name)));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching for hipster and new artists");
+        }
+
+        return [.. result.Take(limit)];
     }
 
     async Task<List<BandModel>> IArtistDiscoveryService.GetRegisteredBandsAsModelsAsync(List<string> genres, string location)
@@ -268,13 +377,14 @@ internal class ArtistDiscoveryService(
         {
             var bandModel = new BandModel
             {
+                Id = band.Id.ToString(),
                 Name = band.Name ?? "Unknown",
                 Location = band.Country ?? band.City ?? location,
                 Genres = !string.IsNullOrEmpty(band.Genre)
-                    ? band.Genre.Split(',').Select(g => g.Trim()).ToList()
-                    : new List<string>(),
+                    ? [.. band.Genre.Split(',').Select(g => g.Trim())]
+                    : [],
                 IsRegistered = true,
-                ImageUrl = band.CoverImage != null ? $"/api/bands/{band.Id}/image" : string.Empty
+                CoverImage = band.CoverImage ?? [],
             };
 
             try
@@ -443,6 +553,7 @@ internal class ArtistDiscoveryService(
     {
         if (queryTemplate.Contains("{genre}"))
         {
+            // Use OR operator to search across multiple genres more effectively
             var genreQuery = string.Join(" OR ", genres.Select(g => $"genre:\"{g}\""));
             return queryTemplate.Replace("{genre}", genreQuery);
         }
