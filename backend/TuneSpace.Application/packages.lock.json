@@ -71,6 +71,25 @@
           "Microsoft.IdentityModel.Logging": "8.9.0"
         }
       },
+      "Microsoft.ML.OnnxRuntime": {
+        "type": "Direct",
+        "requested": "[1.22.0, )",
+        "resolved": "1.22.0",
+        "contentHash": "IC5jOaU6YZ7qcLl7JiR2yL6+NznthdCPwW8XgN2XkbvDERRFqMLIVtwfzu2H110fhms59VIyyMOxHXHl2iVzCg==",
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.22.0"
+        }
+      },
+      "Microsoft.ML.Tokenizers": {
+        "type": "Direct",
+        "requested": "[1.0.2, )",
+        "resolved": "1.0.2",
+        "contentHash": "MefL5+IakSE/CWzx4BQQairgY1fXFBVTPtnn7/01Wngsk2248loViqQ1M5+YB8KBwbi0HjcfoMo86h+cSjiEOA==",
+        "dependencies": {
+          "Google.Protobuf": "3.27.1",
+          "System.Text.Json": "8.0.5"
+        }
+      },
       "System.Net.Http.Json": {
         "type": "Direct",
         "requested": "[9.0.3, )",
@@ -855,25 +874,6 @@
           "Microsoft.IdentityModel.Tokens": "8.9.0"
         }
       },
-      "Microsoft.ML.OnnxRuntime": {
-        "type": "CentralTransitive",
-        "requested": "[1.22.0, )",
-        "resolved": "1.22.0",
-        "contentHash": "IC5jOaU6YZ7qcLl7JiR2yL6+NznthdCPwW8XgN2XkbvDERRFqMLIVtwfzu2H110fhms59VIyyMOxHXHl2iVzCg==",
-        "dependencies": {
-          "Microsoft.ML.OnnxRuntime.Managed": "1.22.0"
-        }
-      },
-      "Microsoft.ML.Tokenizers": {
-        "type": "CentralTransitive",
-        "requested": "[1.0.2, )",
-        "resolved": "1.0.2",
-        "contentHash": "MefL5+IakSE/CWzx4BQQairgY1fXFBVTPtnn7/01Wngsk2248loViqQ1M5+YB8KBwbi0HjcfoMo86h+cSjiEOA==",
-        "dependencies": {
-          "Google.Protobuf": "3.27.1",
-          "System.Text.Json": "8.0.5"
-        }
-      },
       "Npgsql.EntityFrameworkCore.PostgreSQL": {
         "type": "CentralTransitive",
         "requested": "[9.0.3, )",
@@ -897,51 +897,51 @@
       }
     },
     "net9.0/linux-x64": {
-      "System.Text.Encodings.Web": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
-      },
       "Microsoft.ML.OnnxRuntime": {
-        "type": "CentralTransitive",
+        "type": "Direct",
         "requested": "[1.22.0, )",
         "resolved": "1.22.0",
         "contentHash": "IC5jOaU6YZ7qcLl7JiR2yL6+NznthdCPwW8XgN2XkbvDERRFqMLIVtwfzu2H110fhms59VIyyMOxHXHl2iVzCg==",
         "dependencies": {
           "Microsoft.ML.OnnxRuntime.Managed": "1.22.0"
         }
+      },
+      "System.Text.Encodings.Web": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
       }
     },
     "net9.0/osx-x64": {
-      "System.Text.Encodings.Web": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
-      },
       "Microsoft.ML.OnnxRuntime": {
-        "type": "CentralTransitive",
+        "type": "Direct",
         "requested": "[1.22.0, )",
         "resolved": "1.22.0",
         "contentHash": "IC5jOaU6YZ7qcLl7JiR2yL6+NznthdCPwW8XgN2XkbvDERRFqMLIVtwfzu2H110fhms59VIyyMOxHXHl2iVzCg==",
         "dependencies": {
           "Microsoft.ML.OnnxRuntime.Managed": "1.22.0"
         }
+      },
+      "System.Text.Encodings.Web": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
       }
     },
     "net9.0/win-x64": {
-      "System.Text.Encodings.Web": {
-        "type": "Transitive",
-        "resolved": "8.0.0",
-        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
-      },
       "Microsoft.ML.OnnxRuntime": {
-        "type": "CentralTransitive",
+        "type": "Direct",
         "requested": "[1.22.0, )",
         "resolved": "1.22.0",
         "contentHash": "IC5jOaU6YZ7qcLl7JiR2yL6+NznthdCPwW8XgN2XkbvDERRFqMLIVtwfzu2H110fhms59VIyyMOxHXHl2iVzCg==",
         "dependencies": {
           "Microsoft.ML.OnnxRuntime.Managed": "1.22.0"
         }
+      },
+      "System.Text.Encodings.Web": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ=="
       }
     }
   }

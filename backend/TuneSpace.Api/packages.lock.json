@@ -846,6 +846,8 @@
           "Microsoft.AspNetCore.Http": "[2.3.0, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.2, )",
           "Microsoft.IdentityModel.Tokens": "[8.9.0, )",
+          "Microsoft.ML.OnnxRuntime": "[1.22.0, )",
+          "Microsoft.ML.Tokenizers": "[1.0.2, )",
           "System.Net.Http.Json": "[9.0.3, )",
           "TuneSpace.Core": "[1.0.0, )",
           "TuneSpace.Infrastructure": "[1.0.0, )"
