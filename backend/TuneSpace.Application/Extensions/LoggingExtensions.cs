@@ -57,9 +57,12 @@ public static partial class LoggingExtensions
             var localPart = sanitized[..atIndex];
             var domain = sanitized[(atIndex + 1)..];
 
-            if (localPart.Length > 0)
+            if (localPart.Length > 0 && domain.Length > 0)
             {
-                return $"{localPart[0]}***({localPart.Length})@{domain}";
+                var sanitizedDomain = domain.Length > 3
+                    ? $"{domain[0]}***{domain[^1]}"
+                    : "***";
+                return $"{localPart[0]}***({localPart.Length})@{sanitizedDomain}";
             }
         }
 

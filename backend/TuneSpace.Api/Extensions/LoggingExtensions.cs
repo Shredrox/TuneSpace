@@ -38,7 +38,7 @@ public static partial class LoggingExtensions
     }
 
     /// <summary>
-    /// Sanitizes an email address for logging, keeping only basic structure for debugging.
+    /// Sanitizes an email address for logging, masking both local and domain parts for privacy.
     /// </summary>
     /// <param name="email">The email address to sanitize.</param>
     /// <returns>Sanitized email safe for logging.</returns>
@@ -57,9 +57,12 @@ public static partial class LoggingExtensions
             var localPart = sanitized[..atIndex];
             var domain = sanitized[(atIndex + 1)..];
 
-            if (localPart.Length > 0)
+            if (localPart.Length > 0 && domain.Length > 0)
             {
-                return $"{localPart[0]}***({localPart.Length})@{domain}";
+                var sanitizedDomain = domain.Length > 3
+                    ? $"{domain[0]}***{domain[^1]}"
+                    : "***";
+                return $"{localPart[0]}***({localPart.Length})@{sanitizedDomain}";
             }
         }
 
