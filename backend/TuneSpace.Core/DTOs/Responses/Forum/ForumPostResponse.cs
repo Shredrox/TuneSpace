@@ -10,4 +10,6 @@ public record ForumPostResponse(
     DateTime CreatedAt,
     DateTime? UpdatedAt,
     int LikesCount,
-    bool UserHasLiked);
+    bool UserHasLiked,
+    Guid? ParentPostId = null,
+    List<ForumPostResponse>? Replies = null);

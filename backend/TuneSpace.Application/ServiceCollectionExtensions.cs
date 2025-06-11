@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TuneSpace.Core.Interfaces.IServices;
 using TuneSpace.Core.Interfaces.IInfrastructure;
 using TuneSpace.Application.Services;
+using TuneSpace.Application.Services.AI;
 using TuneSpace.Application.Services.MusicDiscovery;
 using TuneSpace.Application.BackgroundServices;
 
@@ -13,16 +14,12 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IApiThrottler, ApiThrottler>();
         services.AddSingleton<IBandCachingService, BandCachingService>();
-
-        services.AddScoped<IDataEnrichmentService, DataEnrichmentService>();
-        services.AddScoped<IArtistDiscoveryService, ArtistDiscoveryService>();
-        services.AddScoped<IRecommendationScoringService, RecommendationScoringService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISpotifyService, SpotifyService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IBandService, BandService>();
-        services.AddScoped<IMusicDiscoveryService, MusicDiscoveryService>();
         services.AddScoped<IMusicEventService, MusicEventService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IChatService, ChatService>();
@@ -32,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBandFollowService, BandFollowService>();
         services.AddScoped<IBandChatService, BandChatService>();
         services.AddScoped<IBandMessageService, BandMessageService>();
+        services.AddScoped<IOAuthStateService, OAuthStateService>();
 
         return services;
     }
@@ -39,6 +37,24 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationBackgroundServices(this IServiceCollection services)
     {
         services.AddHostedService<RefreshTokenCleanupService>();
+        services.AddHostedService<AdaptiveLearningBackgroundService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRecommendationServices(this IServiceCollection services)
+    {
+        services.AddScoped<IMusicDiscoveryService, MusicDiscoveryService>();
+        services.AddScoped<IDataEnrichmentService, DataEnrichmentService>();
+        services.AddScoped<IArtistDiscoveryService, ArtistDiscoveryService>();
+        services.AddScoped<IRecommendationScoringService, RecommendationScoringService>();
+        services.AddSingleton<IEmbeddingService, EmbeddingService>();
+        services.AddScoped<IVectorSearchService, VectorSearchService>();
+        services.AddScoped<IAIRecommendationService, AIRecommendationService>();
+        services.AddScoped<ICollaborativeFilteringService, CollaborativeFilteringService>();
+        services.AddScoped<IAdaptiveLearningService, AdaptiveLearningService>();
+        services.AddScoped<IAdaptiveRecommendationScoringService, AdaptiveRecommendationScoringService>();
+        services.AddScoped<IEnhancedAIPromptService, EnhancedAIPromptService>();
 
         return services;
     }

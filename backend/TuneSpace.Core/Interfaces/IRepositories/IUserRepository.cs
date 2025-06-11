@@ -15,6 +15,14 @@ public interface IUserRepository
     Task<User?> GetUserByIdAsync(string id);
 
     /// <summary>
+    /// Retrieves a user by their external provider ID (e.g., Spotify ID).
+    /// </summary>
+    /// <param name="externalId">The external provider's user ID.</param>
+    /// <param name="provider">The name of the external provider (e.g., "Spotify").</param>
+    /// <returns>The user if found; otherwise, null.</returns>
+    Task<User?> GetUserByExternalIdAsync(string externalId, string provider);
+
+    /// <summary>
     /// Retrieves a user by their email address.
     /// </summary>
     /// <param name="email">The email address to search for.</param>
@@ -44,9 +52,31 @@ public interface IUserRepository
     Task InsertUserAsync(User user, string password);
 
     /// <summary>
+    /// Creates a new user from external login provider information.
+    /// </summary>
+    /// <param name="user">The user entity to insert.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task InsertExternalUserAsync(User user);
+
+    /// <summary>
     /// Updates an existing user's information in the database.
     /// </summary>
     /// <param name="user">The user entity with updated information.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateUserAsync(User user);
+
+    /// <summary>
+    /// Retrieves users who have been active within the specified number of days.
+    /// </summary>
+    /// <param name="daysBack">The number of days to look back for activity.</param>
+    /// <returns>A task representing the asynchronous operation, containing a list of active user entities.</returns>
+    Task<List<User>> GetActiveUsersAsync(int daysBack);
+
+    /// <summary>
+    /// Updates the last active date for a user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="lastActiveDate">The new last active date.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task UpdateUserLastActiveDateAsync(string userId, DateTime lastActiveDate);
 }

@@ -14,6 +14,12 @@ internal class UserRepository(UserManager<User> userManager) : IUserRepository
         return await _userManager.FindByIdAsync(id);
     }
 
+    async Task<User?> IUserRepository.GetUserByExternalIdAsync(string externalId, string provider)
+    {
+        return await _userManager.Users
+            .FirstOrDefaultAsync(u => u.SpotifyId == externalId && u.ExternalProvider == provider);
+    }
+
     async Task<User?> IUserRepository.GetUserByEmailAsync(string email)
     {
         return await _userManager.FindByEmailAsync(email);
@@ -41,8 +47,35 @@ internal class UserRepository(UserManager<User> userManager) : IUserRepository
         }
     }
 
+    async Task IUserRepository.InsertExternalUserAsync(User user)
+    {
+        var result = await _userManager.CreateAsync(user);
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(user, user.Role.ToString());
+        }
+    }
+
     async Task IUserRepository.UpdateUserAsync(User user)
     {
         await _userManager.UpdateAsync(user);
+    }
+
+    async Task<List<User>> IUserRepository.GetActiveUsersAsync(int daysBack)
+    {
+        var cutoffDate = DateTime.UtcNow.AddDays(-daysBack);
+        return await _userManager.Users
+            .Where(u => u.LastActiveDate >= cutoffDate)
+            .ToListAsync();
+    }
+
+    async Task IUserRepository.UpdateUserLastActiveDateAsync(string userId, DateTime lastActiveDate)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user != null)
+        {
+            user.LastActiveDate = lastActiveDate;
+            await _userManager.UpdateAsync(user);
+        }
     }
 }

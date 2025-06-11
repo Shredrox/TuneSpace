@@ -38,7 +38,7 @@ public class UserController(
         }
         catch (NotFoundException e)
         {
-            _logger.LogWarning(e, "User not found: {Username}", username);
+            _logger.LogWarning(e, "User not found");
             return NotFound();
         }
     }
@@ -89,7 +89,7 @@ public class UserController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching profile picture for user {Username}", username);
+            _logger.LogError(ex, "Error fetching profile picture for user");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -129,7 +129,7 @@ public class UserController(
         }
         catch (NotFoundException e)
         {
-            _logger.LogWarning(e, "User not found: {Username}", username);
+            _logger.LogWarning(e, "User not found");
             return NotFound();
         }
     }
@@ -145,10 +145,15 @@ public class UserController(
             return BadRequest("No file uploaded");
         }
 
-        string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Username cannot be null or empty");
+        }
+
+        string[] allowedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"];
         if (!allowedFileTypes.Contains(file.ContentType.ToLower()))
         {
-            return BadRequest("Invalid file type. Only JPEG, PNG, JPG and GIF are allowed.");
+            return BadRequest("Invalid file type. Only JPEG, PNG, JPG, GIF and WEBP are allowed.");
         }
 
         if (file.Length > 5 * 1024 * 1024)

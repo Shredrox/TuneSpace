@@ -195,7 +195,7 @@ export default function LandingPage() {
 
       <section className="container mx-auto px-4">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 p-8 md:p-12">
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20" />
+          <div className="absolute inset-0 opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-cyan-500/10" />
 
           <div className="relative flex flex-col lg:flex-row gap-12 items-center">
@@ -329,7 +329,7 @@ export default function LandingPage() {
 
       <section className="container mx-auto px-4">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-900 via-red-900 to-pink-900 p-8 md:p-12">
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20" />
+          <div className="absolute inset-0 opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-transparent to-red-500/10" />
 
           <div className="relative flex flex-col lg:flex-row gap-12 items-center">
@@ -464,7 +464,7 @@ export default function LandingPage() {
 
       <section className="container mx-auto px-4">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-8 md:p-12">
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20" />
+          <div className="absolute inset-0 opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-purple-500/10" />
 
           <div className="relative text-center text-white">

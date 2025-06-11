@@ -86,15 +86,6 @@ public interface ISpotifyClient
     Task<HttpResponseMessage> Search(string token, string query, string types, int limit);
 
     /// <summary>
-    /// Creates a new playlist for the specified user.
-    /// </summary>
-    /// <param name="token">The access token for authentication.</param>
-    /// <param name="userId">The Spotify ID of the user to create the playlist for.</param>
-    /// <param name="requestContent">JSON content containing playlist details (name, description, public status).</param>
-    /// <returns>HTTP response containing the created playlist information.</returns>
-    Task<HttpResponseMessage> CreatePlaylist(string token, string userId, StringContent requestContent);
-
-    /// <summary>
     /// Refreshes an expired access token using a refresh token.
     /// </summary>
     /// <param name="parameters">The form parameters containing refresh token and client credentials.</param>

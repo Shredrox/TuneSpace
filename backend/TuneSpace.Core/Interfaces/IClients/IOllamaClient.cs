@@ -12,4 +12,11 @@ public interface IOllamaClient
     /// <param name="genres">A list of music genres to include in the recommendation criteria.</param>
     /// <returns>A string containing the AI-generated music recommendations.</returns>
     Task<string> Prompt(string location, List<string> genres);
+
+    /// <summary>
+    /// Sends an enhanced prompt to the Ollama service for RAG-based music recommendations.
+    /// </summary>
+    /// <param name="enhancedPrompt">The full enhanced prompt with context from vector search and user preferences.</param>
+    /// <returns>A string containing the AI-generated music recommendations.</returns>
+    Task<string> PromptWithContext(string enhancedPrompt);
 }

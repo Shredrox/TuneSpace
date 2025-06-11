@@ -9,6 +9,10 @@
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
 		<PackageReference Include="System.Net.Http.Json" />
 		<PackageReference Include="Microsoft.AspNetCore.Http" />
+		<PackageReference Include="FluentEmail.Core" />
+		<PackageReference Include="FluentEmail.Smtp" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\TuneSpace.Core\TuneSpace.Core.csproj" />

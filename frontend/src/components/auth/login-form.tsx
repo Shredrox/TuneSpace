@@ -20,19 +20,6 @@ const Login = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const tokenExpiryTime = searchParams.get("tokenExpiryTime");
-
-    if (tokenExpiryTime) {
-      updateAuth({
-        spotifyTokenExpiry: tokenExpiryTime,
-      });
-
-      router.replace(window.location.pathname);
-    }
-  }, [updateAuth, router]);
-
   const handleSpotifyLogin = () => {
     router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.LOGIN}`);
   };
@@ -60,8 +47,10 @@ const Login = () => {
       updateAuth({
         id: userData.id,
         username: userData.username,
+        email: userData.email,
         accessToken: userData.accessToken,
         role: userData.role,
+        isExternalProvider: userData.isExternalProvider,
       });
 
       router.push("/home");
@@ -76,7 +65,18 @@ const Login = () => {
     } else {
       switch (error.response.status) {
         case 401:
-          setError("Incorrect email or password");
+          const errorMessage =
+            error.response.data?.message || error.response.data;
+          if (
+            typeof errorMessage === "string" &&
+            errorMessage.includes("confirm your email")
+          ) {
+            setError(
+              "Please confirm your email address before logging in. Check your inbox for the confirmation link."
+            );
+          } else {
+            setError("Incorrect email or password");
+          }
           break;
         case 400:
           setError("An error occurred");
@@ -110,6 +110,14 @@ const Login = () => {
           name="password"
           error={errors.password?.message}
         />
+        <div className="text-left">
+          <Link
+            href="/auth/forgot-password"
+            className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
+          >
+            Forgot your password?
+          </Link>
+        </div>
         <Button type="submit" className="w-full">
           Login
         </Button>
@@ -119,21 +127,9 @@ const Login = () => {
             Or continue with
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline" className="w-full">
-            <svg
-              className="w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                fill="currentColor"
-              />
-            </svg>
-            <span className="sr-only">Login with Apple</span>
-          </Button>
+        <div className="grid grid-cols-1 gap-4">
           <Button
+            type="button"
             variant="outline"
             className="w-full"
             onClick={handleSpotifyLogin}

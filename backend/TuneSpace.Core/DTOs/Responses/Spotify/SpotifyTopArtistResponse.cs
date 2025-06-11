@@ -10,6 +10,9 @@ public class SpotifyTopArtistResponse
     [JsonPropertyName("popularity")]
     public int Popularity { get; set; }
 
+    [JsonPropertyName("followers")]
+    public Followers Followers { get; set; } = new();
+
     [JsonPropertyName("images")]
     public List<SpotifyImageDTO> Images { get; set; } = [];
 }

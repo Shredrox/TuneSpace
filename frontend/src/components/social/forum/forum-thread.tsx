@@ -45,6 +45,14 @@ const ForumThread = ({
     }
   };
 
+  const handlePostReply = async (content: string, parentPostId: string) => {
+    try {
+      await createPost({ content, threadId, parentPostId });
+    } catch (error) {
+      console.error("Error creating reply:", error);
+    }
+  };
+
   return (
     <div className="container max-w-5xl mx-auto py-8">
       <div className="mb-6">
@@ -53,19 +61,20 @@ const ForumThread = ({
         </div>
         <h1 className="text-3xl font-bold">{title}</h1>
       </div>
-
       <div className="space-y-6">
-        {posts.map((post, index) => (
-          <ForumPost
-            key={post.id}
-            post={post}
-            isOriginalPost={index === 0}
-            onLike={() => likePost(post.id)}
-            onDislike={() => unlikePost(post.id)}
-          />
-        ))}
+        {posts
+          .filter((post) => !post.parentPostId)
+          .map((post, index) => (
+            <ForumPost
+              key={post.id}
+              post={post}
+              isOriginalPost={index === 0}
+              onLike={(postId) => likePost(postId)}
+              onDislike={(postId) => unlikePost(postId)}
+              onReply={handlePostReply}
+            />
+          ))}
       </div>
-
       <Card className="mt-8">
         <CardHeader>
           <CardTitle className="text-lg">Post a Reply</CardTitle>

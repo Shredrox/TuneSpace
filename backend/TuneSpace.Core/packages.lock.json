@@ -12,6 +12,16 @@
           "Microsoft.Extensions.Identity.Stores": "9.0.2"
         }
       },
+      "Pgvector.EntityFrameworkCore": {
+        "type": "Direct",
+        "requested": "[0.2.2, )",
+        "resolved": "0.2.2",
+        "contentHash": "U4C48O+f31y7lWlUY+fsZrOZAvzI8rCsQb/sEWF3MfGYX/153uQingO2/8YoXeLGx00Wl9na8zl89gehXtMbFg==",
+        "dependencies": {
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.0",
+          "Pgvector": "0.3.1"
+        }
+      },
       "System.Net.Http.Json": {
         "type": "Direct",
         "requested": "[9.0.3, )",
@@ -155,6 +165,34 @@
         "type": "Transitive",
         "resolved": "9.0.2",
         "contentHash": "puBMtKe/wLuYa7H6docBkLlfec+h8L35DXqsDKKJgW0WY5oCwJ3cBJKcDaZchv6knAyqOMfsl6VUbaR++E5LXA=="
+      },
+      "Npgsql": {
+        "type": "Transitive",
+        "resolved": "8.0.3",
+        "contentHash": "6WEmzsQJCZAlUG1pThKg/RmeF6V+I0DmBBBE/8YzpRtEzhyZzKcK7ulMANDm5CkxrALBEC8H+5plxHWtIL7xnA==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.0"
+        }
+      },
+      "Pgvector": {
+        "type": "Transitive",
+        "resolved": "0.3.1",
+        "contentHash": "XeuF5F5krjjv9/Mlt9vtl5Sd7B6ps82XhsA98qP5G6KAjL2bDPr+nvXTTXrJoKiwdE+R5VXoq1t0hWFkgbMyZw==",
+        "dependencies": {
+          "Npgsql": "8.0.3"
+        }
+      },
+      "Npgsql.EntityFrameworkCore.PostgreSQL": {
+        "type": "CentralTransitive",
+        "requested": "[9.0.3, )",
+        "resolved": "8.0.0",
+        "contentHash": "GDXiMS9peEdjSCU/rfgyHruio7q6tYuywGaktqEi6UPQ6ILechp3fVVX+dHXkIXt4nklCBzYVWkzFrSL9ubKUA==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "8.0.0",
+          "Microsoft.EntityFrameworkCore.Abstractions": "8.0.0",
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.0",
+          "Npgsql": "8.0.0"
+        }
       }
     },
     "net9.0/linux-x64": {},

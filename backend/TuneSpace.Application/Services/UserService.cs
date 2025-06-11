@@ -29,7 +29,7 @@ internal class UserService(
 
         if (user == null)
         {
-            _logger.LogWarning("User not found for profile picture retrieval: {Username}", username);
+            _logger.LogWarning("User not found for profile picture retrieval");
             throw new NotFoundException($"User not found: {username}");
         }
 
@@ -60,13 +60,43 @@ internal class UserService(
 
         if (user == null)
         {
-            _logger.LogWarning("User not found for profile picture update: {Username}", username);
+            _logger.LogWarning("User not found for profile picture update");
             throw new NotFoundException($"User not found: {username}");
         }
 
         user.ProfilePicture = profilePicture;
         await _userRepository.UpdateUserAsync(user);
 
-        _logger.LogInformation("Profile picture updated for user: {Username}", username);
+        _logger.LogInformation("Profile picture updated for user");
+    }
+
+    async Task<List<string>> IUserService.GetActiveUserIdsAsync(int daysBack)
+    {
+        try
+        {
+            var activeUsers = await _userRepository.GetActiveUsersAsync(daysBack);
+            var userIds = activeUsers.Select(u => u.Id.ToString()).ToList();
+
+            _logger.LogInformation("Found {Count} active users in the last {Days} days", userIds.Count, daysBack);
+            return userIds;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving active users for the last {Days} days", daysBack);
+            return [];
+        }
+    }
+
+    async Task IUserService.UpdateUserActivityAsync(string userId)
+    {
+        try
+        {
+            await _userRepository.UpdateUserLastActiveDateAsync(userId, DateTime.UtcNow);
+            _logger.LogDebug("Updated last active date for user");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to update last active date for user");
+        }
     }
 }

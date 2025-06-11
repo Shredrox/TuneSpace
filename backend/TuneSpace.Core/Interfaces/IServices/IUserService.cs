@@ -43,4 +43,18 @@ public interface IUserService
     /// <param name="profilePicture">The binary data of the profile picture.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     Task UpdateProfilePictureAsync(string username, byte[] profilePicture);
+
+    /// <summary>
+    /// Retrieves users who have been active within the specified number of days.
+    /// </summary>
+    /// <param name="daysBack">The number of days to look back for activity.</param>
+    /// <returns>A task representing the asynchronous operation, containing a list of active user IDs.</returns>
+    Task<List<string>> GetActiveUserIdsAsync(int daysBack);
+
+    /// <summary>
+    /// Updates the last active date for a user to the current UTC time.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    Task UpdateUserActivityAsync(string userId);
 }

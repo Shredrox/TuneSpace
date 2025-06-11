@@ -34,7 +34,7 @@ public class NotificationController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting notifications for user: {Username}", username);
+            _logger.LogError(ex, "Error getting notifications for user");
             return StatusCode(500, "An error occurred while retrieving notifications.");
         }
     }
@@ -90,7 +90,7 @@ public class NotificationController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error marking all notifications as read for user: {Username}", username);
+            _logger.LogError(ex, "Error marking all notifications as read for user");
             return StatusCode(500, "An error occurred while marking all notifications as read.");
         }
     }

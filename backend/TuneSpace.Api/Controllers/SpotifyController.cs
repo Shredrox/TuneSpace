@@ -9,10 +9,12 @@ namespace TuneSpace.Api.Controllers;
 [ApiController]
 public class SpotifyController(
     ISpotifyService spotifyService,
-    ILogger<SpotifyController> logger) : ControllerBase
+    ILogger<SpotifyController> logger,
+    IUrlBuilderService urlBuilderService) : ControllerBase
 {
     private readonly ISpotifyService _spotifyService = spotifyService;
     private readonly ILogger<SpotifyController> _logger = logger;
+    private readonly IUrlBuilderService _urlBuilderService = urlBuilderService;
 
     [HttpGet("login")]
     public IActionResult SpotifyLogin()
@@ -29,37 +31,53 @@ public class SpotifyController(
         }
     }
 
-    [HttpGet("callback")]
-    public async Task<IActionResult> Callback(string code, string state)
+    [HttpGet("connect")]
+    public IActionResult SpotifyConnect()
     {
         try
         {
-            var spotifyTokens = await _spotifyService.ExchangeCodeForTokenAsync(code);
+            var redirectUrl = _spotifyService.GetSpotifyLoginUrl("connect");
+            return Redirect(redirectUrl);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error generating Spotify connect URL");
+            return BadRequest("Error generating Spotify connect URL");
+        }
+    }
 
-            var tokenExpiry = DateTime.Now.AddSeconds(spotifyTokens.ExpiresIn);
+    [HttpGet("callback")]
+    public IActionResult Callback(string code, string state)
+    {
+        if (string.IsNullOrEmpty(state))
+        {
+            _logger.LogWarning("Invalid or missing OAuth state parameter");
+            return BadRequest("Invalid OAuth state parameter.");
+        }
 
-            Response.Cookies.Append("SpotifyAccessToken", spotifyTokens.AccessToken, new CookieOptions
+        if (string.IsNullOrEmpty(code))
+        {
+            _logger.LogWarning("Missing authorization code in Spotify callback");
+            return BadRequest("Missing authorization code");
+        }
+
+        try
+        {
+            var flowType = "login";
+            if (state.Contains(':'))
             {
-                Expires = tokenExpiry,
-                HttpOnly = true,
-                Secure = true,
-                IsEssential = true,
-                Domain = "localhost",
-                SameSite = SameSiteMode.None
-            });
+                var parts = state.Split(':', 2);
+                if (parts.Length == 2 && (parts[0] == "login" || parts[0] == "connect"))
+                {
+                    flowType = parts[0];
+                }
+            }
 
-            Response.Cookies.Append("SpotifyRefreshToken", spotifyTokens.RefreshToken, new CookieOptions
+            var redirectUrl = flowType switch
             {
-                Expires = DateTime.Now.AddDays(30),
-                HttpOnly = true,
-                Secure = true,
-                IsEssential = true,
-                Domain = "localhost",
-                SameSite = SameSiteMode.None
-            });
-
-            var redirectUrl = $"http://localhost:5173/?" +
-                $"&tokenExpiryTime={Uri.EscapeDataString(tokenExpiry.ToString("o"))}";
+                "connect" => _urlBuilderService.BuildSpotifyConnectCallbackUrl(code, state),
+                _ => _urlBuilderService.BuildSpotifyLoginCallbackUrl(code, state)
+            };
 
             return Redirect(redirectUrl);
         }
@@ -68,6 +86,21 @@ public class SpotifyController(
             _logger.LogError(e, "Error during Spotify callback");
             return BadRequest("Error during Spotify callback");
         }
+    }
+
+    [HttpGet("connection-status")]
+    public IActionResult GetConnectionStatus()
+    {
+        var accessToken = Request.Cookies["SpotifyAccessToken"];
+        var refreshToken = Request.Cookies["SpotifyRefreshToken"];
+
+        var isConnected = !string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken);
+
+        return Ok(new
+        {
+            isConnected,
+            hasTokens = isConnected
+        });
     }
 
     [HttpGet("profile")]
@@ -344,7 +377,10 @@ public class SpotifyController(
 
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return Unauthorized("Refresh token is required");
+            return Ok(new
+            {
+                isConnected = false
+            });
         }
 
         try
@@ -378,13 +414,21 @@ public class SpotifyController(
 
             return Ok(new
             {
-                spotifyTokenExpiry = tokenExpiry,
+                isConnected = true
             });
         }
         catch (SpotifyApiException ex)
         {
             _logger.LogError(ex, "Error refreshing Spotify access token");
-            return StatusCode(500, ex.Message);
+
+            Response.Cookies.Delete("SpotifyAccessToken");
+            Response.Cookies.Delete("SpotifyRefreshToken");
+
+            return Ok(new
+            {
+                isConnected = false,
+                error = "Spotify connection expired. Please reconnect."
+            });
         }
     }
 }

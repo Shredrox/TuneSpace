@@ -1,6 +1,6 @@
 using TuneSpace.Core.Interfaces.IInfrastructure;
 
-namespace TuneSpace.Application.Services.MusicDiscovery;
+namespace TuneSpace.Application.Services;
 
 internal class ApiThrottler(int maxConcurrentRequests = 3) : IApiThrottler
 {

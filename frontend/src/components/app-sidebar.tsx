@@ -28,7 +28,7 @@ import {
 } from "@/components/shadcn/avatar";
 import { usePathname, useRouter } from "next/navigation";
 import useAuth from "@/hooks/auth/useAuth";
-import { ROUTES, UserRole } from "@/utils/constants";
+import { ROUTES } from "@/utils/constants";
 import Link from "next/link";
 import useLogout from "@/hooks/auth/useLogout";
 import { cn } from "@/lib/utils";
@@ -55,9 +55,6 @@ export function AppSidebar() {
     auth?.username || ""
   );
 
-  const isBandAdmin =
-    auth?.role?.toLowerCase() === UserRole.BandAdmin.toLowerCase();
-
   const userInitials = auth?.username
     ? auth.username.substring(0, 2).toUpperCase()
     : "TS";
@@ -65,7 +62,6 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       await logout();
-      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -127,9 +123,8 @@ export function AppSidebar() {
     },
   ];
 
-  const allNavigationLinks = isBandAdmin
-    ? [...navigationLinks, bandDashboardLink]
-    : navigationLinks;
+  const allNavigationLinks = [...navigationLinks, bandDashboardLink];
+
   const renderNavLinks = (group: "navigation" | "content") => {
     const links = group === "navigation" ? allNavigationLinks : contentLinks;
 
@@ -180,6 +175,7 @@ export function AppSidebar() {
       );
     });
   };
+
   return (
     <Sidebar
       collapsible="icon"

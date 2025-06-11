@@ -15,16 +15,14 @@ internal class BandCachingService(
     {
         bool cacheHit = _cache.TryGetValue(cacheKey, out value);
 
-        _logger.LogDebug("Cache {Result} for key: {CacheKey}",
-            cacheHit ? "hit" : "miss",
-            cacheKey);
+        _logger.LogDebug("Cache {Result} for registered bands lookup", cacheHit ? "hit" : "miss");
 
         return cacheHit;
     }
 
     void IBandCachingService.CacheItem<T>(string cacheKey, T item, TimeSpan duration)
     {
-        _logger.LogDebug("Caching item with key: {CacheKey} for duration: {Duration}", cacheKey, duration);
+        _logger.LogDebug("Caching item for user query. Duration: {Duration}", duration);
         _cache.Set(cacheKey, item, duration);
     }
 
@@ -32,16 +30,16 @@ internal class BandCachingService(
     {
         if (!_cache.TryGetValue(cacheKey, out T? result))
         {
-            _logger.LogDebug("Cache miss for key: {CacheKey}, creating new item", cacheKey);
+            _logger.LogDebug("Cache miss");
 
             result = itemFactory();
             _cache.Set(cacheKey, result, duration);
 
-            _logger.LogDebug("Added new item to cache with key: {CacheKey} for duration: {Duration}", cacheKey, duration);
+            _logger.LogDebug("Added new item to cache");
         }
         else
         {
-            _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey);
+            _logger.LogDebug("Cache hit");
         }
 
         return result!;
@@ -51,14 +49,14 @@ internal class BandCachingService(
     {
         if (!_cache.TryGetValue(cacheKey, out T? result))
         {
-            _logger.LogDebug("Cache miss for key: {CacheKey}, creating new item asynchronously", cacheKey);
+            _logger.LogDebug("Cache miss");
             result = await itemFactory();
             _cache.Set(cacheKey, result, duration);
-            _logger.LogDebug("Added new item to cache with key: {CacheKey} for duration: {Duration}", cacheKey, duration);
+            _logger.LogDebug("Added new item to cache");
         }
         else
         {
-            _logger.LogDebug("Cache hit for key: {CacheKey}", cacheKey);
+            _logger.LogDebug("Cache hit");
         }
 
         return result!;

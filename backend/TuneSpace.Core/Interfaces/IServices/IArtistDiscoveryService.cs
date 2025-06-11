@@ -29,6 +29,16 @@ public interface IArtistDiscoveryService
     Task<List<BandModel>> FindArtistsByQueryAsync(string token, List<string> genres, string queryTemplate, int limit, bool isNewRelease = false);
 
     /// <summary>
+    /// Discovers hipster and emerging new artists using specialized search criteria.
+    /// This method focuses on finding lesser-known artists and bands that are gaining popularity.
+    /// </summary>
+    /// <param name="token">Spotify access token for API authentication.</param>
+    /// <param name="queryTemplate">Template string for building specialized search queries to find hipster/new artists.</param>
+    /// <param name="limit">Maximum number of artists to return in the search results.</param>
+    /// <returns>A list of band models representing hipster and newly discovered artists.</returns>
+    Task<List<BandModel>> FindHipsterAndNewArtistsAsync(string token, string queryTemplate, int limit);
+
+    /// <summary>
     /// Retrieves bands registered in the system as BandModel objects, enriched with additional information.
     /// </summary>
     /// <param name="genres">List of genres to filter by.</param>

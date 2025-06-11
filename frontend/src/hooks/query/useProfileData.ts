@@ -3,9 +3,11 @@ import {
   getUserProfile,
   uploadProfilePicture,
 } from "../../services/user-service";
+import useAuth from "../auth/useAuth";
 
 const useProfileData = (profileUser: string, loggedUser: string) => {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
 
   const {
     data: profile,
@@ -15,6 +17,7 @@ const useProfileData = (profileUser: string, loggedUser: string) => {
   } = useQuery({
     queryKey: ["profile", profileUser],
     queryFn: () => getUserProfile(profileUser),
+    enabled: isAuthenticated && !!profileUser,
   });
 
   const { mutateAsync: uploadProfilePictureMutation } = useMutation({

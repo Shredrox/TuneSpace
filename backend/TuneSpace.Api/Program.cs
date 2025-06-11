@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using TuneSpace.Api.Infrastructure;
+using TuneSpace.Api.Middleware;
 using TuneSpace.Application;
 using TuneSpace.Infrastructure;
 using TuneSpace.Infrastructure.Hubs;
@@ -38,8 +39,11 @@ builder.Services.AddOptions(builder.Configuration);
 builder.Services.AddDatabaseServices();
 builder.Services.AddRepositoryServices();
 builder.Services.AddCachingServices();
+builder.Services.AddInfrastructureServices();
 builder.Services.AddIdentityServices();
 builder.Services.AddHttpClientServices();
+builder.Services.AddEmailService();
+builder.Services.AddRecommendationServices();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationBackgroundServices();
@@ -75,6 +79,8 @@ app.UseExceptionHandler();
 app.UseCors("AllowOrigin");
 
 app.UseAuthentication();
+
+app.UseMiddleware<UserActivityMiddleware>();
 
 app.UseAuthorization();
 

@@ -3,9 +3,13 @@ import { fetchBandThreads } from "@/services/forum-service";
 import { getSpotifyArtist } from "@/services/spotify-service";
 import { isNullOrEmpty } from "@/utils/helpers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import useAuth from "@/hooks/auth/useAuth";
+import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
 
 const useBandData = (userId: string) => {
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
+  const { isSpotifyConnected } = useSpotifyErrorHandler();
 
   const {
     data: band,
@@ -15,7 +19,7 @@ const useBandData = (userId: string) => {
   } = useQuery({
     queryKey: ["band", userId],
     queryFn: () => getBand(userId),
-    enabled: !!userId,
+    enabled: isAuthenticated && !!userId,
   });
 
   const {
@@ -37,7 +41,7 @@ const useBandData = (userId: string) => {
   } = useQuery({
     queryKey: ["bandSpotify", band?.id],
     queryFn: () => getSpotifyArtist(band?.spotifyId),
-    enabled: !!band && !isNullOrEmpty(band.spotifyId),
+    enabled: !!band && !isNullOrEmpty(band.spotifyId) && isSpotifyConnected(),
   });
 
   const { mutateAsync: updateBandMutation } = useMutation({

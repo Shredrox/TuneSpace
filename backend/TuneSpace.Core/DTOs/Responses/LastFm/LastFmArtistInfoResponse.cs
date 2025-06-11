@@ -12,6 +12,8 @@ public class LastFmArtist
 {
     [JsonPropertyName("name")]
     public string? Name { get; set; }
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
 
     [JsonPropertyName("listeners")]
     public string? Listeners { get; set; }

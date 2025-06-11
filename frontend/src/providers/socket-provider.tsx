@@ -30,8 +30,16 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   const [bandChats, setBandChats] = useState<BandChat[]>([]);
 
   const createHubConnection = () => {
+    if (!auth.accessToken) {
+      console.log("No access token available, skipping SignalR connection");
+      return;
+    }
+
     const newConnection = new HubConnectionBuilder()
-      .withUrl(SIGNALR_HUB_URL, { withCredentials: true })
+      .withUrl(SIGNALR_HUB_URL, {
+        withCredentials: true,
+        accessTokenFactory: () => auth.accessToken || "",
+      })
       .withAutomaticReconnect()
       .build();
 
@@ -47,23 +55,44 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   };
 
   useEffect(() => {
-    if (auth.username !== undefined && connection === null) {
+    if (
+      auth.username !== undefined &&
+      auth.accessToken &&
+      connection === null
+    ) {
       createHubConnection();
+    } else if (!auth.accessToken && connection) {
+      disconnectFromHub();
     }
-  }, [auth.username]);
+  }, [auth.username, auth.accessToken]);
 
   useEffect(() => {
     if (connection) {
       connection
         .start()
-        .then(() => console.log("SignalR Connected"))
-        .catch((error) => console.log("SignalR Connection Error: ", error));
+        .then(() => {
+          console.log("SignalR Connected");
 
-      connection.on("ReceiveMessage", onMessageReceived);
-      connection.on("ChatCreated", onChatCreated);
-      connection.on("ReceiveNotification", onNotificationReceived);
-      connection.on("ReceiveBandMessage", onBandMessageReceived);
-      connection.on("BandChatCreated", onBandChatCreated);
+          connection.on("ReceiveMessage", onMessageReceived);
+          connection.on("ChatCreated", onChatCreated);
+          connection.on("ReceiveNotification", onNotificationReceived);
+          connection.on("ReceiveBandMessage", onBandMessageReceived);
+          connection.on("BandChatCreated", onBandChatCreated);
+        })
+        .catch((error) => {
+          console.error("SignalR Connection Error: ", error);
+          setConnection(null);
+        });
+
+      return () => {
+        if (connection) {
+          connection.off("ReceiveMessage");
+          connection.off("ChatCreated");
+          connection.off("ReceiveNotification");
+          connection.off("ReceiveBandMessage");
+          connection.off("BandChatCreated");
+        }
+      };
     }
   }, [connection]);
 

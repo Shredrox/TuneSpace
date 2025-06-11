@@ -11,6 +11,13 @@ public interface ISpotifyService
     string GetSpotifyLoginUrl();
 
     /// <summary>
+    /// Generates a Spotify login URL with flow type support
+    /// </summary>
+    /// <param name="flowType">The type of OAuth flow ('login' or 'connect')</param>
+    /// <returns>Spotify login URL to redirect the user to</returns>
+    string GetSpotifyLoginUrl(string flowType);
+
+    /// <summary>
     /// Exchanges an authorization code for a Spotify access token
     /// </summary>
     /// <param name="code">Authorization code received from Spotify callback</param>
@@ -25,6 +32,13 @@ public interface ISpotifyService
     Task<SpotifyProfileDTO> GetUserSpotifyProfileAsync(string token);
 
     /// <summary>
+    /// Gets a user's detailed Spotify profile information including email
+    /// </summary>
+    /// <param name="token">Spotify access token</param>
+    /// <returns>User's detailed Spotify profile data</returns>
+    Task<SpotifyApiProfileResponse> GetUserInfoAsync(string token);
+
+    /// <summary>
     /// Gets a list of artists the user follows on Spotify
     /// </summary>
     /// <param name="token">Spotify access token</param>
@@ -36,7 +50,7 @@ public interface ISpotifyService
     /// </summary>
     /// <param name="token">Spotify access token</param>
     /// <returns>List of user's top artists</returns>
-    Task<List<TopArtistDTO>> GetUserTopArtistsAsync(string token);
+    Task<List<SpotifyArtistDTO>> GetUserTopArtistsAsync(string token);
 
     /// <summary>
     /// Gets a user's recently played tracks on Spotify

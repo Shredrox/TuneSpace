@@ -2,5 +2,6 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
       <PackageReference Include="System.Net.Http.Json" />
+      <PackageReference Include="Pgvector.EntityFrameworkCore" />
     </ItemGroup>
 </Project>

@@ -5,15 +5,21 @@ using Microsoft.Extensions.DependencyInjection;
 using TuneSpace.Infrastructure.Clients;
 using TuneSpace.Infrastructure.Data;
 using TuneSpace.Infrastructure.Repositories;
+using TuneSpace.Infrastructure.Services;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IRepositories;
+using TuneSpace.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using TuneSpace.Infrastructure.Identity;
 using TuneSpace.Infrastructure.Options;
 using Microsoft.Extensions.Options;
+using Polly;
+using Microsoft.Extensions.Http.Resilience;
+using TuneSpace.Core.Exceptions;
+using System.Net.Mail;
 
 namespace TuneSpace.Infrastructure;
 
@@ -22,7 +28,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDatabaseServices(this IServiceCollection services)
     {
         services.AddDbContext<TuneSpaceDbContext>((provider, options) =>
-            options.UseNpgsql(provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value.DefaultConnection));
+            options.UseNpgsql(provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value.DefaultConnection,
+            o => o.UseVector()));
 
         return services;
     }
@@ -88,6 +95,35 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddEmailService(this IServiceCollection services)
+    {
+        var emailOptions = services.BuildServiceProvider().GetRequiredService<IOptionsSnapshot<EmailOptions>>().Value;
+
+        services.AddFluentEmail(emailOptions.FromEmail, emailOptions.FromName)
+            .AddSmtpSender(() =>
+            {
+                return new SmtpClient(emailOptions?.SmtpHost ?? "localhost")
+                {
+                    //TODO: Set up gmail SMTP
+                    //local emails for now
+                    DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory,
+                    PickupDirectoryLocation = @"C:\Emails",
+                    EnableSsl = false,
+                };
+            });
+
+        services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUrlBuilderService, UrlBuilderService>();
+
+        return services;
+    }
+
     public static IServiceCollection AddRepositoryServices(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
@@ -103,6 +139,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBandChatRepository, BandChatRepository>();
         services.AddScoped<IBandMessageRepository, BandMessageRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IArtistEmbeddingRepository, ArtistEmbeddingRepository>();
+        services.AddScoped<IRecommendationContextRepository, RecommendationContextRepository>();
+        services.AddScoped<IRecommendationFeedbackRepository, RecommendationFeedbackRepository>();
 
         return services;
     }
@@ -112,7 +151,76 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IOllamaClient, OllamaClient>();
         services.AddHttpClient<ILastFmClient, LastFmClient>();
         services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
-        services.AddHttpClient<ISpotifyClient, SpotifyClient>();
+
+        services.AddHttpClient<ISpotifyClient, SpotifyClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.spotify.com/v1/");
+            client.DefaultRequestHeaders.Add("User-Agent", "TuneSpace/1.0");
+        })
+        .ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            return new SocketsHttpHandler
+            {
+                MaxConnectionsPerServer = 10,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(15)
+            };
+        })
+        .AddResilienceHandler(
+            "spotifyResiliencePipeline", pipeline =>
+            {
+                pipeline.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    ShouldHandle = args =>
+                    {
+                        if (args.Outcome.Exception is SpotifyApiException)
+                        {
+                            return ValueTask.FromResult(false);
+                        }
+
+                        if (args.Outcome.Exception is HttpRequestException or TaskCanceledException)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        if (args.Outcome.Result?.StatusCode is
+                            System.Net.HttpStatusCode.TooManyRequests or
+                            System.Net.HttpStatusCode.InternalServerError or
+                            System.Net.HttpStatusCode.BadGateway or
+                            System.Net.HttpStatusCode.ServiceUnavailable or
+                            System.Net.HttpStatusCode.GatewayTimeout)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        return ValueTask.FromResult(false);
+                    },
+                    OnRetry = async args =>
+                    {
+                        if (args.Outcome.Result?.StatusCode == System.Net.HttpStatusCode.TooManyRequests &&
+                            args.Outcome.Result.Headers.RetryAfter?.Delta is TimeSpan retryAfter)
+                        {
+                            await Task.Delay(retryAfter);
+                        }
+                    }
+                });
+
+                pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+                {
+                    FailureRatio = 0.5,
+                    SamplingDuration = TimeSpan.FromMinutes(2),
+                    MinimumThroughput = 10,
+                    BreakDuration = TimeSpan.FromSeconds(30)
+                });
+
+                pipeline.AddTimeout(TimeSpan.FromSeconds(30));
+            }
+        );
+
+        services.AddHttpClient<IBandcampClient, BandcampClient>();
 
         return services;
     }
@@ -120,6 +228,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        services.Configure<EmailOptions>(configuration.GetSection("Email"));
+        services.Configure<FrontendOptions>(configuration.GetSection("Frontend"));
         services.Configure<DatabaseOptions>(configuration.GetSection("ConnectionStrings"));
         services.Configure<SpotifyOptions>(configuration.GetSection("Spotify"));
         services.Configure<LastFmOptions>(configuration.GetSection("LastFm"));
