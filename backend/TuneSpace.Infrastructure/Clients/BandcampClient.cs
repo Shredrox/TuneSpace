@@ -127,7 +127,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering random artists by genre: {genre}");
+            _logger.LogError($"Error discovering random artists by genre");
             return [];
         }
     }

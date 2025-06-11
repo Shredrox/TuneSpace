@@ -22,7 +22,7 @@ internal class OAuthStateService(
 
         _cache.Set(cacheKey, true, StateExpiration);
 
-        _logger.LogDebug("Generated and stored OAuth state: {StatePrefix}***", state[..8]);
+        _logger.LogDebug("Generated and stored OAuth state");
 
         return state;
     }
@@ -41,12 +41,11 @@ internal class OAuthStateService(
         {
             _cache.Remove(cacheKey);
 
-            _logger.LogDebug("OAuth state validation successful: {StatePrefix}***", state[..8]);
+            _logger.LogDebug("OAuth state validation successful");
             return true;
         }
 
-        _logger.LogWarning("OAuth state validation failed: {StatePrefix}*** not found or expired",
-            state.Length >= 8 ? state[..8] : state);
+        _logger.LogWarning("OAuth state validation failed");
 
         return false;
     }

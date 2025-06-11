@@ -120,7 +120,7 @@ internal class MusicDiscoveryService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Adaptive scoring failed for user {UserId}. Falling back to regular scoring.", userId);
+            _logger.LogError(ex, "Adaptive scoring failed for user");
         }
 
         return _scoringService.ScoreBands(bands, genres, location, topArtists, isRegistered, isFromSearch);
@@ -147,12 +147,12 @@ internal class MusicDiscoveryService(
 
                 await adaptiveLearningService.ProcessRecommendationFeedbackAsync(feedback);
 
-                _logger.LogInformation("Tracked recommendation interaction for user {UserId} on artist {ArtistName} with type {InteractionType}", userId, artistName, interactionType);
+                _logger.LogInformation("Tracked recommendation interaction");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to track recommendation interaction for user {UserId} on artist {ArtistName}: {Message}", userId, artistName, ex.Message);
+            _logger.LogError(ex, "Failed to track recommendation interaction");
         }
     }
 
@@ -180,12 +180,12 @@ internal class MusicDiscoveryService(
                     await adaptiveLearningService.ProcessRecommendationFeedbackAsync(feedback);
                 }
 
-                _logger.LogInformation("Tracked batch recommendation interactions for user {UserId}", userId);
+                _logger.LogInformation("Tracked batch recommendation interactions");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to track batch recommendation interactions for user {UserId}: {Message}", userId, ex.Message);
+            _logger.LogError(ex, "Failed to track batch recommendation interactions");
         }
     }
 
