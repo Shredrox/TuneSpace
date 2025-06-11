@@ -54,7 +54,7 @@ internal class BandChatService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting band chat for user {UserId} and band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error getting band chat");
             throw;
         }
     }
@@ -120,7 +120,7 @@ internal class BandChatService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating or getting band chat for user {UserId} and band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error creating or getting band chat");
             throw;
         }
     }
@@ -162,7 +162,7 @@ internal class BandChatService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting band chats for user {UserId}", userId);
+            _logger.LogError(ex, "Error getting band chats for user");
             throw;
         }
     }
@@ -261,11 +261,11 @@ internal class BandChatService(
             }
 
             await _bandChatRepository.DeleteAsync(bandChatId);
-            _logger.LogInformation("Band chat {BandChatId} deleted by user {UserId}", bandChatId, requestingUserId);
+            _logger.LogInformation("Band chat deleted");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting band chat {BandChatId} by user {UserId}", bandChatId, requestingUserId);
+            _logger.LogError(ex, "Error deleting band chat");
             throw;
         }
     }

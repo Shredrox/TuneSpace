@@ -96,11 +96,11 @@ internal class BandService(
     {
         try
         {
-            _logger.LogInformation("Getting band for user with ID {UserId}", id);
+            _logger.LogInformation("Getting band for user");
             var band = await _bandRepository.GetBandByUserIdAsync(id);
             if (band == null)
             {
-                _logger.LogWarning("No band found for user with ID {UserId}", id);
+                _logger.LogWarning("No band found for user");
                 return null;
             }
 
@@ -124,7 +124,7 @@ internal class BandService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving band for user with ID {UserId}", id);
+            _logger.LogError(ex, "Error retrieving band for user");
             throw;
         }
     }
@@ -183,7 +183,7 @@ internal class BandService(
             var user = await _userRepository.GetUserByIdAsync(request.UserId);
             if (user == null)
             {
-                _logger.LogWarning("User with ID {UserId} not found when creating band", request.UserId);
+                _logger.LogWarning("User not found when creating band");
                 return null;
             }
 
@@ -290,18 +290,18 @@ internal class BandService(
     {
         try
         {
-            _logger.LogInformation("Adding user with ID {UserId} to band with ID {BandId}", userId, bandId);
+            _logger.LogInformation("Adding user to band");
             var band = await _bandRepository.GetBandByIdAsync(bandId);
             if (band == null)
             {
-                _logger.LogWarning("Band with ID {BandId} not found when adding member", bandId);
+                _logger.LogWarning("Band not found when adding member");
                 return;
             }
 
             var user = await _userRepository.GetUserByIdAsync(userId.ToString());
             if (user == null)
             {
-                _logger.LogWarning("User with ID {UserId} not found when adding to band", userId);
+                _logger.LogWarning("User not found when adding to band");
                 return;
             }
 
@@ -311,11 +311,11 @@ internal class BandService(
             user.Role = Roles.BandMember;
             await _userRepository.UpdateUserAsync(user);
 
-            _logger.LogInformation("User with ID {UserId} added to band with ID {BandId} successfully", userId, bandId);
+            _logger.LogInformation("User added to band successfully");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding user with ID {UserId} to band with ID {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error adding user to band");
             throw;
         }
     }

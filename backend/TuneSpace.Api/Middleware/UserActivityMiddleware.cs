@@ -35,13 +35,13 @@ public class UserActivityMiddleware(RequestDelegate next, ILogger<UserActivityMi
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "Failed to update user activity for user {UserId}", userIdClaim.SanitizeUserIdForLogging());
+                            _logger.LogWarning(ex, "Failed to update user activity");
                         }
                     });
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Error initiating user activity update for user {UserId}", userIdClaim.SanitizeUserIdForLogging());
+                    _logger.LogWarning(ex, "Error initiating user activity update");
                 }
             }
         }

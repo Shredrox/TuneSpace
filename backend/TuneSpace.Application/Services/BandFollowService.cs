@@ -21,12 +21,12 @@ internal class BandFollowService(
     {
         try
         {
-            _logger.LogInformation("Getting band follow relationship for user {UserId} and band {BandId}", userId, bandId);
+            _logger.LogInformation("Getting band follow relationship");
             return await _bandFollowRepository.GetBandFollowAsync(userId, bandId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting band follow relationship for user {UserId} and band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error getting band follow relationship");
             throw;
         }
     }
@@ -50,12 +50,12 @@ internal class BandFollowService(
     {
         try
         {
-            _logger.LogInformation("Getting followed bands for user {UserId}", userId);
+            _logger.LogInformation("Getting followed bands for user");
             return await _bandFollowRepository.GetUserFollowedBandsAsync(userId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting followed bands for user {UserId}", userId);
+            _logger.LogError(ex, "Error getting followed bands for user");
             throw;
         }
     }
@@ -78,12 +78,12 @@ internal class BandFollowService(
     {
         try
         {
-            _logger.LogInformation("Getting followed bands count for user {UserId}", userId);
+            _logger.LogInformation("Getting followed bands count for user");
             return await _bandFollowRepository.GetUserFollowedBandsCountAsync(userId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting followed bands count for user {UserId}", userId);
+            _logger.LogError(ex, "Error getting followed bands count for user");
             throw;
         }
     }
@@ -92,12 +92,12 @@ internal class BandFollowService(
     {
         try
         {
-            _logger.LogInformation("Checking if user {UserId} is following band {BandId}", userId, bandId);
+            _logger.LogInformation("Checking if user is following band");
             return await _bandFollowRepository.IsFollowingBandAsync(userId, bandId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if user {UserId} is following band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error checking if user is following band");
             throw;
         }
     }
@@ -106,12 +106,12 @@ internal class BandFollowService(
     {
         try
         {
-            _logger.LogInformation("User {UserId} attempting to follow band {BandId}", userId, bandId);
+            _logger.LogInformation("User attempting to follow band");
 
             var existingFollow = await _bandFollowRepository.GetBandFollowAsync(userId, bandId);
             if (existingFollow != null)
             {
-                _logger.LogInformation("User {UserId} is already following band {BandId}", userId, bandId);
+                _logger.LogInformation("User is already following band");
                 return false;
             }
 
@@ -120,13 +120,13 @@ internal class BandFollowService(
 
             if (user is null)
             {
-                _logger.LogWarning("User {UserId} not found when attempting to follow band", userId);
+                _logger.LogWarning("User not found when attempting to follow band");
                 return false;
             }
 
             if (band is null)
             {
-                _logger.LogWarning("Band {BandId} not found when user {UserId} attempting to follow", bandId, userId);
+                _logger.LogWarning("Band not found when user attempting to follow");
                 return false;
             }
 

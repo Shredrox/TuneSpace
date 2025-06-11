@@ -38,7 +38,7 @@ public class UserController(
         }
         catch (NotFoundException e)
         {
-            _logger.LogWarning(e, "User not found: {Username}", username.SanitizeForLogging());
+            _logger.LogWarning(e, "User not found");
             return NotFound();
         }
     }
@@ -89,7 +89,7 @@ public class UserController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error fetching profile picture for user {Username}", username.SanitizeForLogging());
+            _logger.LogError(ex, "Error fetching profile picture for user");
             return StatusCode(500, "Internal server error");
         }
     }
@@ -129,7 +129,7 @@ public class UserController(
         }
         catch (NotFoundException e)
         {
-            _logger.LogWarning(e, "User not found: {Username}", username.SanitizeForLogging());
+            _logger.LogWarning(e, "User not found");
             return NotFound();
         }
     }

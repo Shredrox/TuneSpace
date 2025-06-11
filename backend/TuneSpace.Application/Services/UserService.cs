@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using TuneSpace.Application.Extensions;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IRepositories;
@@ -30,7 +29,7 @@ internal class UserService(
 
         if (user == null)
         {
-            _logger.LogWarning("User not found for profile picture retrieval: {Username}", username.SanitizeForLogging());
+            _logger.LogWarning("User not found for profile picture retrieval");
             throw new NotFoundException($"User not found: {username}");
         }
 
@@ -61,14 +60,14 @@ internal class UserService(
 
         if (user == null)
         {
-            _logger.LogWarning("User not found for profile picture update: {Username}", username.SanitizeForLogging());
+            _logger.LogWarning("User not found for profile picture update");
             throw new NotFoundException($"User not found: {username}");
         }
 
         user.ProfilePicture = profilePicture;
         await _userRepository.UpdateUserAsync(user);
 
-        _logger.LogInformation("Profile picture updated for user: {Username}", username.SanitizeForLogging());
+        _logger.LogInformation("Profile picture updated for user");
     }
 
     async Task<List<string>> IUserService.GetActiveUserIdsAsync(int daysBack)
@@ -93,11 +92,11 @@ internal class UserService(
         try
         {
             await _userRepository.UpdateUserLastActiveDateAsync(userId, DateTime.UtcNow);
-            _logger.LogDebug("Updated last active date for user: {UserId}", userId.SanitizeUserIdForLogging());
+            _logger.LogDebug("Updated last active date for user");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to update last active date for user: {UserId}", userId.SanitizeUserIdForLogging());
+            _logger.LogWarning(ex, "Failed to update last active date for user");
         }
     }
 }

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using FluentEmail.Core;
-using TuneSpace.Application.Extensions;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Interfaces.IServices;
 using TuneSpace.Core.Models.Email;
@@ -77,18 +76,18 @@ internal class EmailService(
 
             if (result.Successful)
             {
-                _logger.LogInformation("Email sent successfully to {To}", to.SanitizeEmailForLogging());
+                _logger.LogInformation("Email sent successfully");
             }
             else
             {
                 var errors = string.Join(", ", result.ErrorMessages);
-                _logger.LogError("Failed to send email to {To}. Errors: {Errors}", to.SanitizeEmailForLogging(), errors);
+                _logger.LogError("Failed to send email. Errors: {Errors}", errors);
                 throw new InvalidOperationException($"Failed to send email: {errors}");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error sending email to {To}", to.SanitizeEmailForLogging());
+            _logger.LogError(ex, "Error sending email");
             throw;
         }
     }

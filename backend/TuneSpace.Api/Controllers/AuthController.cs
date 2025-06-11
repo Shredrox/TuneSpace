@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Mvc;
-using TuneSpace.Api.Extensions;
 using TuneSpace.Api.Infrastructure;
 using TuneSpace.Core.Common;
 using TuneSpace.Core.DTOs.Requests.Auth;
@@ -107,12 +106,12 @@ public class AuthController(
         }
         catch (ArgumentException e)
         {
-            _logger.LogWarning(e, "Registration conflict for user: {Username}", request.Name.SanitizeForLogging());
+            _logger.LogWarning(e, "Registration conflict");
             return Conflict(e.Message);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Unexpected error during registration for user: {Username}", request.Name.SanitizeForLogging());
+            _logger.LogError(e, "Unexpected error during registration");
             return StatusCode(500, "An error occurred while registering.");
         }
     }
@@ -152,12 +151,12 @@ public class AuthController(
         }
         catch (UnauthorizedException e)
         {
-            _logger.LogWarning(e, "Unauthorized login attempt for email: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogError(e, "Unexpected error during login");
             return Unauthorized(e.Message);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Unexpected error during login for email: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogError(e, "Unexpected error during login");
             return StatusCode(500, "An error occurred while logging in.");
         }
     }
@@ -218,7 +217,7 @@ public class AuthController(
             var role = user.Role.ToString().ToUpper();
             var id = user.Id;
 
-            _logger.LogInformation("Token refreshed successfully for user: {UserId}", user.Id.ToString().SanitizeUserIdForLogging());
+            _logger.LogInformation("Token refreshed successfully");
             return Ok(new
             {
                 id,
@@ -461,7 +460,7 @@ public class AuthController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error confirming email for user: {UserId}", userId.SanitizeUserIdForLogging());
+            _logger.LogError(e, "Error confirming email");
             return StatusCode(500, "An error occurred while confirming your email.");
         }
     }
@@ -481,17 +480,17 @@ public class AuthController(
         }
         catch (ArgumentException e)
         {
-            _logger.LogWarning(e, "Failed to resend confirmation for email: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogWarning(e, "Failed to resend confirmation email");
             return NotFound(e.Message);
         }
         catch (InvalidOperationException e)
         {
-            _logger.LogWarning(e, "Email already confirmed for: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogWarning(e, "Email already confirmed");
             return BadRequest(e.Message);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error resending confirmation email for: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogError(e, "Error resending confirmation email");
             return StatusCode(500, "An error occurred while sending the confirmation email.");
         }
     }
@@ -511,12 +510,12 @@ public class AuthController(
         }
         catch (ArgumentException e)
         {
-            _logger.LogWarning(e, "Password reset requested for non-existent email: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogWarning(e, "Password reset requested for non-existent email");
             return Ok(new { message = "Password reset email sent. Please check your inbox." });
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error sending password reset email for: {Email}", request.Email.SanitizeEmailForLogging());
+            _logger.LogError(e, "Error sending password reset email");
             return StatusCode(500, "An error occurred while sending the password reset email.");
         }
     }
@@ -544,7 +543,7 @@ public class AuthController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error resetting password for user: {UserId}", request.UserId.SanitizeUserIdForLogging());
+            _logger.LogError(e, "Error resetting password");
             return StatusCode(500, "An error occurred while resetting your password.");
         }
     }
@@ -582,17 +581,17 @@ public class AuthController(
         }
         catch (ArgumentException e)
         {
-            _logger.LogWarning(e, "Email change request failed for user: {NewEmail}", request.NewEmail.SanitizeEmailForLogging());
+            _logger.LogWarning(e, "Email change request failed");
             return BadRequest(e.Message);
         }
         catch (InvalidOperationException e)
         {
-            _logger.LogWarning(e, "Email change request failed for user: {NewEmail}", request.NewEmail.SanitizeEmailForLogging());
+            _logger.LogWarning(e, "Email change request failed");
             return BadRequest(e.Message);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error requesting email change for user");
+            _logger.LogError(e, "Error requesting email change");
             return StatusCode(500, "An error occurred while requesting the email change.");
         }
     }
@@ -620,7 +619,7 @@ public class AuthController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error confirming email change for user: {UserId}", request.UserId.SanitizeUserIdForLogging());
+            _logger.LogError(e, "Error confirming email change");
             return StatusCode(500, "An error occurred while confirming the email change.");
         }
     }

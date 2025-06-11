@@ -69,11 +69,11 @@ public class AdaptiveLearningBackgroundService(
                 try
                 {
                     await adaptiveLearningService.TriggerPeriodicAdaptationAsync(userId);
-                    _logger.LogDebug("Completed adaptation for user {UserId}", userId);
+                    _logger.LogDebug("Completed adaptation for user");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to adapt recommendations for user {UserId}", userId);
+                    _logger.LogWarning(ex, "Failed to adapt recommendations for user");
                 }
             });
 
@@ -110,20 +110,18 @@ public class AdaptiveLearningBackgroundService(
 
                     if (emergingGenres.Count != 0)
                     {
-                        _logger.LogInformation("User {UserId} has {Count} emerging genres: {Genres}",
-                            userId, emergingGenres.Count, string.Join(", ", emergingGenres));
+                        _logger.LogInformation("User has {Count} emerging genres", emergingGenres.Count);
                     }
 
                     if (trends.Any(t => Math.Abs(t.Value) > 0.05))
                     {
                         var significantTrends = trends.Where(t => Math.Abs(t.Value) > 0.05);
-                        _logger.LogInformation("User {UserId} has significant genre trend changes: {Trends}",
-                            userId, string.Join(", ", significantTrends.Select(t => $"{t.Key}: {t.Value:F3}")));
+                        _logger.LogInformation("User has significant genre trend changes");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed genre evolution analysis for user {UserId}", userId);
+                    _logger.LogWarning(ex, "Failed genre evolution analysis for user");
                 }
             }
 
