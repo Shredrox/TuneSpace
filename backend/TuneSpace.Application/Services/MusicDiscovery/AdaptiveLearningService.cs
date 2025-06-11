@@ -24,7 +24,7 @@ internal class AdaptiveLearningService(
             weights = new DynamicScoringWeights { UserId = userId };
             _dbContext.DynamicScoringWeights.Add(weights);
             await _dbContext.SaveChangesAsync();
-            _logger.LogInformation("Created initial scoring weights for user {UserId}", userId);
+            _logger.LogInformation("Created initial scoring weights");
         }
 
         return weights;
@@ -80,8 +80,6 @@ internal class AdaptiveLearningService(
         weights.LastUpdated = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync();
-        _logger.LogInformation("Updated scoring weights for user {UserId}. Success rate: {SuccessRate:P2}",
-            userId, weights.SuccessRate);
     }
 
     async Task<List<GenreEvolution>> IAdaptiveLearningService.GetUserGenreEvolutionAsync(string userId)
@@ -162,8 +160,6 @@ internal class AdaptiveLearningService(
         }
 
         await _dbContext.SaveChangesAsync();
-        _logger.LogInformation("Updated genre preferences for user {UserId}, genres: {Genres}",
-            userId, string.Join(", ", genres));
     }
 
     async Task<Dictionary<string, double>> IAdaptiveLearningService.PredictFutureGenrePreferencesAsync(string userId, int daysAhead)
@@ -200,8 +196,6 @@ internal class AdaptiveLearningService(
         }
 
         await _dbContext.SaveChangesAsync();
-        _logger.LogInformation("Processed recommendation feedback for user {UserId}, band {BandName}, success: {Success:F2}",
-            feedback.UserId, feedback.BandName, feedback.CalculatedSuccess);
     }
 
     double IAdaptiveLearningService.CalculateRecommendationSuccess(RecommendationFeedback feedback)
@@ -257,7 +251,7 @@ internal class AdaptiveLearningService(
         }
 
         await _dbContext.SaveChangesAsync();
-        _logger.LogInformation("Completed periodic adaptation for user {UserId}", userId);
+        _logger.LogInformation("Completed periodic adaptation");
     }
 
     async Task IAdaptiveLearningService.AdaptWeightsBasedOnSuccessRateAsync(string userId)

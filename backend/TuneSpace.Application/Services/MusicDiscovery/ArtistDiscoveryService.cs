@@ -121,7 +121,7 @@ internal class ArtistDiscoveryService(
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogWarning(ex, "Error fetching albums for artist {ArtistName}", artist.Name);
+                                _logger.LogWarning(ex, "Error fetching albums for artist");
                             }
                         }
                     }
@@ -180,8 +180,7 @@ internal class ArtistDiscoveryService(
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error searching for artists with query {QueryTemplate} for genres {GenreBatch}",
-                    queryTemplate, string.Join(", ", genreBatch));
+                _logger.LogError(ex, "Error searching for artists");
             }
         }
 

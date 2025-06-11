@@ -85,7 +85,7 @@ public class MusicDiscoveryController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error tracking recommendation feedback for artist {ArtistName}", request.ArtistName);
+            _logger.LogError(e, "Error tracking recommendation feedback");
 
             var errorResponse = new RecommendationFeedbackResponse(
                 "Failed to track recommendation feedback",
