@@ -24,6 +24,7 @@ import { getSpotifySongsBySearch } from "@/services/spotify-service";
 import Loading from "../fallback/loading";
 import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
 import { BASE_URL, SPOTIFY_ENDPOINTS } from "@/utils/constants";
+import QuickShareButton from "../discovery/quick-share-button";
 
 const HeaderSearchBar = () => {
   const [search, setSearch] = useState("");
@@ -124,7 +125,7 @@ const HeaderSearchBar = () => {
   return (
     <div className="relative w-full max-w-xl ">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           ref={inputRef}
           value={search}
@@ -178,10 +179,9 @@ const HeaderSearchBar = () => {
                   searchSongs?.map((song, index) => (
                     <Card
                       key={index}
-                      onClick={() => setSearch("")}
-                      className={`p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-100 transition-colors ${
+                      className={`p-3 flex items-center gap-3 hover:bg-accent transition-colors group ${
                         selectedIndex === index
-                          ? "bg-gray-100 border-blue-400"
+                          ? "bg-accent border-primary"
                           : ""
                       }`}
                     >
@@ -192,18 +192,34 @@ const HeaderSearchBar = () => {
                         width={50}
                         height={50}
                       />
-                      <div className="flex flex-col">
-                        <span className="font-medium truncate text-wrap">
+                      <div
+                        className="flex flex-col flex-1"
+                        onClick={() => setSearch("")}
+                      >
+                        <span className="font-medium truncate text-wrap cursor-pointer">
                           {song.name}
                         </span>
-                        <span className="text-sm text-gray-500 truncate">
+                        <span className="text-sm text-muted-foreground truncate cursor-pointer">
                           {song.artist}
                         </span>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        {" "}
+                        <QuickShareButton
+                          song={{
+                            title: song.name,
+                            artist: song.artist,
+                            spotifyUrl: `https://open.spotify.com/track/${song.id}`,
+                            imageUrl: song.albumArt,
+                          }}
+                          variant="ghost"
+                          size="sm"
+                        />
                       </div>
                     </Card>
                   ))
                 ) : searchSongs?.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
+                  <div className="p-4 text-center text-muted-foreground">
                     No songs found for "{search}"
                   </div>
                 ) : isSongsError ? (
@@ -227,7 +243,7 @@ const HeaderSearchBar = () => {
                         </Button>
                       </div>
                     ) : (
-                      <div className="text-red-500">
+                      <div className="text-destructive">
                         <p>Error searching songs</p>
                         <Button
                           size="sm"
@@ -258,9 +274,9 @@ const HeaderSearchBar = () => {
                         router.push(`/profile/${user.name}`);
                         setSearch("");
                       }}
-                      className={`p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-100 transition-colors ${
+                      className={`p-3 flex items-center gap-3 cursor-pointer hover:bg-accent transition-colors ${
                         selectedIndex === index
-                          ? "bg-gray-100 border-blue-400"
+                          ? "bg-accent border-primary"
                           : ""
                       }`}
                     >
@@ -281,11 +297,11 @@ const HeaderSearchBar = () => {
                     </Card>
                   ))
                 ) : searchUsers?.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
+                  <div className="p-4 text-center text-muted-foreground">
                     No users found for "{search}"
                   </div>
                 ) : isUsersError ? (
-                  <div className="p-4 text-center text-red-500">
+                  <div className="p-4 text-center text-destructive">
                     Error: {usersError.message}
                   </div>
                 ) : null}

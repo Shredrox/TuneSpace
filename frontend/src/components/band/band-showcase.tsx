@@ -21,6 +21,7 @@ import Link from "next/link";
 import Band from "@/interfaces/Band";
 import BandFollowButton from "./band-follow-button";
 import BandFollowers from "./band-followers";
+import QuickShareButton from "../discovery/quick-share-button";
 
 interface BandShowcaseProps {
   band: Band;
@@ -149,7 +150,6 @@ const BandShowcase = ({ band, spotifyData }: BandShowcaseProps) => {
                   size="default"
                   showText={true}
                 />
-
                 <Button
                   variant="outline"
                   className="hover:bg-muted/50"
@@ -157,15 +157,32 @@ const BandShowcase = ({ band, spotifyData }: BandShowcaseProps) => {
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Message
-                </Button>
-
-                <Button
+                </Button>{" "}
+                <QuickShareButton
+                  artist={{
+                    id: band.id,
+                    name: band.name,
+                    location:
+                      band.city && band.country
+                        ? `${band.city}, ${band.country}`
+                        : undefined,
+                    genres: band.genre ? [band.genre] : [],
+                    imageUrl: band.coverImage
+                      ? `data:image/jpeg;base64,${band.coverImage}`
+                      : spotifyData?.images?.[0]?.url,
+                    externalUrl: band.spotifyId
+                      ? `https://open.spotify.com/artist/${band.spotifyId}`
+                      : undefined,
+                    followers: spotifyData?.followers?.total,
+                    popularity: spotifyData?.popularity,
+                    isRegistered: true,
+                  }}
                   variant="outline"
-                  size="icon"
                   className="hover:bg-muted/50"
                 >
-                  <Share className="h-4 w-4" />
-                </Button>
+                  <Share className="h-4 w-4 mr-2" />
+                  Share
+                </QuickShareButton>
               </div>
               <div className="flex gap-4">
                 {band.spotifyId && (

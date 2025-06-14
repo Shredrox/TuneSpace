@@ -21,6 +21,7 @@ import {
   Waves,
   Earth,
   AudioWaveform,
+  Share2,
 } from "lucide-react";
 import { Badge } from "../shadcn/badge";
 import { Button } from "../shadcn/button";
@@ -31,6 +32,7 @@ import {
   TooltipTrigger,
 } from "../shadcn/tooltip";
 import ExternalArtistModal from "./external-artist-modal";
+import ShareArtistModal from "./share-artist-modal";
 import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
 import useAuth from "@/hooks/auth/useAuth";
 import useAuthInitialization from "@/hooks/auth/useAuthInitialization";
@@ -44,7 +46,7 @@ interface DiscoveryArtist {
   playCount: number;
   imageUrl: string;
   externalUrl?: string;
-  coverImage?: Uint8Array;
+  coverImage?: Uint8Array | string;
   popularity: number;
   relevanceScore: number;
   similarArtists: string[];
@@ -74,6 +76,9 @@ const DiscoveryList = () => {
   const [isExternalModalOpen, setIsExternalModalOpen] = useState(false);
   const [selectedExternalArtist, setSelectedExternalArtist] =
     useState<string>("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedArtistToShare, setSelectedArtistToShare] =
+    useState<DiscoveryArtist | null>(null);
   const router = useRouter();
 
   const { handleSpotifyError, parseSpotifyErrorSilent } =
@@ -124,6 +129,11 @@ const DiscoveryList = () => {
       setSelectedExternalArtist(artist.name);
       setIsExternalModalOpen(true);
     }
+  };
+
+  const handleShareClick = (artist: DiscoveryArtist) => {
+    setSelectedArtistToShare(artist);
+    setIsShareModalOpen(true);
   };
 
   const {
@@ -602,9 +612,8 @@ const DiscoveryList = () => {
                           </p>
                         </div>
                       )}
-                  </div>
-
-                  <div className="pt-2 mt-auto">
+                  </div>{" "}
+                  <div className="pt-2 mt-auto space-y-2">
                     <Button
                       onClick={() => handleExploreClick(artist)}
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-all duration-200 group-hover:shadow-md"
@@ -622,6 +631,18 @@ const DiscoveryList = () => {
                             <span>Find in Spotify</span>
                           </>
                         )}
+                      </div>
+                    </Button>
+
+                    <Button
+                      onClick={() => handleShareClick(artist)}
+                      variant="outline"
+                      className="w-full rounded-lg transition-all duration-200 border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                      size="sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Share2 className="w-4 h-4" />
+                        <span>Share to Forum</span>
                       </div>
                     </Button>
                   </div>
@@ -669,12 +690,22 @@ const DiscoveryList = () => {
             </Button>
           </div>
         </div>
-      )}
+      )}{" "}
       <ExternalArtistModal
         isOpen={isExternalModalOpen}
         onClose={() => setIsExternalModalOpen(false)}
         artistName={selectedExternalArtist}
       />
+      {selectedArtistToShare && (
+        <ShareArtistModal
+          isOpen={isShareModalOpen}
+          onClose={() => {
+            setIsShareModalOpen(false);
+            setSelectedArtistToShare(null);
+          }}
+          artist={selectedArtistToShare}
+        />
+      )}
     </div>
   );
 };
