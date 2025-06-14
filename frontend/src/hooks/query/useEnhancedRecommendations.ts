@@ -1,8 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import musicDiscoveryService, {
+import {
   RecommendationFeedback,
   BatchRecommendationFeedback,
+} from "@/interfaces/music-discovery";
+import {
+  getEnhancedRecommendations,
+  getRecommendations,
+  trackRecommendationFeedback,
+  trackBatchRecommendationFeedback,
 } from "@/services/music-discovery-service";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback } from "react";
 
 export interface UseEnhancedRecommendationsOptions {
@@ -31,8 +37,7 @@ export const useEnhancedRecommendations = ({
 
   const enhancedQuery = useQuery({
     queryKey: ["enhancedRecommendations", genres, location],
-    queryFn: () =>
-      musicDiscoveryService.getEnhancedRecommendations(genres, location),
+    queryFn: () => getEnhancedRecommendations(genres, location),
     enabled: enabled && enableEnhanced,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -40,7 +45,7 @@ export const useEnhancedRecommendations = ({
 
   const regularQuery = useQuery({
     queryKey: ["recommendations", genres, location],
-    queryFn: () => musicDiscoveryService.getRecommendations(genres, location),
+    queryFn: () => getRecommendations(genres, location),
     enabled: enabled && !enableEnhanced,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -112,7 +117,7 @@ export const useRecommendationFeedback = (
 
   const feedbackMutation = useMutation({
     mutationFn: (feedback: RecommendationFeedback) =>
-      musicDiscoveryService.trackRecommendationFeedback(feedback),
+      trackRecommendationFeedback(feedback),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["enhancedRecommendations"] });
       queryClient.invalidateQueries({ queryKey: ["recommendations"] });
@@ -123,7 +128,7 @@ export const useRecommendationFeedback = (
 
   const batchFeedbackMutation = useMutation({
     mutationFn: (batchFeedback: BatchRecommendationFeedback) =>
-      musicDiscoveryService.trackBatchRecommendationFeedback(batchFeedback),
+      trackBatchRecommendationFeedback(batchFeedback),
     onSuccess: (data) => {
       setPendingFeedback([]);
       queryClient.invalidateQueries({ queryKey: ["enhancedRecommendations"] });
