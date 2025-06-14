@@ -413,40 +413,36 @@ const BandDashboard = () => {
                     </div>
                   ) : (
                     <div className="h-[200px]">
-                      {!isSpotifyConnected() && (
-                        <>
-                          <SpotifyFallback
-                            variant="stats"
-                            title={`${
-                              bandData.band?.spotifyId
-                                ? "Spotify Stats"
-                                : "Spotify Not Connected"
-                            }`}
-                            description={`${
-                              !bandData.band?.spotifyId
-                                ? "Connect your Spotify account to see band statistics and embed content"
-                                : "Spotify artist profile added. Connect your Spotify account to view stats."
-                            }`}
-                            labelText={`${
-                              bandData.band?.spotifyId ? "Connected" : ""
-                            }`}
-                            showExploreButton={false}
-                            connectButtonDisabled={
-                              !isSpotifyConnected() && bandData.band?.spotifyId
-                                ? true
-                                : false
-                            }
-                            onConnectSpotify={() =>
-                              setIsSpotifyDialogOpen(true)
-                            }
-                          />
-                          <ConnectSpotifyDialog
-                            handleSpotifyIdUpdate={handleSpotifyIdUpdate}
-                            open={isSpotifyDialogOpen}
-                            onOpenChange={setIsSpotifyDialogOpen}
-                          />
-                        </>
-                      )}
+                      <>
+                        <SpotifyFallback
+                          variant="stats"
+                          title={`${
+                            bandData.band?.spotifyId
+                              ? "Spotify Stats"
+                              : "Spotify Not Connected"
+                          }`}
+                          description={`${
+                            !bandData.band?.spotifyId
+                              ? "Connect your Spotify account to see band statistics and embed content"
+                              : "Spotify artist profile added. Connect your Spotify account to view stats."
+                          }`}
+                          labelText={`${
+                            bandData.band?.spotifyId ? "Connected" : ""
+                          }`}
+                          showExploreButton={false}
+                          connectButtonDisabled={
+                            !isSpotifyConnected() && bandData.band?.spotifyId
+                              ? true
+                              : false
+                          }
+                          onConnectSpotify={() => setIsSpotifyDialogOpen(true)}
+                        />
+                        <ConnectSpotifyDialog
+                          handleSpotifyIdUpdate={handleSpotifyIdUpdate}
+                          open={isSpotifyDialogOpen}
+                          onOpenChange={setIsSpotifyDialogOpen}
+                        />
+                      </>
                     </div>
                   )}
                 </CardContent>
