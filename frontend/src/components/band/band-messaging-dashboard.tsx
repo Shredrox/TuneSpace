@@ -12,15 +12,10 @@ interface BandMessagingDashboardProps {
 }
 
 const BandMessagingDashboard = ({ bandId }: BandMessagingDashboardProps) => {
-  const {
-    chatData,
-    isLoading: loading,
-    error,
-  } = useBandChat({
+  const { chatData, isLoading: loading } = useBandChat({
     bandId,
   });
   const chats = chatData.bandChats || [];
-  const messages = chatData.messages || [];
 
   const router = useRouter();
 
@@ -57,8 +52,6 @@ const BandMessagingDashboard = ({ bandId }: BandMessagingDashboardProps) => {
       </Card>
     );
   }
-
-  console.log(chatData);
 
   return (
     <Card className="overflow-hidden">

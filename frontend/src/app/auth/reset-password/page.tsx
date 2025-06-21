@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, CheckCircle } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +17,7 @@ import { Label } from "@/components/shadcn/label";
 import { resetPassword } from "@/services/auth-service";
 import { toast } from "sonner";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
       });
       setIsSuccess(true);
       toast("Password reset successfully!");
-    } catch (error) {
+    } catch {
       toast(
         "Invalid or expired reset token. Please request a new password reset."
       );
@@ -282,7 +282,35 @@ export default function ResetPasswordPage() {
             </Button>
           </form>
         </CardContent>
+      </Card>{" "}
+    </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle>Loading...</CardTitle>
+          <CardDescription>
+            Please wait while we process your request.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

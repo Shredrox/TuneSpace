@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAuthStore } from "@/stores/auth-store";
 import { BASE_URL } from "@/utils/constants";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";

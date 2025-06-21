@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useAuth from "@/hooks/auth/useAuth";
 import { ENDPOINTS } from "@/utils/constants";
 import httpClient from "@/services/http-client";
 
-export default function SpotifyCallbackPage() {
+function SpotifyCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { updateAuth } = useAuth();
@@ -52,6 +52,7 @@ export default function SpotifyCallbackPage() {
         });
 
         router.push("/home");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Spotify OAuth error:", error);
         setError(
@@ -93,6 +94,24 @@ export default function SpotifyCallbackPage() {
       </div>
     );
   }
-
   return null;
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-lg">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SpotifyCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SpotifyCallbackContent />
+    </Suspense>
+  );
 }

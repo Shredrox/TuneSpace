@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import {
@@ -14,8 +15,8 @@ import { Input } from "@/components/shadcn/input";
 import { useState } from "react";
 import { Label } from "../shadcn/label";
 import { Textarea } from "../shadcn/textarea";
-import useToast from "@/hooks/useToast";
 import useMerchandise from "@/hooks/query/useMerchandise";
+import { toast } from "sonner";
 
 interface AddMerchandiseDialogProps {
   bandId: string;
@@ -63,12 +64,12 @@ const AddMerchandiseDialog = ({
     e.preventDefault();
 
     if (!name.trim()) {
-      useToast("Please enter a name for the merchandise item", 3000);
+      toast("Please enter a name for the merchandise item", { duration: 3000 });
       return;
     }
 
     if (!price.trim() || isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
-      useToast("Please enter a valid price", 3000);
+      toast("Please enter a valid price", { duration: 3000 });
       return;
     }
 
@@ -85,7 +86,7 @@ const AddMerchandiseDialog = ({
 
       await addMerchandise(formData);
 
-      useToast("Merchandise item added successfully", 3000);
+      toast("Merchandise item added successfully", { duration: 3000 });
       resetForm();
       setOpen(false);
 
@@ -93,11 +94,11 @@ const AddMerchandiseDialog = ({
         onMerchandiseAdded();
       }
     } catch (error) {
-      useToast(
+      toast(
         `Failed to add merchandise: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
-        5000
+        { duration: 5000 }
       );
       console.error("Error adding merchandise:", error);
     }

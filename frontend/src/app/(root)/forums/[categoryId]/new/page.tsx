@@ -14,9 +14,9 @@ import { Input } from "@/components/shadcn/input";
 import { Textarea } from "@/components/shadcn/textarea";
 import { ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
-import useToast from "@/hooks/useToast";
 import useForumCategory from "@/hooks/query/useForumCategory";
 import useForumThreads from "@/hooks/query/useForumThreads";
+import { toast } from "sonner";
 
 export default function NewThreadPage() {
   const params = useParams();
@@ -33,7 +33,9 @@ export default function NewThreadPage() {
     e.preventDefault();
 
     if (title.trim() === "" || content.trim() === "") {
-      useToast("Please fill in all fields", 3000);
+      toast("Please fill in all fields", {
+        duration: 3000,
+      });
       return;
     }
 
@@ -43,10 +45,12 @@ export default function NewThreadPage() {
         content,
         categoryId,
       });
-      useToast("Thread created successfully", 3000);
+      toast("Thread created successfully", {
+        duration: 3000,
+      });
       router.push(`/forums/${categoryId}`);
-    } catch (error) {
-      useToast("Failed to create thread. Please try again.", 3000);
+    } catch {
+      toast("Failed to create thread. Please try again.", { duration: 3000 });
     }
   };
 

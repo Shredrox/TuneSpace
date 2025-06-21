@@ -32,6 +32,7 @@ const ExternalArtistModal = ({
     null
   );
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [artistToShare, setArtistToShare] = useState<any>(null);
 
   const {
@@ -107,7 +108,7 @@ const ExternalArtistModal = ({
       return (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">
-            No artists found for "{artistName}"
+            No artists found for &quot;{artistName}&quot;
           </p>
           <Button variant="outline" onClick={onClose}>
             Close

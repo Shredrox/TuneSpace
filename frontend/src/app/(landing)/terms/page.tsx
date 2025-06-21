@@ -61,10 +61,11 @@ export default function TermsOfServicePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Welcome to TuneSpace! These Terms of Service ("Terms") govern
-                  your use of our website, mobile application, and related
-                  services (collectively, the "Service") operated by TuneSpace
-                  ("us," "we," or "our").
+                  Welcome to TuneSpace! These Terms of Service
+                  (&quot;Terms&quot;) govern your use of our website, mobile
+                  application, and related services (collectively, the
+                  &quot;Service&quot;) operated by TuneSpace (&quot;us,&quot;
+                  &quot;we,&quot; or &quot;our&quot;).
                 </p>
                 <p>
                   By accessing or using our Service, you agree to be bound by
@@ -208,7 +209,7 @@ export default function TermsOfServicePage() {
                       <li>Attempting to hack or compromise our systems</li>
                       <li>Creating fake accounts or impersonating others</li>
                       <li>Automated data collection or scraping</li>
-                      <li>Interfering with other users' experience</li>
+                      <li>Interfering with other users&apos; experience</li>
                       <li>Violating any applicable laws or regulations</li>
                     </ul>
                   </div>
@@ -427,8 +428,8 @@ export default function TermsOfServicePage() {
                   <h4 className="font-semibold mb-3">Service Disclaimers</h4>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>
-                      TuneSpace is provided "as is" without warranties of any
-                      kind
+                      TuneSpace is provided &quot;as is&quot; without warranties
+                      of any kind
                     </li>
                     <li>
                       We do not guarantee the accuracy of user-generated content
@@ -481,8 +482,8 @@ export default function TermsOfServicePage() {
                 </p>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>
-                    We will update the "Last updated" date at the top of this
-                    page
+                    We will update the &quot;Last updated&quot; date at the top
+                    of this page
                   </li>
                   <li>
                     Material changes will be communicated via email or platform

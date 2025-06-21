@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { confirmEmail } from "@/services/auth-service";
 import { ROUTES } from "@/utils/constants";
@@ -8,7 +8,7 @@ import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import BandChoice from "@/components/auth/band-choice";
 import useAuth from "@/hooks/auth/useAuth";
 
-export default function ConfirmEmailPage() {
+function ConfirmEmailContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
@@ -50,6 +50,7 @@ export default function ConfirmEmailPage() {
         setTimeout(() => {
           setShowBandChoice(true);
         }, 2000);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setStatus("error");
         if (error?.response?.data?.message) {
@@ -122,7 +123,33 @@ export default function ConfirmEmailPage() {
             )}
           </div>
         </div>
-      )}
+      )}{" "}
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
+        <div className="text-center">
+          <div className="mb-6">
+            <Loader2 className="w-16 h-16 text-indigo-400 animate-spin mx-auto" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-4">Loading...</h1>
+          <p className="text-gray-300">
+            Please wait while we process your request.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ConfirmEmailPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ConfirmEmailContent />
+    </Suspense>
   );
 }

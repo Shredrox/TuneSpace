@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -812,8 +813,8 @@ const DiscoveryList = () => {
                 No recommendations found
               </h3>
               <p className="text-muted-foreground text-sm">
-                We couldn't find any artist recommendations at the moment. Try
-                adjusting your preferences or check back later.
+                We couldn&apos;t find any artist recommendations at the moment.
+                Try adjusting your preferences or check back later.
               </p>
             </div>
             <Button

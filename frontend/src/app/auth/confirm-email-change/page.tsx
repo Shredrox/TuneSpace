@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { confirmEmailChange } from "@/services/auth-service";
 import { ROUTES } from "@/utils/constants";
 import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 
-export default function ConfirmEmailChangePage() {
+function ConfirmEmailChangeContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
@@ -40,6 +40,7 @@ export default function ConfirmEmailChangePage() {
         setTimeout(() => {
           router.push(ROUTES.LOGIN);
         }, 5000);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setStatus("error");
         if (error?.response?.data?.message) {
@@ -115,7 +116,33 @@ export default function ConfirmEmailChangePage() {
             </div>
           )}
         </div>
+      </div>{" "}
+    </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/20">
+        <div className="text-center">
+          <div className="mb-6">
+            <Loader2 className="w-16 h-16 text-indigo-400 animate-spin mx-auto" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-4">Loading...</h1>
+          <p className="text-gray-300">
+            Please wait while we process your request.
+          </p>
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmEmailChangePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ConfirmEmailChangeContent />
+    </Suspense>
   );
 }

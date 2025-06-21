@@ -3,6 +3,7 @@
 import httpClient from "@/services/http-client";
 import { ENDPOINTS } from "@/utils/constants";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registerBand = async (data: { [key: string]: any }) => {
   const formData = new FormData();
   for (const key in data) {

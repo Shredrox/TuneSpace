@@ -43,7 +43,7 @@ const useAuthInitialization = () => {
 
             try {
               await refreshSpotifyToken();
-            } catch (spotifyError) {
+            } catch {
               console.log(
                 "Spotify token refresh failed, continuing without it"
               );
@@ -61,12 +61,12 @@ const useAuthInitialization = () => {
 
             try {
               await refreshSpotifyToken();
-            } catch (spotifyError) {
+            } catch {
               console.log(
                 "Spotify token refresh failed, continuing without it"
               );
             }
-          } catch (error) {
+          } catch {
             console.log(
               "Authentication initialization failed, user needs to login"
             );
@@ -90,6 +90,7 @@ const useAuthInitialization = () => {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialized]);
 
   return {

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { connectSpotifyAccount } from "@/services/spotify-service";
 import { toast } from "sonner";
 
-export default function SpotifyConnectCallbackPage() {
+function SpotifyConnectCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -38,6 +38,7 @@ export default function SpotifyConnectCallbackPage() {
         } else {
           throw new Error("Failed to connect Spotify account");
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error("Spotify connect error:", error);
 
@@ -99,6 +100,24 @@ export default function SpotifyConnectCallbackPage() {
       </div>
     );
   }
-
   return null;
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-lg">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SpotifyConnectCallbackPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SpotifyConnectCallbackContent />
+    </Suspense>
+  );
 }

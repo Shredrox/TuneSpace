@@ -30,8 +30,7 @@ const ForumThread = ({
 }: ForumThreadProps) => {
   const [replyContent, setReplyContent] = useState("");
 
-  const { createPost, likePost, unlikePost, isCreating, isPending } =
-    useForumThread(threadId);
+  const { createPost, likePost, unlikePost } = useForumThread(threadId);
 
   const handleSubmitReply = async () => {
     if (replyContent.trim() === "") {

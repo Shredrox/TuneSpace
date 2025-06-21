@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Card, CardContent } from "@/components/shadcn/card";
@@ -34,6 +35,7 @@ const MusicShareCard = ({ content }: MusicShareCardProps) => {
       return null;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result: any = { type: "unknown" };
 
     if (content.includes("## 📋 Artist Info")) {
@@ -259,7 +261,7 @@ const MusicShareCard = ({ content }: MusicShareCardProps) => {
           {musicData.userComment && (
             <div className="mt-4 p-4 bg-card rounded-lg shadow-sm border-l-2 border-l-blue-300 dark:border-l-blue-600">
               <p className="text-muted-foreground italic">
-                "{musicData.userComment}"
+                &quot;{musicData.userComment}&quot;
               </p>
             </div>
           )}
@@ -332,7 +334,7 @@ const MusicShareCard = ({ content }: MusicShareCardProps) => {
           {musicData.userComment && (
             <div className="mt-4 p-4 bg-card rounded-lg shadow-sm border-l-2 border-l-green-300 dark:border-l-green-600">
               <p className="text-muted-foreground italic">
-                "{musicData.userComment}"
+                &quot;{musicData.userComment}&quot;
               </p>
             </div>
           )}

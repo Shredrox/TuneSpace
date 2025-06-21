@@ -45,6 +45,7 @@ const YouTubeEmbedDialog = ({
     } else {
       setVideoId(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoUrl]);
 
   return (

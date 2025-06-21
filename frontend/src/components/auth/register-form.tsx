@@ -42,6 +42,7 @@ const Register = () => {
   }, [watchName, watchEmail, watchPassword, watchConfirmPassword]);
 
   const onSubmit = async (data: RegisterInputs) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...rest } = data;
     const requestData: RegisterData = { ...rest, role: UserRole.Listener };
 
@@ -50,11 +51,13 @@ const Register = () => {
       router.push(
         `/auth/email-confirmation-sent?email=${encodeURIComponent(data.email)}`
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       handleRequestError(error);
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRequestError = (error: any) => {
     if (!error?.response) {
       setError("No response from server");

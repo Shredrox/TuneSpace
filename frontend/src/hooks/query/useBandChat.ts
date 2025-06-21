@@ -27,7 +27,7 @@ interface UseBandChatOptions {
 }
 
 const useBandChat = (options: UseBandChatOptions) => {
-  const { bandId, chatId, autoStart = false } = options;
+  const { bandId, chatId } = options;
   const queryClient = useQueryClient();
   const { bandMessages } = useSocket();
   const { isAuthenticated } = useAuth();

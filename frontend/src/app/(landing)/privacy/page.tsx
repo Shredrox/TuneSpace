@@ -168,7 +168,7 @@ export default function PrivacyPolicyPage() {
                   </li>
                   <li>
                     <strong>With Spotify:</strong> When you connect your Spotify
-                    account, we access data according to Spotify's terms
+                    account, we access data according to Spotify&apos;s terms
                   </li>
                   <li>
                     <strong>Service Providers:</strong> Trusted third parties
@@ -176,7 +176,7 @@ export default function PrivacyPolicyPage() {
                   </li>
                   <li>
                     <strong>Legal Requirements:</strong> When required by law or
-                    to protect our rights and users' safety
+                    to protect our rights and users&apos; safety
                   </li>
                   <li>
                     <strong>Business Transfers:</strong> In connection with
@@ -299,7 +299,7 @@ export default function PrivacyPolicyPage() {
 
             <Card className="mb-8 border-pink-200/50">
               <CardHeader>
-                <CardTitle>Children's Privacy</CardTitle>
+                <CardTitle>Children&apos;s Privacy</CardTitle>
               </CardHeader>
               <CardContent>
                 <p>
@@ -319,7 +319,7 @@ export default function PrivacyPolicyPage() {
                 <p>
                   We may update this Privacy Policy from time to time. We will
                   notify you of any changes by posting the new policy on this
-                  page and updating the "Last updated" date.
+                  page and updating the &quot;Last updated&quot; date.
                 </p>
                 <p>
                   Significant changes will be communicated through email or

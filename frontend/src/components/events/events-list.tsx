@@ -5,6 +5,7 @@ import MusicEvent from "@/interfaces/MusicEvent";
 interface EventsListProps {
   events: MusicEvent[];
   isLoading: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any;
   onEventSelect: (event: MusicEvent) => void;
   selectedEventId?: string;

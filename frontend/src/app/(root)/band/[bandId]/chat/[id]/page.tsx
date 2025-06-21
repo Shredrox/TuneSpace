@@ -32,7 +32,6 @@ export default function BandChatPage() {
     handleStartNewChat,
     isLoading,
     isError,
-    error,
   } = useBandChat({
     bandId,
     chatId,
@@ -128,8 +127,8 @@ export default function BandChatPage() {
           <div className="text-center">
             <p className="text-lg font-medium mb-2">Band member access</p>
             <p className="text-muted-foreground mb-4">
-              As a member of this band, you can't start a chat with your own
-              band. You can use the band dashboard to communicate with fans
+              As a member of this band, you can&apos;t start a chat with your
+              own band. You can use the band dashboard to communicate with fans
               instead.
             </p>
             <Button

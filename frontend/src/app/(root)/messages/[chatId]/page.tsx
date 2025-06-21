@@ -167,8 +167,8 @@ export default function MessagesPage() {
                       Conversation Not Found
                     </h2>
                     <p className="text-muted-foreground leading-relaxed mb-6">
-                      The conversation you're looking for doesn't exist or may
-                      have been deleted.
+                      The conversation you&apos;re looking for doesn&apos;t
+                      exist or may have been deleted.
                     </p>
                     <Button
                       onClick={handleBackToMessages}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "../shadcn/button";
 import { Input } from "../shadcn/input";
 import { ScrollArea } from "../shadcn/scroll-area";
@@ -31,7 +31,10 @@ const BandChatInterface = ({ chatId, band }: BandChatInterfaceProps) => {
     chatId,
   });
 
-  const messages = chatData?.messages || [];
+  const messages = useMemo(
+    () => chatData?.messages || [],
+    [chatData?.messages]
+  );
   const hasChat = !!chatData?.chatInfo;
 
   const isUserBandMember =

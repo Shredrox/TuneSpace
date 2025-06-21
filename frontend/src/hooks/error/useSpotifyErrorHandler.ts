@@ -21,7 +21,7 @@ export interface SpotifyError {
 
 export const useSpotifyErrorHandler = () => {
   const router = useRouter();
-  const { auth, isAuthenticated, isLoggingOut } = useAuth();
+  const { isAuthenticated, isLoggingOut } = useAuth();
 
   const { data: connectionStatus, refetch: refetchConnectionStatus } = useQuery(
     {

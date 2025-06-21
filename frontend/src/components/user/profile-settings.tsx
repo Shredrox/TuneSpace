@@ -16,9 +16,8 @@ import { Label } from "@/components/shadcn/label";
 import { Separator } from "@/components/shadcn/separator";
 import { AlertCircle, Mail, Lock, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/shadcn/alert";
-import useAuth from "@/hooks/auth/useAuth";
-import useToast from "@/hooks/useToast";
 import { changeEmail, forgotPassword } from "@/services/auth-service";
+import { toast } from "sonner";
 
 const emailChangeSchema = z.object({
   newEmail: z.string().email("Please enter a valid email address"),
@@ -41,7 +40,6 @@ const ProfileSettings = ({
   userEmail,
   isExternalProvider,
 }: ProfileSettingsProps) => {
-  const { auth } = useAuth();
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [isRequestingPasswordReset, setIsRequestingPasswordReset] =
     useState(false);
@@ -61,7 +59,6 @@ const ProfileSettings = ({
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     formState: { errors: passwordErrors },
-    reset: resetPasswordForm,
   } = useForm<PasswordResetForm>({
     resolver: zodResolver(passwordResetSchema),
     defaultValues: {
@@ -71,7 +68,7 @@ const ProfileSettings = ({
 
   const onEmailChange = async (data: EmailChangeForm) => {
     if (isExternalProvider) {
-      useToast("External provider users cannot change their email address.");
+      toast("External provider users cannot change their email address.");
       return;
     }
 
@@ -82,15 +79,16 @@ const ProfileSettings = ({
       const response = await changeEmail({ newEmail: data.newEmail });
       setEmailChangeSuccess(true);
       resetEmailForm();
-      useToast(
+      toast(
         response.message ||
           "Email change confirmation sent to your new email address."
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message ||
         "Failed to request email change. Please try again.";
-      useToast(errorMessage);
+      toast(errorMessage);
     } finally {
       setIsChangingEmail(false);
     }
@@ -98,7 +96,7 @@ const ProfileSettings = ({
 
   const onPasswordReset = async (data: PasswordResetForm) => {
     if (isExternalProvider) {
-      useToast("External provider users cannot reset their password.");
+      toast("External provider users cannot reset their password.");
       return;
     }
 
@@ -108,15 +106,16 @@ const ProfileSettings = ({
     try {
       const response = await forgotPassword({ email: data.email });
       setPasswordResetSuccess(true);
-      useToast(
+      toast(
         response.message ||
           "Password reset email sent. Please check your inbox."
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const errorMessage =
         error?.response?.data?.message ||
         "Failed to send password reset email. Please try again.";
-      useToast(errorMessage);
+      toast(errorMessage);
     } finally {
       setIsRequestingPasswordReset(false);
     }

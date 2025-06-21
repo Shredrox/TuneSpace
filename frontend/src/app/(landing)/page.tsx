@@ -218,7 +218,7 @@ export default function LandingPage() {
                   <div>
                     <div className="font-semibold text-white">Early Access</div>
                     <div className="text-sm text-emerald-200">
-                      Hear tracks before they're mainstream
+                      Hear tracks before they&apos;re mainstream
                     </div>
                   </div>
                 </div>
@@ -260,7 +260,7 @@ export default function LandingPage() {
                       Support Artists
                     </div>
                     <div className="text-sm text-blue-200">
-                      Help shape music's future
+                      Help shape music&apos;s future
                     </div>
                   </div>
                 </div>
@@ -472,7 +472,7 @@ export default function LandingPage() {
               Ready to Join the Space for Tunes?
             </h2>
             <p className="text-xl text-blue-100 mb-12 leading-relaxed max-w-3xl mx-auto">
-              Whether you're an artist ready to share your sound or a music
+              Whether you&apos;re an artist ready to share your sound or a music
               lover seeking your next obsession,
               <br />
               TuneSpace is where musical journeys begin. Join thousands

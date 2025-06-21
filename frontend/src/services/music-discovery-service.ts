@@ -15,6 +15,7 @@ const baseUrl = `${BASE_URL}/MusicDiscovery`;
 export const getRecommendations = async (
   genres?: string[],
   location?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> => {
   let url = `${baseUrl}/recommendations`;
   const params = new URLSearchParams();
@@ -77,6 +78,7 @@ export const trackBatchRecommendationFeedback = async (
 
 export const getRecommendationsByPreferences = async (
   preferences: UserPreferences
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> => {
   const response = await httpClient.post(
     `${baseUrl}/recommendations/preferences`,

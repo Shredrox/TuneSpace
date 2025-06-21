@@ -27,6 +27,7 @@ const useMessages = (chatId: string | undefined) => {
         });
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId, auth?.username, isAuthenticated]);
 
   const { mutateAsync: sendMessageMutation } = useMutation({
@@ -42,6 +43,7 @@ const useMessages = (chatId: string | undefined) => {
     if (messagesData) {
       setChatMessages(messagesData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesData]);
 
   return {

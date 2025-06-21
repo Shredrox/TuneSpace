@@ -128,7 +128,7 @@ export function AppSidebar() {
   const renderNavLinks = (group: "navigation" | "content") => {
     const links = group === "navigation" ? allNavigationLinks : contentLinks;
 
-    return links.map((link, index) => {
+    return links.map((link) => {
       const isActive = pathname === link.to;
 
       return (
