@@ -16,6 +16,8 @@ import { MessageSquare, ThumbsUp, Send, X } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import ThreadPost from "@/interfaces/forum/ThreadPost";
 import { useState } from "react";
+import MusicShareCard from "./music-share-card";
+import EventShareCard from "./event-share-card";
 
 interface ForumPostProps {
   post: ThreadPost;
@@ -126,11 +128,20 @@ const ForumPost = ({
                 {format(new Date(createdAt), "MMM d, yyyy 'at' HH:mm")}
               </span>
             </div>
-          </CardHeader>
+          </CardHeader>{" "}
           <CardContent className="pt-2 pb-4">
-            <div className="prose dark:prose-invert max-w-none">
-              <p>{content}</p>
-            </div>
+            {content.includes("🎵") &&
+            (content.includes("# 🎵") || content.includes("🎧")) ? (
+              content.includes("# 🎵 Event Announcement:") ? (
+                <EventShareCard content={content} />
+              ) : (
+                <MusicShareCard content={content} />
+              )
+            ) : (
+              <div className="prose dark:prose-invert max-w-none">
+                <p style={{ whiteSpace: "pre-wrap" }}>{content}</p>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="border-t pt-3 flex flex-col gap-3">
             <div className="flex justify-between w-full">

@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Pgvector;
 
 #nullable disable
 
@@ -12,6 +13,37 @@ namespace TuneSpace.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:vector", ",,");
+
+            migrationBuilder.CreateTable(
+                name: "ArtistEmbeddings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ArtistName = table.Column<string>(type: "text", nullable: false),
+                    SpotifyId = table.Column<string>(type: "text", nullable: true),
+                    BandcampUrl = table.Column<string>(type: "text", nullable: true),
+                    Genres = table.Column<string>(type: "text", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    Tags = table.Column<string>(type: "text", nullable: true),
+                    Embedding = table.Column<Vector>(type: "vector(384)", nullable: true),
+                    Followers = table.Column<int>(type: "integer", nullable: true),
+                    Popularity = table.Column<decimal>(type: "numeric", nullable: true),
+                    LastActive = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ImageUrl = table.Column<string>(type: "text", nullable: true),
+                    SimilarArtists = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DataSource = table.Column<string>(type: "text", nullable: false),
+                    SourceMetadata = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArtistEmbeddings", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -90,6 +122,10 @@ namespace TuneSpace.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     ProfilePicture = table.Column<byte[]>(type: "bytea", nullable: true),
+                    SpotifyId = table.Column<string>(type: "text", nullable: true),
+                    ExternalProvider = table.Column<string>(type: "text", nullable: true),
+                    ExternalLoginLinkedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastActiveDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     BandId = table.Column<Guid>(type: "uuid", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -335,6 +371,40 @@ namespace TuneSpace.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DynamicScoringWeights",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    GenreMatchWeight = table.Column<double>(type: "double precision", nullable: false),
+                    LocationMatchWeight = table.Column<double>(type: "double precision", nullable: false),
+                    ListenerScoreWeight = table.Column<double>(type: "double precision", nullable: false),
+                    SimilarArtistWeight = table.Column<double>(type: "double precision", nullable: false),
+                    UndergroundBandWeight = table.Column<double>(type: "double precision", nullable: false),
+                    NewReleaseWeight = table.Column<double>(type: "double precision", nullable: false),
+                    RegisteredBandWeight = table.Column<double>(type: "double precision", nullable: false),
+                    ExplorationFactor = table.Column<double>(type: "double precision", nullable: false),
+                    DiversityFactor = table.Column<double>(type: "double precision", nullable: false),
+                    LearningRate = table.Column<double>(type: "double precision", nullable: false),
+                    RecommendationCount = table.Column<int>(type: "integer", nullable: false),
+                    PositiveFeedbackCount = table.Column<int>(type: "integer", nullable: false),
+                    SuccessRate = table.Column<double>(type: "double precision", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastAdaptation = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DynamicScoringWeights", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DynamicScoringWeights_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Follows",
                 columns: table => new
                 {
@@ -392,6 +462,35 @@ namespace TuneSpace.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GenreEvolutions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Genre = table.Column<string>(type: "text", nullable: false),
+                    CurrentPreference = table.Column<double>(type: "double precision", nullable: false),
+                    PreviousPreference = table.Column<double>(type: "double precision", nullable: false),
+                    PreferenceChange = table.Column<double>(type: "double precision", nullable: false),
+                    PreferenceVelocity = table.Column<double>(type: "double precision", nullable: false),
+                    FirstEncountered = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EncounterCount = table.Column<int>(type: "integer", nullable: false),
+                    MonthlyPreferences = table.Column<string>(type: "text", nullable: false),
+                    WeeklyPreferences = table.Column<string>(type: "text", nullable: false),
+                    LifecycleStage = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GenreEvolutions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GenreEvolutions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
@@ -409,6 +508,67 @@ namespace TuneSpace.Infrastructure.Migrations
                     table.PrimaryKey("PK_Notifications", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Notifications_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RecommendationContexts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserGenres = table.Column<string>(type: "text", nullable: false),
+                    UserLocation = table.Column<string>(type: "text", nullable: true),
+                    UserTopArtists = table.Column<string>(type: "text", nullable: false),
+                    UserRecentlyPlayed = table.Column<string>(type: "text", nullable: false),
+                    UserPreferenceEmbedding = table.Column<Vector>(type: "vector(384)", nullable: true),
+                    RetrievedContext = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecommendationContexts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RecommendationContexts_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RecommendationFeedbacks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BandId = table.Column<string>(type: "text", nullable: false),
+                    BandName = table.Column<string>(type: "text", nullable: false),
+                    RecommendedGenres = table.Column<string>(type: "text", nullable: false),
+                    InitialScore = table.Column<double>(type: "double precision", nullable: false),
+                    RecommendedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FeedbackType = table.Column<int>(type: "integer", nullable: false),
+                    FeedbackAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ExplicitRating = table.Column<double>(type: "double precision", nullable: false),
+                    Clicked = table.Column<bool>(type: "boolean", nullable: false),
+                    PlayedTrack = table.Column<bool>(type: "boolean", nullable: false),
+                    FollowedBand = table.Column<bool>(type: "boolean", nullable: false),
+                    SharedRecommendation = table.Column<bool>(type: "boolean", nullable: false),
+                    SavedForLater = table.Column<bool>(type: "boolean", nullable: false),
+                    TimeSpentListening = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    ScoringFactors = table.Column<string>(type: "text", nullable: false),
+                    CalculatedSuccess = table.Column<double>(type: "double precision", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecommendationFeedbacks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RecommendationFeedbacks_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -512,6 +672,7 @@ namespace TuneSpace.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ThreadId = table.Column<Guid>(type: "uuid", nullable: false),
                     AuthorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ParentPostId = table.Column<Guid>(type: "uuid", nullable: true),
                     Content = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -525,6 +686,11 @@ namespace TuneSpace.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ForumPosts_ForumPosts_ParentPostId",
+                        column: x => x.ParentPostId,
+                        principalTable: "ForumPosts",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ForumPosts_ForumThreads_ThreadId",
                         column: x => x.ThreadId,
@@ -558,6 +724,22 @@ namespace TuneSpace.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArtistEmbeddings_ArtistName",
+                table: "ArtistEmbeddings",
+                column: "ArtistName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArtistEmbeddings_DataSource",
+                table: "ArtistEmbeddings",
+                column: "DataSource");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArtistEmbeddings_SpotifyId",
+                table: "ArtistEmbeddings",
+                column: "SpotifyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -647,6 +829,12 @@ namespace TuneSpace.Infrastructure.Migrations
                 column: "ParticipantBId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DynamicScoringWeights_UserId",
+                table: "DynamicScoringWeights",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Follows_FollowerId",
                 table: "Follows",
                 column: "FollowerId");
@@ -672,6 +860,11 @@ namespace TuneSpace.Infrastructure.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ForumPosts_ParentPostId",
+                table: "ForumPosts",
+                column: "ParentPostId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ForumPosts_ThreadId",
                 table: "ForumPosts",
                 column: "ThreadId");
@@ -685,6 +878,12 @@ namespace TuneSpace.Infrastructure.Migrations
                 name: "IX_ForumThreads_CategoryId",
                 table: "ForumThreads",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GenreEvolutions_UserId_Genre",
+                table: "GenreEvolutions",
+                columns: new[] { "UserId", "Genre" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Merchandises_BandId",
@@ -717,6 +916,27 @@ namespace TuneSpace.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RecommendationContexts_UserId",
+                table: "RecommendationContexts",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecommendationFeedbacks_BandId",
+                table: "RecommendationFeedbacks",
+                column: "BandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecommendationFeedbacks_RecommendedAt",
+                table: "RecommendationFeedbacks",
+                column: "RecommendedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecommendationFeedbacks_UserId",
+                table: "RecommendationFeedbacks",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
                 column: "UserId");
@@ -725,6 +945,9 @@ namespace TuneSpace.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ArtistEmbeddings");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -747,10 +970,16 @@ namespace TuneSpace.Infrastructure.Migrations
                 name: "BandMessages");
 
             migrationBuilder.DropTable(
+                name: "DynamicScoringWeights");
+
+            migrationBuilder.DropTable(
                 name: "Follows");
 
             migrationBuilder.DropTable(
                 name: "ForumPostLikes");
+
+            migrationBuilder.DropTable(
+                name: "GenreEvolutions");
 
             migrationBuilder.DropTable(
                 name: "Merchandises");
@@ -763,6 +992,12 @@ namespace TuneSpace.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Notifications");
+
+            migrationBuilder.DropTable(
+                name: "RecommendationContexts");
+
+            migrationBuilder.DropTable(
+                name: "RecommendationFeedbacks");
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");

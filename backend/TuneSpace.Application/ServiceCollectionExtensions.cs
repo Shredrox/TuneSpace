@@ -30,6 +30,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBandChatService, BandChatService>();
         services.AddScoped<IBandMessageService, BandMessageService>();
         services.AddScoped<IOAuthStateService, OAuthStateService>();
+        services.AddScoped<IUserLocationService, UserLocationService>();
+        services.AddHttpClient<IUserLocationService, UserLocationService>();
 
         return services;
     }

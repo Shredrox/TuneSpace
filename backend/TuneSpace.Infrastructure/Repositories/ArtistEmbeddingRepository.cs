@@ -14,7 +14,7 @@ internal class ArtistEmbeddingRepository(TuneSpaceDbContext context) : IArtistEm
     async Task<ArtistEmbedding?> IArtistEmbeddingRepository.GetByArtistNameAsync(string artistName)
     {
         return await _context.ArtistEmbeddings
-            .FirstOrDefaultAsync(a => a.ArtistName.Equals(artistName, StringComparison.CurrentCultureIgnoreCase));
+            .FirstOrDefaultAsync(a => EF.Functions.ILike(a.ArtistName, artistName));
     }
 
     async Task<ArtistEmbedding?> IArtistEmbeddingRepository.GetBySpotifyIdAsync(string spotifyId)
@@ -36,7 +36,7 @@ internal class ArtistEmbeddingRepository(TuneSpaceDbContext context) : IArtistEm
     async Task<List<ArtistEmbedding>> IArtistEmbeddingRepository.GetByLocationAsync(string location, int limit)
     {
         return await _context.ArtistEmbeddings
-            .Where(a => a.Location != null && a.Location.Contains(location, StringComparison.CurrentCultureIgnoreCase))
+            .Where(a => a.Location != null && EF.Functions.ILike(a.Location, $"%{location}%"))
             .Take(limit)
             .ToListAsync();
     }
@@ -73,7 +73,7 @@ internal class ArtistEmbeddingRepository(TuneSpaceDbContext context) : IArtistEm
 
         if (!string.IsNullOrEmpty(location))
         {
-            query = query.Where(a => a.Location != null && a.Location.Contains(location, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(a => a.Location != null && EF.Functions.ILike(a.Location, $"%{location}%"));
         }
 
         return await query
@@ -120,7 +120,7 @@ internal class ArtistEmbeddingRepository(TuneSpaceDbContext context) : IArtistEm
     async Task<bool> IArtistEmbeddingRepository.ExistsAsync(string artistName)
     {
         return await _context.ArtistEmbeddings
-            .AnyAsync(a => a.ArtistName.Equals(artistName, StringComparison.CurrentCultureIgnoreCase));
+            .AnyAsync(a => EF.Functions.ILike(a.ArtistName, artistName));
     }
 
     async Task<List<ArtistEmbedding>> IArtistEmbeddingRepository.CreateBulkAsync(List<ArtistEmbedding> artistEmbeddings)

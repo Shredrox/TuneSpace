@@ -49,7 +49,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering artists by genre: {genre}");
+            _logger.LogError("Error discovering artists by genre");
             return [];
         }
     }
@@ -75,7 +75,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering artists by location: {location}");
+            _logger.LogError("Error discovering artists by location");
             return [];
         }
     }
@@ -101,7 +101,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering artists by genres: {string.Join(", ", genres)}");
+            _logger.LogError($"Error discovering artists by genres");
             return [];
         }
     }
@@ -127,7 +127,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering random artists by genre");
+            _logger.LogError("Error discovering random artists by genre");
             return [];
         }
     }
@@ -153,7 +153,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering random artists by genres: {string.Join(", ", genres)}");
+            _logger.LogError("Error discovering random artists by genres");
             return [];
         }
     }
@@ -180,7 +180,7 @@ internal class BandcampClient(
         }
         catch (Exception)
         {
-            _logger.LogError($"Error discovering artists by genres and location: {string.Join(", ", genres)}, {location}");
+            _logger.LogError("Error discovering artists by genres and location");
             return [];
         }
     }

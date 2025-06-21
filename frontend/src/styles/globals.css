@@ -169,6 +169,39 @@
   animation-delay: 0s;
 }
 
+.map-container {
+  position: relative;
+  z-index: 1;
+}
+
+.map-container.modal-open {
+  z-index: 1 !important;
+}
+
+.leaflet-control-container {
+  z-index: 1000 !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 1001 !important;
+}
+
+.leaflet-marker-pane {
+  z-index: 600 !important;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 650 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 400 !important;
+}
+
+[data-radix-portal] [role="dialog"] {
+  z-index: 2000 !important;
+}
+
 @keyframes animloader {
   0% {
     height: 48px;

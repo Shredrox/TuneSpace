@@ -16,17 +16,19 @@ internal class RecommendationFeedbackRepository(TuneSpaceDbContext context) : IR
 
     async Task<List<RecommendationFeedback>> IRecommendationFeedbackRepository.GetByUserIdAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         return await _context.RecommendationFeedbacks
-            .Where(rf => rf.UserId == userId)
+            .Where(rf => rf.UserId == userGuid)
             .OrderByDescending(rf => rf.FeedbackAt)
             .ToListAsync();
     }
 
     async Task<List<RecommendationFeedback>> IRecommendationFeedbackRepository.GetUserFeedbackHistoryAsync(string userId, int daysPeriod)
     {
+        var userGuid = Guid.Parse(userId);
         var cutoffDate = DateTime.UtcNow.AddDays(-daysPeriod);
         return await _context.RecommendationFeedbacks
-            .Where(rf => rf.UserId == userId && rf.FeedbackAt >= cutoffDate)
+            .Where(rf => rf.UserId == userGuid && rf.FeedbackAt >= cutoffDate)
             .OrderByDescending(rf => rf.FeedbackAt)
             .ToListAsync();
     }
@@ -41,22 +43,25 @@ internal class RecommendationFeedbackRepository(TuneSpaceDbContext context) : IR
 
     public async Task<List<RecommendationFeedback>> GetByUserAndBandAsync(string userId, string bandId)
     {
+        var userGuid = Guid.Parse(userId);
         return await _context.RecommendationFeedbacks
-            .Where(rf => rf.UserId == userId && rf.BandId == bandId)
+            .Where(rf => rf.UserId == userGuid && rf.BandId == bandId)
             .OrderByDescending(rf => rf.FeedbackAt)
             .ToListAsync();
     }
 
     async Task<int> IRecommendationFeedbackRepository.GetCountByUserAndTypeAsync(string userId, FeedbackType feedbackType)
     {
+        var userGuid = Guid.Parse(userId);
         return await _context.RecommendationFeedbacks
-            .CountAsync(rf => rf.UserId == userId && rf.FeedbackType == feedbackType);
+            .CountAsync(rf => rf.UserId == userGuid && rf.FeedbackType == feedbackType);
     }
 
     async Task<int> IRecommendationFeedbackRepository.GetTotalCountByUserAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         return await _context.RecommendationFeedbacks
-            .CountAsync(rf => rf.UserId == userId);
+            .CountAsync(rf => rf.UserId == userGuid);
     }
 
     async Task<RecommendationFeedback> IRecommendationFeedbackRepository.InsertAsync(RecommendationFeedback feedback)
@@ -84,8 +89,9 @@ internal class RecommendationFeedbackRepository(TuneSpaceDbContext context) : IR
 
     async Task<Dictionary<string, double>> IRecommendationFeedbackRepository.GetUserEngagementMetricsAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         var feedbacks = await _context.RecommendationFeedbacks
-            .Where(rf => rf.UserId == userId)
+            .Where(rf => rf.UserId == userGuid)
             .ToListAsync();
 
         if (feedbacks.Count == 0)
@@ -124,8 +130,9 @@ internal class RecommendationFeedbackRepository(TuneSpaceDbContext context) : IR
 
     async Task<double> IRecommendationFeedbackRepository.GetUserSuccessRateAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         var feedbacks = await _context.RecommendationFeedbacks
-            .Where(rf => rf.UserId == userId)
+            .Where(rf => rf.UserId == userGuid)
             .ToListAsync();
 
         if (feedbacks.Count == 0)

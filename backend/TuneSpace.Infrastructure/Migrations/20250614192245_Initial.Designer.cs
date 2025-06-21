@@ -13,8 +13,8 @@ using TuneSpace.Infrastructure.Data;
 namespace TuneSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(TuneSpaceDbContext))]
-    [Migration("20250605125737_SpotifyIdToUser")]
-    partial class SpotifyIdToUser
+    [Migration("20250614192245_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -353,6 +353,71 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.ToTable("Chats");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.DynamicScoringWeights", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("DiversityFactor")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ExplorationFactor")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("GenreMatchWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("LastAdaptation")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("LearningRate")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("ListenerScoreWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("LocationMatchWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("NewReleaseWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("PositiveFeedbackCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RecommendationCount")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("RegisteredBandWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("SimilarArtistWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("SuccessRate")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("UndergroundBandWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("DynamicScoringWeights");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Follow", b =>
                 {
                     b.Property<Guid>("Id")
@@ -423,6 +488,9 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("ParentPostId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ThreadId")
                         .HasColumnType("uuid");
 
@@ -432,6 +500,8 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("ParentPostId");
 
                     b.HasIndex("ThreadId");
 
@@ -500,6 +570,59 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("ForumThreads");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.GenreEvolution", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("CurrentPreference")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("EncounterCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("FirstEncountered")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LifecycleStage")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MonthlyPreferences")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("PreferenceChange")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PreferenceVelocity")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("PreviousPreference")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("WeeklyPreferences")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Genre")
+                        .IsUnique();
+
+                    b.ToTable("GenreEvolutions");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Merchandise", b =>
@@ -680,9 +803,8 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("UserLocation")
                         .HasColumnType("text");
@@ -704,6 +826,81 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("RecommendationContexts");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.RecommendationFeedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BandId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BandName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("CalculatedSuccess")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("Clicked")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("ExplicitRating")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("FeedbackAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FeedbackType")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("FollowedBand")
+                        .HasColumnType("boolean");
+
+                    b.Property<double>("InitialScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("PlayedTrack")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("RecommendedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RecommendedGenres")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("SavedForLater")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ScoringFactors")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("SharedRecommendation")
+                        .HasColumnType("boolean");
+
+                    b.Property<TimeSpan?>("TimeSpentListening")
+                        .HasColumnType("interval");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BandId");
+
+                    b.HasIndex("RecommendedAt");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RecommendationFeedbacks");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.RefreshToken", b =>
@@ -760,6 +957,9 @@ namespace TuneSpace.Infrastructure.Migrations
 
                     b.Property<string>("ExternalProvider")
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("LastActiveDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -975,6 +1175,17 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("ParticipantB");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.DynamicScoringWeights", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Follow", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "Follower")
@@ -1002,6 +1213,10 @@ namespace TuneSpace.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TuneSpace.Core.Entities.ForumPost", "ParentPost")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentPostId");
+
                     b.HasOne("TuneSpace.Core.Entities.ForumThread", "Thread")
                         .WithMany("Posts")
                         .HasForeignKey("ThreadId")
@@ -1009,6 +1224,8 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+
+                    b.Navigation("ParentPost");
 
                     b.Navigation("Thread");
                 });
@@ -1049,6 +1266,17 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.GenreEvolution", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Merchandise", b =>
@@ -1111,6 +1339,28 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.RecommendationContext", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.RecommendationFeedback", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.RefreshToken", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "User")
@@ -1157,6 +1407,8 @@ namespace TuneSpace.Infrastructure.Migrations
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumPost", b =>
                 {
                     b.Navigation("Likes");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.ForumThread", b =>

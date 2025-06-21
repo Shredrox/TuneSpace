@@ -12,11 +12,9 @@ public class LastFmArtist
 {
     [JsonPropertyName("name")]
     public string? Name { get; set; }
+
     [JsonPropertyName("url")]
     public string? Url { get; set; }
-
-    [JsonPropertyName("listeners")]
-    public string? Listeners { get; set; }
 
     [JsonPropertyName("stats")]
     public LastFmStats? Stats { get; set; }
@@ -32,6 +30,9 @@ public class LastFmStats
 {
     [JsonPropertyName("playcount")]
     public string? PlayCount { get; set; }
+
+    [JsonPropertyName("listeners")]
+    public string? Listeners { get; set; }
 }
 
 public class LastFmImage

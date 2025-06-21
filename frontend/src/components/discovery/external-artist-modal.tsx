@@ -10,11 +10,12 @@ import {
 } from "@/components/shadcn/dialog";
 import { Button } from "@/components/shadcn/button";
 import { Badge } from "@/components/shadcn/badge";
-import { ExternalLink, Users, Star } from "lucide-react";
+import { ExternalLink, Users, Star, Share2 } from "lucide-react";
 import { searchSpotifyArtists } from "@/services/spotify-service";
 import Loading from "@/components/fallback/loading";
 import Image from "next/image";
 import SpotifyArtist from "@/interfaces/spotify/SpotifyArtist";
+import ShareArtistModal from "./share-artist-modal";
 
 interface ExternalArtistModalProps {
   isOpen: boolean;
@@ -30,6 +31,8 @@ const ExternalArtistModal = ({
   const [selectedArtist, setSelectedArtist] = useState<SpotifyArtist | null>(
     null
   );
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [artistToShare, setArtistToShare] = useState<any>(null);
 
   const {
     data: searchResults,
@@ -45,10 +48,30 @@ const ExternalArtistModal = ({
   const handleArtistSelect = (artist: SpotifyArtist) => {
     setSelectedArtist(artist);
   };
-
   const handleOpenSpotify = (artist: SpotifyArtist) => {
     const spotifyUrl = `https://open.spotify.com/artist/${artist.id}`;
     window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleShareArtist = (artist: SpotifyArtist) => {
+    const discoveryArtist = {
+      id: artist.id,
+      name: artist.name,
+      location: "",
+      genres: artist.genres || [],
+      listeners: 0,
+      playCount: 0,
+      imageUrl: artist.images?.[0]?.url || "",
+      externalUrl: `https://open.spotify.com/artist/${artist.id}`,
+      popularity: artist.popularity || 0,
+      relevanceScore: 0,
+      similarArtists: [],
+      isRegistered: false,
+      followers: artist.followers?.total || 0,
+    };
+
+    setArtistToShare(discoveryArtist);
+    setIsShareModalOpen(true);
   };
 
   const formatFollowerCount = (count: number) => {
@@ -138,8 +161,7 @@ const ExternalArtistModal = ({
                 </div>
               )}
             </div>
-          </div>
-
+          </div>{" "}
           <div className="flex gap-3">
             <Button
               onClick={() => handleOpenSpotify(selectedArtist)}
@@ -147,6 +169,13 @@ const ExternalArtistModal = ({
             >
               <ExternalLink className="w-4 h-4 mr-2" />
               Open in Spotify
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleShareArtist(selectedArtist)}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share to Forum
             </Button>
             <Button variant="outline" onClick={() => setSelectedArtist(null)}>
               Back to Results
@@ -160,13 +189,12 @@ const ExternalArtistModal = ({
       <div className="space-y-4">
         <p className="text-sm text-gray-600 mb-4">
           Select an artist to view more details:
-        </p>
+        </p>{" "}
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {searchResults.map((artist) => (
             <div
               key={artist.id}
-              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-              onClick={() => handleArtistSelect(artist)}
+              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
             >
               {artist.images?.[0] && (
                 <Image
@@ -177,7 +205,10 @@ const ExternalArtistModal = ({
                   className="rounded object-cover"
                 />
               )}
-              <div className="flex-1">
+              <div
+                className="flex-1 cursor-pointer"
+                onClick={() => handleArtistSelect(artist)}
+              >
                 <h4 className="font-medium">{artist.name}</h4>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span>
@@ -191,27 +222,58 @@ const ExternalArtistModal = ({
                   )}
                 </div>
               </div>
-              <Button size="sm" variant="ghost">
-                View Details
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleShareArtist(artist);
+                  }}
+                >
+                  <Share2 className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleArtistSelect(artist);
+                  }}
+                >
+                  View Details
+                </Button>
+              </div>
             </div>
           ))}
         </div>
       </div>
     );
   };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>
-            {selectedArtist ? selectedArtist.name : `Explore "${artistName}"`}
-          </DialogTitle>
-        </DialogHeader>
-        {renderContent()}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedArtist ? selectedArtist.name : `Explore "${artistName}"`}
+            </DialogTitle>
+          </DialogHeader>
+          {renderContent()}
+        </DialogContent>
+      </Dialog>
+
+      {artistToShare && (
+        <ShareArtistModal
+          isOpen={isShareModalOpen}
+          onClose={() => {
+            setIsShareModalOpen(false);
+            setArtistToShare(null);
+          }}
+          artist={artistToShare}
+        />
+      )}
+    </>
   );
 };
 

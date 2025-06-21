@@ -34,6 +34,7 @@ import { Disc, User as LucideUser, Settings } from "lucide-react";
 import SpotifyConnectionStatus from "@/components/spotify/spotify-connection-status";
 import SpotifyFallback from "@/components/spotify/spotify-fallback";
 import SpotifyArtist from "@/interfaces/spotify/SpotifyArtist";
+import QuickShareButton from "../discovery/quick-share-button";
 
 interface ProfileProps {
   username: string;
@@ -272,7 +273,7 @@ const Profile = ({
                         spotifyProfileData.topArtists.map((artist, index) => (
                           <div
                             key={index}
-                            className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
+                            className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all group"
                           >
                             <Avatar className="h-16 w-16 border-2 border-background shadow-md">
                               <AvatarImage
@@ -284,13 +285,29 @@ const Profile = ({
                                 <LucideUser className="w-6 h-6 text-muted-foreground" />
                               </AvatarFallback>
                             </Avatar>
-                            <div>
+                            <div className="flex-1">
                               <p className="font-medium text-lg text-card-foreground">
                                 {artist.name}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 Artist
                               </p>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              {" "}
+                              <QuickShareButton
+                                artist={{
+                                  name: artist.name,
+                                  genres: artist.genres || [],
+                                  imageUrl: artist.images?.[0]?.url,
+                                  externalUrl: `https://open.spotify.com/artist/${artist.id}`,
+                                  followers: artist.followers?.total,
+                                  popularity: artist.popularity,
+                                  isRegistered: false,
+                                }}
+                                variant="ghost"
+                                size="sm"
+                              />
                             </div>
                           </div>
                         ))
@@ -315,7 +332,7 @@ const Profile = ({
                         spotifyProfileData.topSongs.map((song, index) => (
                           <div
                             key={index}
-                            className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all"
+                            className="flex items-center gap-4 mb-4 hover:bg-accent p-2 rounded-lg transition-all group"
                           >
                             {song.image ? (
                               <img
@@ -328,13 +345,24 @@ const Profile = ({
                                 <Disc className="w-8 h-8 text-muted-foreground" />
                               </div>
                             )}
-                            <div className="flex flex-col">
+                            <div className="flex flex-col flex-1">
                               <p className="font-medium text-lg text-card-foreground">
                                 {song.name}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {song.artist}
                               </p>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <QuickShareButton
+                                song={{
+                                  title: song.name,
+                                  artist: song.artist,
+                                  imageUrl: song.image,
+                                }}
+                                variant="ghost"
+                                size="sm"
+                              />
                             </div>
                           </div>
                         ))
@@ -360,7 +388,7 @@ const Profile = ({
                         recentlyPlayedTracks.map((track, index) => (
                           <div
                             key={`${track.trackName}-${index}`}
-                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-all"
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-all group"
                           >
                             {track.albumImageUrl ? (
                               <img
@@ -373,7 +401,7 @@ const Profile = ({
                                 <Disc className="w-8 h-8 text-muted-foreground" />
                               </div>
                             )}
-                            <div className="flex flex-col overflow-hidden">
+                            <div className="flex flex-col overflow-hidden flex-1">
                               <p className="font-medium text-card-foreground truncate">
                                 {track.trackName}
                               </p>
@@ -383,6 +411,18 @@ const Profile = ({
                               <p className="text-xs text-muted-foreground">
                                 {formatDate(track.playedAt)}
                               </p>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <QuickShareButton
+                                song={{
+                                  title: track.trackName,
+                                  artist: track.artistName,
+                                  album: track.albumName,
+                                  imageUrl: track.albumImageUrl,
+                                }}
+                                variant="ghost"
+                                size="sm"
+                              />
                             </div>
                           </div>
                         ))

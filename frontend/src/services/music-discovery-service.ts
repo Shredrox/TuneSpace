@@ -1,136 +1,158 @@
 import httpClient from "./http-client";
 import { BASE_URL } from "@/utils/constants";
+import type {
+  RecommendationFeedback,
+  BatchRecommendationFeedback,
+  EnhancedRecommendationsResponse,
+  RecommendationFeedbackResponse,
+  BatchRecommendationFeedbackResponse,
+  UserLocation,
+  UserPreferences,
+} from "@/interfaces/music-discovery";
 
-//TODO: Extract interfaces
-export interface RecommendationFeedback {
-  artistName: string;
-  interactionType: "like" | "dislike" | "thumbs_up" | "thumbs_down" | "rating";
-  rating?: number;
-  genres?: string[];
-}
+const baseUrl = `${BASE_URL}/MusicDiscovery`;
 
-export interface BatchRecommendationFeedback {
-  interactions: RecommendationFeedback[];
-}
+export const getRecommendations = async (
+  genres?: string[],
+  location?: string
+): Promise<any[]> => {
+  let url = `${baseUrl}/recommendations`;
+  const params = new URLSearchParams();
 
-export interface EnhancedRecommendation {
-  id: string;
-  name: string;
-  description: string;
-  genres: string[];
-  location: string;
-  relevanceScore: number;
-  dataSource: string;
-  externalUrls: Record<string, string>;
-  similarToArtistName?: string;
-  confidenceScore: number;
-  isEnhancedAI: boolean;
-  isCollaborativeFiltering: boolean;
-  adaptiveLearningEnabled: boolean;
-}
-
-export interface EnhancedRecommendationsResponse {
-  message: string;
-  totalRecommendations: number;
-  hasAdaptiveLearning: boolean;
-  processedAt: string;
-  recommendations: EnhancedRecommendation[];
-}
-
-export interface RecommendationFeedbackResponse {
-  message: string;
-  success: boolean;
-  timestamp: string;
-}
-
-export interface BatchRecommendationFeedbackResponse {
-  message: string;
-  success: boolean;
-  processedCount: number;
-  totalCount: number;
-  timestamp: string;
-}
-
-//TODO: Make not a class
-class MusicDiscoveryService {
-  private readonly baseUrl = `${BASE_URL}/MusicDiscovery`;
-
-  /**
-   * Get regular recommendations
-   */
-  async getRecommendations(
-    genres?: string[],
-    location?: string
-  ): Promise<any[]> {
-    let url = `${this.baseUrl}/recommendations`;
-    const params = new URLSearchParams();
-
-    if (genres && genres.length > 0) {
-      params.append("genres", genres.join(","));
-    }
-    if (location) {
-      params.append("location", location);
-    }
-
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-
-    const response = await httpClient.get(url);
-    return response.data;
+  if (genres && genres.length > 0) {
+    params.append("genres", genres.join(","));
   }
 
-  /**
-   * Get enhanced AI recommendations with confidence scoring
-   */
-  async getEnhancedRecommendations(
-    genres?: string[],
-    location?: string
-  ): Promise<EnhancedRecommendationsResponse> {
-    let url = `${this.baseUrl}/recommendations/enhanced`;
-    const params = new URLSearchParams();
-
-    if (genres && genres.length > 0) {
-      params.append("genres", genres.join(","));
-    }
-    if (location) {
-      params.append("location", location);
-    }
-
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-
-    const response = await httpClient.get(url);
-    return response.data;
+  if (location) {
+    params.append("location", location);
   }
 
-  /**
-   * Track single recommendation feedback
-   */
-  async trackRecommendationFeedback(
-    feedback: RecommendationFeedback
-  ): Promise<RecommendationFeedbackResponse> {
-    const response = await httpClient.post(
-      `${this.baseUrl}/feedback`,
-      feedback
+  if (params.toString()) {
+    url += `?${params.toString()}`;
+  }
+
+  const response = await httpClient.get(url);
+  return response.data;
+};
+
+export const getEnhancedRecommendations = async (
+  genres?: string[],
+  location?: string
+): Promise<EnhancedRecommendationsResponse> => {
+  let url = `${baseUrl}/recommendations/enhanced`;
+  const params = new URLSearchParams();
+
+  if (genres && genres.length > 0) {
+    params.append("genres", genres.join(","));
+  }
+
+  if (location) {
+    params.append("location", location);
+  }
+
+  if (params.toString()) {
+    url += `?${params.toString()}`;
+  }
+
+  const response = await httpClient.get(url);
+  return response.data;
+};
+
+export const trackRecommendationFeedback = async (
+  feedback: RecommendationFeedback
+): Promise<RecommendationFeedbackResponse> => {
+  const response = await httpClient.post(`${baseUrl}/feedback`, feedback);
+  return response.data;
+};
+
+export const trackBatchRecommendationFeedback = async (
+  batchFeedback: BatchRecommendationFeedback
+): Promise<BatchRecommendationFeedbackResponse> => {
+  const response = await httpClient.post(
+    `${baseUrl}/feedback/batch`,
+    batchFeedback
+  );
+  return response.data;
+};
+
+export const getRecommendationsByPreferences = async (
+  preferences: UserPreferences
+): Promise<any> => {
+  const response = await httpClient.post(
+    `${baseUrl}/recommendations/preferences`,
+    preferences
+  );
+  return response.data;
+};
+
+export const getEnhancedRecommendationsByPreferences = async (
+  preferences: UserPreferences
+): Promise<EnhancedRecommendationsResponse> => {
+  const response = await httpClient.post(
+    `${baseUrl}/recommendations/enhanced/preferences`,
+    preferences
+  );
+  return response.data;
+};
+
+export const getCurrentLocation = async (): Promise<{
+  latitude: number;
+  longitude: number;
+} | null> => {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.warn("Geolocation error:", error);
+        resolve(null);
+      },
+      {
+        timeout: 10000,
+        maximumAge: 300000,
+        enableHighAccuracy: false,
+      }
     );
-    return response.data;
-  }
+  });
+};
 
-  /**
-   * Track batch recommendation feedback
-   */
-  async trackBatchRecommendationFeedback(
-    batchFeedback: BatchRecommendationFeedback
-  ): Promise<BatchRecommendationFeedbackResponse> {
-    const response = await httpClient.post(
-      `${this.baseUrl}/feedback/batch`,
-      batchFeedback
+export const getLocationFromCoordinates = async (
+  latitude: number,
+  longitude: number
+): Promise<UserLocation | null> => {
+  try {
+    const response = await httpClient.get(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
     );
-    return response.data;
-  }
-}
 
-export const musicDiscoveryService = new MusicDiscoveryService();
-export default musicDiscoveryService;
+    const data = response.data;
+
+    if (data.address) {
+      return {
+        country: data.address.country || "Unknown",
+        city:
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          "Unknown",
+        latitude,
+        longitude,
+        detectionMethod: "coordinates",
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn("Reverse geocoding error:", error);
+    return null;
+  }
+};

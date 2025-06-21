@@ -24,4 +24,13 @@ public class SpotifyArtistDTO
 
     [JsonPropertyName("popularity")]
     public int Popularity { get; set; }
+
+    [JsonPropertyName("external_urls")]
+    public SpotifyExternalUrls ExternalUrls { get; set; } = new();
+}
+
+public class SpotifyExternalUrls
+{
+    [JsonPropertyName("spotify")]
+    public string Spotify { get; set; } = string.Empty;
 }

@@ -365,9 +365,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<double>("ExplorationFactor")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("GenreMatchConfidence")
-                        .HasColumnType("double precision");
-
                     b.Property<double>("GenreMatchWeight")
                         .HasColumnType("double precision");
 
@@ -381,9 +378,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<double>("ListenerScoreWeight")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("LocationMatchConfidence")
                         .HasColumnType("double precision");
 
                     b.Property<double>("LocationMatchWeight")
@@ -401,9 +395,6 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<double>("RegisteredBandWeight")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("SimilarArtistConfidence")
-                        .HasColumnType("double precision");
-
                     b.Property<double>("SimilarArtistWeight")
                         .HasColumnType("double precision");
 
@@ -413,9 +404,8 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<double>("UndergroundBandWeight")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -608,12 +598,6 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("NextUpdatePredicted")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double>("PredictionConfidence")
-                        .HasColumnType("double precision");
-
                     b.Property<double>("PreferenceChange")
                         .HasColumnType("double precision");
 
@@ -623,18 +607,8 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<double>("PreviousPreference")
                         .HasColumnType("double precision");
 
-                    b.Property<double>("SeasonalInfluence")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("SocialInfluence")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("TrendInfluence")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("WeeklyPreferences")
                         .IsRequired()
@@ -826,9 +800,8 @@ namespace TuneSpace.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("UserLocation")
                         .HasColumnType("text");
@@ -913,9 +886,8 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Property<TimeSpan?>("TimeSpentListening")
                         .HasColumnType("interval");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -1200,6 +1172,17 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("ParticipantB");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.DynamicScoringWeights", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Follow", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "Follower")
@@ -1282,6 +1265,17 @@ namespace TuneSpace.Infrastructure.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("TuneSpace.Core.Entities.GenreEvolution", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TuneSpace.Core.Entities.Merchandise", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.Band", "Band")
@@ -1332,6 +1326,28 @@ namespace TuneSpace.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("TuneSpace.Core.Entities.Notification", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.RecommendationContext", b =>
+                {
+                    b.HasOne("TuneSpace.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TuneSpace.Core.Entities.RecommendationFeedback", b =>
                 {
                     b.HasOne("TuneSpace.Core.Entities.User", "User")
                         .WithMany()

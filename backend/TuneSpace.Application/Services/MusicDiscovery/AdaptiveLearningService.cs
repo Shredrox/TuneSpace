@@ -16,12 +16,13 @@ internal class AdaptiveLearningService(
 
     async Task<DynamicScoringWeights> IAdaptiveLearningService.GetUserScoringWeightsAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         var weights = await _dbContext.DynamicScoringWeights
-            .FirstOrDefaultAsync(w => w.UserId == userId);
+            .FirstOrDefaultAsync(w => w.UserId == userGuid);
 
         if (weights is null)
         {
-            weights = new DynamicScoringWeights { UserId = userId };
+            weights = new DynamicScoringWeights { UserId = userGuid };
             _dbContext.DynamicScoringWeights.Add(weights);
             await _dbContext.SaveChangesAsync();
             _logger.LogInformation("Created initial scoring weights");
@@ -74,6 +75,7 @@ internal class AdaptiveLearningService(
         if (weights.RecommendationCount % 10 == 0)
         {
             await ((IAdaptiveLearningService)this).UpdateExplorationFactorAsync(userId, weights.SuccessRate > 0.6);
+            await UpdateDiversityFactorAsync(userId, weights.SuccessRate);
         }
 
         weights.LastAdaptation = DateTime.UtcNow;
@@ -84,8 +86,9 @@ internal class AdaptiveLearningService(
 
     async Task<List<GenreEvolution>> IAdaptiveLearningService.GetUserGenreEvolutionAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         return await _dbContext.GenreEvolutions
-            .Where(ge => ge.UserId == userId)
+            .Where(ge => ge.UserId == userGuid)
             .OrderBy(ge => ge.Genre)
             .ToListAsync();
     }
@@ -104,14 +107,15 @@ internal class AdaptiveLearningService(
 
         foreach (var genre in genres)
         {
+            var userGuid = Guid.Parse(userId);
             var evolution = await _dbContext.GenreEvolutions
-                .FirstOrDefaultAsync(ge => ge.UserId == userId && ge.Genre == genre);
+                .FirstOrDefaultAsync(ge => ge.UserId == userGuid && ge.Genre == genre);
 
             if (evolution is null)
             {
                 evolution = new GenreEvolution
                 {
-                    UserId = userId,
+                    UserId = userGuid,
                     Genre = genre,
                     CurrentPreference = feedbackValue,
                     FirstEncountered = currentTime
@@ -188,11 +192,11 @@ internal class AdaptiveLearningService(
 
         _dbContext.RecommendationFeedbacks.Add(feedback);
 
-        await ((IAdaptiveLearningService)this).UpdateScoringWeightsAsync(feedback.UserId, feedback);
+        await ((IAdaptiveLearningService)this).UpdateScoringWeightsAsync(feedback.UserId.ToString(), feedback);
 
         if (feedback.RecommendedGenres.Count != 0)
         {
-            await ((IAdaptiveLearningService)this).UpdateGenrePreferencesAsync(feedback.UserId, feedback.RecommendedGenres, feedback.FeedbackType);
+            await ((IAdaptiveLearningService)this).UpdateGenrePreferencesAsync(feedback.UserId.ToString(), feedback.RecommendedGenres, feedback.FeedbackType);
         }
 
         await _dbContext.SaveChangesAsync();
@@ -263,8 +267,9 @@ internal class AdaptiveLearningService(
             return;
         }
 
+        var userGuid = Guid.Parse(userId);
         var recentFeedback = await _dbContext.RecommendationFeedbacks
-            .Where(rf => rf.UserId == userId)
+            .Where(rf => rf.UserId == userGuid)
             .Where(rf => rf.RecommendedAt > DateTime.UtcNow.AddDays(-30))
             .ToListAsync();
 
@@ -316,8 +321,9 @@ internal class AdaptiveLearningService(
     async Task<Dictionary<string, double>> IAdaptiveLearningService.GetGenreTrendsAsync(string userId, int daysPeriod)
     {
         var cutoffDate = DateTime.UtcNow.AddDays(-daysPeriod);
+        var userGuid = Guid.Parse(userId);
         var evolutions = await _dbContext.GenreEvolutions
-            .Where(ge => ge.UserId == userId && ge.LastUpdated > cutoffDate)
+            .Where(ge => ge.UserId == userGuid && ge.LastUpdated > cutoffDate)
             .ToListAsync();
 
         return evolutions.ToDictionary(e => e.Genre, e => e.PreferenceVelocity);
@@ -325,8 +331,9 @@ internal class AdaptiveLearningService(
 
     async Task<GenreLifecycleStage> IAdaptiveLearningService.DetermineGenreLifecycleStageAsync(string userId, string genre)
     {
+        var userGuid = Guid.Parse(userId);
         var evolution = await _dbContext.GenreEvolutions
-            .FirstOrDefaultAsync(ge => ge.UserId == userId && ge.Genre == genre);
+            .FirstOrDefaultAsync(ge => ge.UserId == userGuid && ge.Genre == genre);
 
         if (evolution is null)
         {
@@ -394,6 +401,57 @@ internal class AdaptiveLearningService(
         else
         {
             weights.ExplorationFactor = Math.Max(0.05, weights.ExplorationFactor * 0.95);
+        }
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Updates the diversity factor based on user success rate and preference patterns.
+    /// Higher success with varied genres = increase diversity, lower success = decrease diversity.
+    /// </summary>
+    private async Task UpdateDiversityFactorAsync(string userId, double successRate)
+    {
+        var weights = await ((IAdaptiveLearningService)this).GetUserScoringWeightsAsync(userId);
+
+        var userGuid = Guid.Parse(userId);
+        var recentFeedback = await _dbContext.RecommendationFeedbacks
+            .Where(rf => rf.UserId == userGuid)
+            .Where(rf => rf.RecommendedAt > DateTime.UtcNow.AddDays(-30))
+            .OrderByDescending(rf => rf.RecommendedAt)
+            .Take(20)
+            .ToListAsync();
+
+        if (recentFeedback.Count < 5)
+        {
+            return;
+        }
+
+        var successfulGenres = recentFeedback
+            .Where(f => f.CalculatedSuccess > 0.6)
+            .SelectMany(f => f.RecommendedGenres)
+            .Distinct()
+            .Count();
+
+        var unsuccessfulGenres = recentFeedback
+            .Where(f => f.CalculatedSuccess <= 0.4)
+            .SelectMany(f => f.RecommendedGenres)
+            .Distinct()
+            .Count();
+
+        var totalSuccessful = recentFeedback.Count(f => f.CalculatedSuccess > 0.6);
+        var totalUnsuccessful = recentFeedback.Count(f => f.CalculatedSuccess <= 0.4);
+
+        var diversitySuccessRatio = totalSuccessful > 0 ? (double)successfulGenres / totalSuccessful : 0;
+        var diversityFailureRatio = totalUnsuccessful > 0 ? (double)unsuccessfulGenres / totalUnsuccessful : 0;
+
+        if (diversitySuccessRatio > diversityFailureRatio && successRate > 0.6)
+        {
+            weights.DiversityFactor = Math.Min(0.3, weights.DiversityFactor * 1.05);
+        }
+        else if (diversityFailureRatio > diversitySuccessRatio && successRate < 0.5)
+        {
+            weights.DiversityFactor = Math.Max(0.05, weights.DiversityFactor * 0.95);
         }
 
         await _dbContext.SaveChangesAsync();
