@@ -21,7 +21,7 @@ internal class VectorSearchService(
 
         var context = new RecommendationContext
         {
-            UserId = userId,
+            UserId = Guid.Parse(userId),
             UserGenres = genres,
             UserLocation = location,
             UserTopArtists = topArtists,

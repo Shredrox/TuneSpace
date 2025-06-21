@@ -131,7 +131,7 @@ internal class AdaptiveRecommendationScoringService(
         {
             var feedback = new RecommendationFeedback
             {
-                UserId = userId,
+                UserId = Guid.Parse(userId),
                 BandId = bandId,
                 BandName = bandName,
                 RecommendedGenres = genres,
@@ -174,13 +174,13 @@ internal class AdaptiveRecommendationScoringService(
     private async Task<DynamicScoringWeights> GetOrCreateUserWeightsAsync(string userId)
     {
         var weights = await _context.DynamicScoringWeights
-            .FirstOrDefaultAsync(w => w.UserId == userId);
+            .FirstOrDefaultAsync(w => w.UserId.ToString() == userId);
 
         if (weights == null)
         {
             weights = new DynamicScoringWeights
             {
-                UserId = userId,
+                UserId = Guid.Parse(userId),
                 GenreMatchWeight = MusicDiscoveryConstants.GenreMatchScore,
                 LocationMatchWeight = MusicDiscoveryConstants.LocationMatchBonus,
                 ListenerScoreWeight = MusicDiscoveryConstants.ListenerScoreFactor,

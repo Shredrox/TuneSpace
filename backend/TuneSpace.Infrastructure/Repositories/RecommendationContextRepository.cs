@@ -13,8 +13,9 @@ internal class RecommendationContextRepository(TuneSpaceDbContext context) : IRe
 
     async Task<RecommendationContext?> IRecommendationContextRepository.GetByUserIdAsync(string userId)
     {
+        var userGuid = Guid.Parse(userId);
         return await _context.RecommendationContexts
-            .FirstOrDefaultAsync(rc => rc.UserId == userId);
+            .FirstOrDefaultAsync(rc => rc.UserId == userGuid);
     }
 
     async Task<List<RecommendationContext>> IRecommendationContextRepository.GetSimilarUsersAsync(Vector userEmbedding, int limit)
@@ -28,7 +29,7 @@ internal class RecommendationContextRepository(TuneSpaceDbContext context) : IRe
 
     async Task<RecommendationContext> IRecommendationContextRepository.CreateOrUpdateAsync(RecommendationContext context)
     {
-        var existing = await ((IRecommendationContextRepository)this).GetByUserIdAsync(context.UserId);
+        var existing = await GetByUserIdInternalAsync(context.UserId);
 
         if (existing is not null)
         {
@@ -67,5 +68,11 @@ internal class RecommendationContextRepository(TuneSpaceDbContext context) : IRe
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private async Task<RecommendationContext?> GetByUserIdInternalAsync(Guid userId)
+    {
+        return await _context.RecommendationContexts
+            .FirstOrDefaultAsync(rc => rc.UserId == userId);
     }
 }
