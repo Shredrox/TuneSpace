@@ -149,8 +149,113 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddHttpClientServices(this IServiceCollection services)
     {
         services.AddHttpClient<IOllamaClient, OllamaClient>();
-        services.AddHttpClient<ILastFmClient, LastFmClient>();
-        services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>();
+
+        services.AddHttpClient<ILastFmClient, LastFmClient>(client =>
+        {
+            client.DefaultRequestHeaders.Add("User-Agent", "TuneSpace/1.0");
+        })
+        .AddResilienceHandler(
+            "lastFmResiliencePipeline", pipeline =>
+            {
+                pipeline.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                    Delay = TimeSpan.FromMilliseconds(500),
+                    ShouldHandle = args =>
+                    {
+                        if (args.Outcome.Exception is HttpRequestException or TaskCanceledException)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        if (args.Outcome.Result?.StatusCode is
+                            System.Net.HttpStatusCode.TooManyRequests or
+                            System.Net.HttpStatusCode.InternalServerError or
+                            System.Net.HttpStatusCode.BadGateway or
+                            System.Net.HttpStatusCode.ServiceUnavailable or
+                            System.Net.HttpStatusCode.GatewayTimeout)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        return ValueTask.FromResult(false);
+                    },
+                    OnRetry = async args =>
+                    {
+                        if (args.Outcome.Result?.StatusCode == System.Net.HttpStatusCode.TooManyRequests &&
+                            args.Outcome.Result.Headers.RetryAfter?.Delta is TimeSpan retryAfter)
+                        {
+                            await Task.Delay(retryAfter);
+                        }
+                    }
+                });
+
+                pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+                {
+                    FailureRatio = 0.5,
+                    SamplingDuration = TimeSpan.FromMinutes(2),
+                    MinimumThroughput = 10,
+                    BreakDuration = TimeSpan.FromSeconds(30)
+                });
+
+                pipeline.AddTimeout(TimeSpan.FromSeconds(30));
+            }
+        );
+
+        services.AddHttpClient<IMusicBrainzClient, MusicBrainzClient>(client =>
+        {
+            client.DefaultRequestHeaders.Add("User-Agent", "TuneSpace/1.0");
+        })
+        .AddResilienceHandler(
+            "musicBrainzResiliencePipeline", pipeline =>
+            {
+                pipeline.AddRetry(new HttpRetryStrategyOptions
+                {
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                    Delay = TimeSpan.FromMilliseconds(1000),
+                    ShouldHandle = args =>
+                    {
+                        if (args.Outcome.Exception is HttpRequestException or TaskCanceledException)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        if (args.Outcome.Result?.StatusCode is
+                            System.Net.HttpStatusCode.TooManyRequests or
+                            System.Net.HttpStatusCode.InternalServerError or
+                            System.Net.HttpStatusCode.BadGateway or
+                            System.Net.HttpStatusCode.ServiceUnavailable or
+                            System.Net.HttpStatusCode.GatewayTimeout)
+                        {
+                            return ValueTask.FromResult(true);
+                        }
+
+                        return ValueTask.FromResult(false);
+                    },
+                    OnRetry = async args =>
+                    {
+                        if (args.Outcome.Result?.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(1));
+                        }
+                    }
+                });
+
+                pipeline.AddCircuitBreaker(new HttpCircuitBreakerStrategyOptions
+                {
+                    FailureRatio = 0.5,
+                    SamplingDuration = TimeSpan.FromMinutes(2),
+                    MinimumThroughput = 5,
+                    BreakDuration = TimeSpan.FromMinutes(1)
+                });
+
+                pipeline.AddTimeout(TimeSpan.FromSeconds(30));
+            }
+        );
 
         services.AddHttpClient<ISpotifyClient, SpotifyClient>(client =>
         {
