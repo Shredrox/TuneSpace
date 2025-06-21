@@ -6,10 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../shadcn/card";
-import { Button } from "../shadcn/button";
 import { CalendarIcon, MapPinIcon, ClockIcon, TicketIcon } from "lucide-react";
 import { formatDate2, extractTimeFromDate } from "@/utils/helpers";
 import MusicEvent from "@/interfaces/MusicEvent";
+import QuickShareEventButton from "./quick-share-event-button";
 
 interface EventCardProps {
   event: MusicEvent;
@@ -18,6 +18,7 @@ interface EventCardProps {
 }
 
 const EventCard = ({ event, isSelected, variant = "full" }: EventCardProps) => {
+  console.log(event);
   return (
     <Card
       className={`w-full transition-all duration-300 hover:shadow-md 
@@ -57,7 +58,7 @@ const EventCard = ({ event, isSelected, variant = "full" }: EventCardProps) => {
           <div className="flex items-center gap-2">
             <MapPinIcon size={16} className="text-primary" />
             <span className="line-clamp-1">
-              {event.venue}, {event.city}, {event.country}
+              {event.venueAddress?.split(",")[0]}, {event.city}, {event.country}
             </span>
           </div>
           {variant === "full" && event.ticketPrice && (
@@ -66,15 +67,27 @@ const EventCard = ({ event, isSelected, variant = "full" }: EventCardProps) => {
               <span>${event.ticketPrice.toFixed(2)}</span>
             </div>
           )}
-        </div>
+        </div>{" "}
       </CardContent>
-      {(variant === "full" || isSelected) && event.ticketUrl && (
-        <CardFooter>
-          <Button className="w-full" variant="secondary" asChild>
-            <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
-              Buy Tickets
-            </a>
-          </Button>
+      {(variant === "full" || isSelected) && (
+        <CardFooter className="flex gap-2">
+          {/* no ticket system yet */}
+          {/* {event.ticketUrl && (
+            <Button className="flex-1" variant="secondary" asChild>
+              <a
+                href={event.ticketUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Buy Tickets
+              </a>
+            </Button>
+          )} */}
+          <QuickShareEventButton
+            event={event}
+            variant="outline"
+            size="default"
+          />
         </CardFooter>
       )}
     </Card>

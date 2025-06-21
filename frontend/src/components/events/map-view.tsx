@@ -11,6 +11,7 @@ import MusicEvent from "@/interfaces/MusicEvent";
 import { parseCoordinates } from "./map/map-utils";
 import { MapStyles } from "./map/map-styles";
 import MarkerCluster from "./map/marker-cluster";
+import ShareEventModal from "./share-event-modal";
 import {
   FullscreenControl,
   LocationFilterControl,
@@ -35,13 +36,14 @@ const MapView = ({
   const [mapStyle, setMapStyle] = useState<string>(
     "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
   );
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [eventToShare, setEventToShare] = useState<MusicEvent | null>(null);
 
   const validEvents = events.filter(
     (event) => parseCoordinates(event.location) !== null
   );
 
   const [useLocationFilter, setUseLocationFilter] = useState(false);
-  const [filterRadius, setFilterRadius] = useState(50);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
   const filteredEvents =
@@ -75,9 +77,16 @@ const MapView = ({
     );
   }, [validEvents]);
 
+  const handleEventShare = (event: MusicEvent) => {
+    setEventToShare(event);
+    setShareModalOpen(true);
+  };
+
   return (
     <div
-      className="map-container w-full h-full relative"
+      className={`map-container w-full h-full relative ${
+        shareModalOpen ? "modal-open" : ""
+      }`}
       style={{ height: "70vh", borderRadius: "12px", overflow: "hidden" }}
     >
       <MapStyles />
@@ -85,7 +94,10 @@ const MapView = ({
         <MapContainer
           center={userLocation || defaultLocation}
           zoom={13}
-          style={{ height: "100%", width: "100%" }}
+          style={{
+            height: "100%",
+            width: "100%",
+          }}
           ref={(ref) => {
             if (ref) {
               mapRef.current = ref;
@@ -104,14 +116,26 @@ const MapView = ({
             setUseLocationFilter={setUseLocationFilter}
             setSelectedCountry={setSelectedCountry}
             validEvents={validEvents}
-          />
+          />{" "}
           <MarkerCluster
             events={filteredEvents}
             selectedEventId={selectedEventId}
             onEventClick={onEventClick}
+            onEventShare={handleEventShare}
           />
           <MapStyleControl setMapStyle={setMapStyle} />
         </MapContainer>
+      )}
+
+      {eventToShare && (
+        <ShareEventModal
+          isOpen={shareModalOpen}
+          onClose={() => {
+            setShareModalOpen(false);
+            setEventToShare(null);
+          }}
+          event={eventToShare}
+        />
       )}
     </div>
   );

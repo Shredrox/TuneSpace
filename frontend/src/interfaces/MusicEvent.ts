@@ -14,4 +14,5 @@ export default interface MusicEvent {
   imageUrl?: string;
   ticketPrice?: number;
   ticketUrl?: string;
+  venueAddress?: string;
 }

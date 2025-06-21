@@ -17,6 +17,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import ThreadPost from "@/interfaces/forum/ThreadPost";
 import { useState } from "react";
 import MusicShareCard from "./music-share-card";
+import EventShareCard from "./event-share-card";
 
 interface ForumPostProps {
   post: ThreadPost;
@@ -131,7 +132,11 @@ const ForumPost = ({
           <CardContent className="pt-2 pb-4">
             {content.includes("🎵") &&
             (content.includes("# 🎵") || content.includes("🎧")) ? (
-              <MusicShareCard content={content} />
+              content.includes("# 🎵 Event Announcement:") ? (
+                <EventShareCard content={content} />
+              ) : (
+                <MusicShareCard content={content} />
+              )
             ) : (
               <div className="prose dark:prose-invert max-w-none">
                 <p style={{ whiteSpace: "pre-wrap" }}>{content}</p>
