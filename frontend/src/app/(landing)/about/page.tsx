@@ -103,7 +103,7 @@ export default function AboutPage() {
               TuneSpace was created to bridge the gap between underground
               artists and the music lovers who crave authentic, undiscovered
               talent. We believe the best music often comes from artists who
-              haven't yet been discovered by the mainstream.
+              haven&apos;t yet been discovered by the mainstream.
             </p>
           </div>
 
@@ -115,14 +115,14 @@ export default function AboutPage() {
               <div className="space-y-4 text-muted-foreground">
                 <p>
                   Underground artists bring raw authenticity and innovative
-                  sounds that haven't been filtered through industry machinery.
-                  They're creating music for the love of it, not just commercial
-                  success.
+                  sounds that haven&apos;t been filtered through industry
+                  machinery. They&apos;re creating music for the love of it, not
+                  just commercial success.
                 </p>
                 <p>
-                  By connecting these artists with passionate listeners, we're
-                  helping to shape the future of music while giving talented
-                  musicians the recognition they deserve.
+                  By connecting these artists with passionate listeners,
+                  we&apos;re helping to shape the future of music while giving
+                  talented musicians the recognition they deserve.
                 </p>
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function AboutPage() {
               <p className="text-lg text-muted-foreground mb-8">
                 Tired of the same mainstream music? Join a community of
                 passionate listeners who discover and support underground
-                artists creating tomorrow's classics.
+                artists creating tomorrow&apos;s classics.
               </p>
 
               <div className="space-y-4">
@@ -339,7 +339,7 @@ export default function AboutPage() {
                       Support Artists
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      Help shape the careers of tomorrow's stars
+                      Help shape the careers of tomorrow&apos;s stars
                     </p>
                   </div>
                 </div>
@@ -366,8 +366,8 @@ export default function AboutPage() {
             Join the Underground Music Revolution
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Whether you're creating the music or discovering it, TuneSpace is
-            where underground culture thrives.
+            Whether you&apos;re creating the music or discovering it, TuneSpace
+            is where underground culture thrives.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button

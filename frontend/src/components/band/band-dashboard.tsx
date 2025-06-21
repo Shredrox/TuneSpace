@@ -8,7 +8,6 @@ import YouTubeEmbedDialog from "./youtube-embed-dialog";
 import useAuth from "@/hooks/auth/useAuth";
 import useBandData from "@/hooks/query/useBandData";
 import Loading from "../fallback/loading";
-import useToast from "@/hooks/useToast";
 import ConnectSpotifyDialog from "./connect-spotify-dialog";
 import EditBandDialog from "./edit-band-dialog";
 import { Users, CalendarDays, Music, Guitar } from "lucide-react";
@@ -53,7 +52,7 @@ const BandDashboard = () => {
   const bandChats = chatData?.bandChats || [];
   const messages = chatData?.messages || [];
 
-  const totalNewMessages = bandChats.reduce((total, chat) => {
+  const totalNewMessages = bandChats.reduce((total) => {
     try {
       return (
         total +
@@ -65,7 +64,7 @@ const BandDashboard = () => {
     }
   }, 0);
 
-  const totalUserMessages = bandChats.reduce((total, chat) => {
+  const totalUserMessages = bandChats.reduce((total) => {
     try {
       return total + (messages?.filter((msg) => !msg.isFromBand).length || 0);
     } catch (error) {
@@ -74,7 +73,7 @@ const BandDashboard = () => {
     }
   }, 0);
 
-  const totalBandResponses = bandChats.reduce((total, chat) => {
+  const totalBandResponses = bandChats.reduce((total) => {
     try {
       return total + (messages?.filter((msg) => msg.isFromBand).length || 0);
     } catch (error) {
@@ -98,14 +97,14 @@ const BandDashboard = () => {
 
       await mutations.updateBandMutation(formData);
 
-      useToast("Spotify connection successful", 5000);
+      toast("Spotify connection successful", { duration: 5000 });
       setIsSpotifyDialogOpen(false);
     } catch (error) {
-      useToast(
+      toast(
         `Failed to connect Spotify: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
-        5000
+        { duration: 5000 }
       );
       console.error("Spotify connection error:", error);
     }
@@ -119,18 +118,19 @@ const BandDashboard = () => {
 
       await mutations.updateBandMutation(formData);
 
-      useToast("YouTube video successfully embedded", 5000);
+      toast("YouTube video successfully embedded", { duration: 5000 });
     } catch (error) {
-      useToast(
+      toast(
         `Failed to update YouTube embed: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
-        5000
+        { duration: 5000 }
       );
       console.error("YouTube embed update error:", error);
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleBandUpdate = async (updatedBand: any) => {
     try {
       if (!bandData?.band?.id) {
@@ -151,13 +151,13 @@ const BandDashboard = () => {
 
       await mutations.updateBandMutation(formData);
 
-      useToast("Band information updated successfully", 5000);
+      toast("Band information updated successfully", { duration: 5000 });
     } catch (error) {
-      useToast(
+      toast(
         `Failed to update band: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
-        5000
+        { duration: 5000 }
       );
       console.error("Band update error:", error);
     }
@@ -702,6 +702,7 @@ const BandDashboard = () => {
                       <Card key={item.id} className="overflow-hidden">
                         <div className="aspect-square bg-muted/20 flex items-center justify-center">
                           {item.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={item.imageUrl}
                               alt={item.name}

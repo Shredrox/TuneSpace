@@ -19,6 +19,7 @@ export default function NotFound() {
       setCurrentIcon((prev) => (prev + 1) % musicIcons.length);
     }, 2000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const CurrentIcon = musicIcons[currentIcon];
@@ -46,7 +47,7 @@ export default function NotFound() {
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-md mx-auto">
             Looks like this song skipped to a different playlist. The page
-            you're looking for doesn't exist in our music library.
+            you&apos;re looking for doesn&apos;t exist in our music library.
           </p>
         </div>
 

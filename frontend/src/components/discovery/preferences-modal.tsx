@@ -25,10 +25,7 @@ import {
   getCurrentLocation,
   getLocationFromCoordinates,
 } from "@/services/music-discovery-service";
-import type {
-  UserPreferences,
-  UserLocation,
-} from "@/services/music-discovery-service";
+import { UserLocation, UserPreferences } from "@/interfaces/music-discovery";
 
 interface PreferencesModalProps {
   isOpen: boolean;

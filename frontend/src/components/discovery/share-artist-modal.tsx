@@ -84,6 +84,7 @@ const ShareArtistModal = ({
   const { createPost, isCreating: isCreatingPost } =
     useForumThread(selectedThreadId);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function generateDefaultContent(artist: any) {
     let content = `I just discovered ${artist.name} and wanted to share them with the community!\n\n`;
 
@@ -171,7 +172,7 @@ const ShareArtistModal = ({
       }
 
       onClose();
-    } catch (error) {
+    } catch {
       toast.error(
         `Failed to ${
           shareMode === "new" ? "create thread" : "post to thread"
@@ -208,6 +209,7 @@ const ShareArtistModal = ({
     return null;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function generateRichArtistPost(artist: any) {
     let content = `# 🎵 ${artist.name}\n\n`;
 
@@ -414,7 +416,7 @@ const ShareArtistModal = ({
                       name="shareMode"
                       value="new"
                       checked={shareMode === "new"}
-                      onChange={(e) => setShareMode("new")}
+                      onChange={() => setShareMode("new")}
                       className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                     />
                     <label
@@ -431,7 +433,7 @@ const ShareArtistModal = ({
                       name="shareMode"
                       value="existing"
                       checked={shareMode === "existing"}
-                      onChange={(e) => setShareMode("existing")}
+                      onChange={() => setShareMode("existing")}
                       className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                     />
                     <label

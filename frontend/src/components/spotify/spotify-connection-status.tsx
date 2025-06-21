@@ -169,8 +169,8 @@ const SpotifyConnectionStatus = ({
           <Alert>
             <Wifi className="h-4 w-4" />
             <AlertDescription>
-              Some Spotify data couldn't be loaded. This might be due to network
-              issues or temporary Spotify API problems.
+              Some Spotify data couldn&apos;t be loaded. This might be due to
+              network issues or temporary Spotify API problems.
             </AlertDescription>
           </Alert>
         )}

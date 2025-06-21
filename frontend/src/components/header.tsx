@@ -7,7 +7,6 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { Bell } from "lucide-react";
-import { SidebarTrigger } from "./shadcn/sidebar";
 import Link from "next/link";
 import { Button } from "./shadcn/button";
 import { Badge } from "./shadcn/badge";

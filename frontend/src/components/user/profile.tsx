@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import useProfileData from "@/hooks/query/useProfileData";

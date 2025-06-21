@@ -10,6 +10,7 @@ const useNotifications = () => {
   const { auth, isAuthenticated } = useAuth();
   const { setUserNotifications } = useSocket();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [unreadCount, setUnreadCount] = useState(0);
 
   const {
@@ -28,6 +29,7 @@ const useNotifications = () => {
     if (notifications) {
       setUserNotifications(notifications);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications]);
 
   const markAsRead = useMutation({

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   RecommendationFeedback,
   BatchRecommendationFeedback,
@@ -31,6 +32,7 @@ export const useEnhancedRecommendations = ({
   enabled = true,
 }: UseEnhancedRecommendationsOptions = {}) => {
   const [confidenceThreshold, setConfidenceThreshold] = useState(0.5);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [feedbackHistory, setFeedbackHistory] = useState<
     Map<string, RecommendationFeedback>
   >(new Map());

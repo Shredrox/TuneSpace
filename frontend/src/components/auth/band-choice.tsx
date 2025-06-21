@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Music, Headphones, AudioLines } from "lucide-react";
 import { ROUTES } from "@/utils/constants";
-import useToast from "@/hooks/useToast";
+import { toast } from "sonner";
 
 interface BandChoiceProps {
   title?: string;
@@ -59,9 +59,9 @@ const BandChoice = ({
               <Button
                 onClick={() => {
                   router.push(ROUTES.HOME);
-                  useToast(
+                  toast(
                     "Welcome to TuneSpace! Enjoy exploring music and connecting with artists.",
-                    5000
+                    { duration: 5000 }
                   );
                 }}
                 variant="outline"

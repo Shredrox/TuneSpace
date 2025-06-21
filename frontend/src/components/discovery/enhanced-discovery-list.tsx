@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState } from "react";
@@ -84,6 +85,7 @@ const EnhancedDiscoveryList: React.FC<EnhancedDiscoveryListProps> = ({
     }
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getSourceIcon = (recommendation: any) => {
     if (recommendation.isEnhancedAI) return <Brain className="w-4 h-4" />;
     if (recommendation.isCollaborativeFiltering)

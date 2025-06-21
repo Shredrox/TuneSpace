@@ -40,7 +40,6 @@ const HeaderSearchBar = () => {
   const {
     data: searchSongs,
     isError: isSongsError,
-    error: songsError,
     refetch: refetchSongs,
     isLoading: isSongsLoading,
   } = useQuery({
@@ -175,7 +174,7 @@ const HeaderSearchBar = () => {
                   <div className="h-24 flex justify-center items-center">
                     <Loading />
                   </div>
-                ) : searchSongs?.length! > 0 ? (
+                ) : searchSongs && searchSongs?.length > 0 ? (
                   searchSongs?.map((song, index) => (
                     <Card
                       key={index}
@@ -220,7 +219,7 @@ const HeaderSearchBar = () => {
                   ))
                 ) : searchSongs?.length === 0 ? (
                   <div className="p-4 text-center text-muted-foreground">
-                    No songs found for "{search}"
+                    No songs found for &quot;{search}&quot;
                   </div>
                 ) : isSongsError ? (
                   <div className="p-4 text-center">
@@ -266,7 +265,7 @@ const HeaderSearchBar = () => {
                   <div className="h-24 flex justify-center items-center">
                     <Loading />
                   </div>
-                ) : searchUsers?.length! > 0 ? (
+                ) : searchUsers && searchUsers.length > 0 ? (
                   searchUsers?.map((user, index) => (
                     <Card
                       key={index}
@@ -298,7 +297,7 @@ const HeaderSearchBar = () => {
                   ))
                 ) : searchUsers?.length === 0 ? (
                   <div className="p-4 text-center text-muted-foreground">
-                    No users found for "{search}"
+                    No users found for &quot;{search}&quot;
                   </div>
                 ) : isUsersError ? (
                   <div className="p-4 text-center text-destructive">

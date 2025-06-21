@@ -138,6 +138,7 @@ const MarkerCluster = ({
           marker.openPopup();
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const markerElement = (e.target as any)._icon;
         if (markerElement) {
           markerElement.style.filter = "brightness(1.3)";
@@ -202,6 +203,7 @@ const MarkerCluster = ({
       cleanupFunctions.forEach((cleanup) => cleanup());
       map.removeLayer(markers);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events, onEventClick, onEventShare, isDarkMode]);
 
   useEffect(() => {
@@ -216,8 +218,10 @@ const MarkerCluster = ({
             map.setView(coordinates, 15);
 
             setTimeout(() => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               map.eachLayer((layer: any) => {
                 if (layer instanceof L.MarkerClusterGroup) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   layer.getLayers().forEach((marker: any) => {
                     const markerPosition = marker.getLatLng();
                     if (

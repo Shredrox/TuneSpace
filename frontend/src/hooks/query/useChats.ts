@@ -34,6 +34,7 @@ const useChats = (user: string | undefined) => {
     if (chatsData) {
       setUserChats(chatsData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatsData]);
 
   return {

@@ -33,7 +33,7 @@ export default function CopyrightPolicyPage() {
             Copyright Policy
           </h1>
           <p className="text-lg text-muted-foreground mb-6">
-            Protecting creators' rights while fostering a vibrant music
+            Protecting creators&apos; rights while fostering a vibrant music
             community. Learn about our copyright policies and DMCA procedures.
           </p>
           <p className="text-sm text-muted-foreground">
@@ -68,8 +68,8 @@ export default function CopyrightPolicyPage() {
                 <p>
                   As a platform dedicated to supporting underground and emerging
                   artists, we understand the critical importance of protecting
-                  creators' rights while fostering a community where music can
-                  be discovered and shared responsibly.
+                  creators&apos; rights while fostering a community where music
+                  can be discovered and shared responsibly.
                 </p>
                 <p className="text-sm text-muted-foreground">
                   We take copyright infringement seriously and have implemented
@@ -164,8 +164,8 @@ export default function CopyrightPolicyPage() {
                       authorized
                     </li>
                     <li>
-                      A statement that the information is accurate and you're
-                      authorized to act
+                      A statement that the information is accurate and
+                      you&apos;re authorized to act
                     </li>
                   </ul>
                 </div>
@@ -280,10 +280,10 @@ export default function CopyrightPolicyPage() {
                     <li>We respond promptly to valid takedown requests</li>
                     <li>We implement a repeat infringer policy</li>
                     <li>
-                      We don't have actual knowledge of infringing activity
+                      We don&apos;t have actual knowledge of infringing activity
                     </li>
                     <li>
-                      We don't receive financial benefit from infringing
+                      We don&apos;t receive financial benefit from infringing
                       activity
                     </li>
                   </ul>
@@ -335,8 +335,8 @@ export default function CopyrightPolicyPage() {
                     <li>Effect of use on the market for the original work</li>
                   </ul>
                   <p className="text-sm text-muted-foreground mt-4">
-                    Fair use is determined case-by-case and doesn't guarantee
-                    protection from copyright claims.
+                    Fair use is determined case-by-case and doesn&apos;t
+                    guarantee protection from copyright claims.
                   </p>
                 </div>
 
@@ -524,7 +524,9 @@ export default function CopyrightPolicyPage() {
                       Understand the difference between streaming and download
                       rights
                     </li>
-                    <li>When in doubt, seek legal advice or don't upload</li>
+                    <li>
+                      When in doubt, seek legal advice or don&apos;t upload
+                    </li>
                   </ul>
                 </div>
 

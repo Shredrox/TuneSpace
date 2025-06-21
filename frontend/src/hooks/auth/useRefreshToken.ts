@@ -34,7 +34,7 @@ const useRefreshToken = () => {
       const data = await refreshSpotifyToken();
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       console.log("Spotify token refreshed successfully");
     },
     onError: (error) => {

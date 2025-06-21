@@ -64,6 +64,7 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
     } else if (!auth.accessToken && connection) {
       disconnectFromHub();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.username, auth.accessToken]);
 
   useEffect(() => {

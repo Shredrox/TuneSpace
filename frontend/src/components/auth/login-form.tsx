@@ -54,11 +54,13 @@ const Login = () => {
       });
 
       router.push("/home");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       handleRequestError(error);
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRequestError = (error: any) => {
     if (!error?.response) {
       setError("No response from server");

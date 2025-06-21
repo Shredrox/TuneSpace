@@ -66,7 +66,7 @@ export default function NewCategoryPage() {
       await createForumCategory({ name, description, iconName });
       toast.success("Category created!");
       router.push("/forums");
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to create category");
     }
   };

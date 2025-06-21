@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
@@ -51,7 +52,6 @@ const HomeDashboard = () => {
   const getTodayHours = () => todayStats?.totalHoursPlayed || 0;
   const getThisWeekHours = () => thisWeekStats?.totalHoursPlayed || 0;
   const getTodayTracks = () => todayStats?.tracks?.slice(0, 6) || [];
-  const getRecentTracks = () => thisWeekStats?.tracks?.slice(0, 10);
 
   const formatFollowerCount = (count: number): string => {
     if (count >= 1000000000) {
@@ -76,7 +76,7 @@ const HomeDashboard = () => {
           Welcome back, {auth.username}! 🎵
         </h1>
         <p className="text-muted-foreground mt-2 text-lg">
-          Ready to discover your next favorite song? Let's dive into your
+          Ready to discover your next favorite song? Let&apos;s dive into your
           musical journey.
         </p>
         {(getTodayHours() > 0 || getThisWeekHours() > 0) && (
@@ -116,7 +116,7 @@ const HomeDashboard = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   <Headphones className="h-4 w-4 text-green-600 group-hover:animate-pulse" />
-                  Today's Listening
+                  Today&apos;s Listening
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -235,14 +235,14 @@ const HomeDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <Play className="h-5 w-5 text-green-500" />
-                Today's Listening
+                Today&apos;s Listening
               </h2>
               {getTodayTracks().length > 0 && (
                 <Badge
                   variant="outline"
                   className="text-xs bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800"
                 >
-                  Today's picks
+                  Today&apos;s picks
                 </Badge>
               )}
             </div>
@@ -251,7 +251,7 @@ const HomeDashboard = () => {
                 <div className="text-center">
                   <Loader2 className="h-8 w-8 animate-spin text-green-500 mx-auto mb-3" />
                   <span className="text-muted-foreground">
-                    Loading today's music...
+                    Loading today&apos;s music...
                   </span>
                 </div>
               </div>
@@ -549,7 +549,7 @@ const HomeDashboard = () => {
         </TabsContent>
         <TabsContent value="today" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Today's Listening</h2>
+            <h2 className="text-xl font-semibold">Today&apos;s Listening</h2>
             {todayStats && (
               <div className="text-sm text-muted-foreground">
                 {todayStats.totalHoursPlayed}h • {todayStats.totalPlays} plays
@@ -560,7 +560,7 @@ const HomeDashboard = () => {
           {isTodayStatsLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Loading today's statistics...</span>
+              <span className="ml-2">Loading today&apos;s statistics...</span>
             </div>
           ) : todayStats?.tracks?.length && todayStats?.tracks?.length > 0 ? (
             <div className="space-y-3">
@@ -627,7 +627,7 @@ const HomeDashboard = () => {
           {isThisWeekStatsLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Loading this week's music...</span>
+              <span className="ml-2">Loading this week&apos;s music...</span>
             </div>
           ) : (
             <div className="space-y-3">

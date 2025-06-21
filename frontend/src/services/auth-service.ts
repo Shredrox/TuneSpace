@@ -56,7 +56,7 @@ export const checkCurrentUser = async (): Promise<AuthResponse | null> => {
       role: response.data.role,
       isExternalProvider: !!response.data.externalProvider,
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 };

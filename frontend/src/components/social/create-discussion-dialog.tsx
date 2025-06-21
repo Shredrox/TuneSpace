@@ -70,7 +70,7 @@ const CreateDiscussionDialog = ({
       setCategoryId("");
 
       router.push(`/forums/${categoryId}`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to create discussion. Please try again.");
     }
   };

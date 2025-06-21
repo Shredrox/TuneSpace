@@ -25,6 +25,7 @@ import QuickShareButton from "../discovery/quick-share-button";
 
 interface BandShowcaseProps {
   band: Band;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   spotifyData?: any;
 }
 

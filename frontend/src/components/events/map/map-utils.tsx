@@ -49,7 +49,7 @@ export const formatDate = (dateString: string): string => {
       month: "long",
       day: "numeric",
     });
-  } catch (e) {
+  } catch {
     return dateString;
   }
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -58,6 +59,7 @@ const ShareSongModal = ({ isOpen, onClose, song }: ShareSongModalProps) => {
   const { createPost, isCreating: isCreatingPost } =
     useForumThread(selectedThreadId);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function generateRichSongPost(song: any) {
     let content = `# 🎵 ${song.title}\n### by **${song.artist}**\n\n`;
 
@@ -96,6 +98,7 @@ const ShareSongModal = ({ isOpen, onClose, song }: ShareSongModalProps) => {
     return content;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function generateSimpleSongPost(song: any) {
     let content = `Just discovered "${song.title}" by ${song.artist} and had to share!\n\n`;
 
@@ -148,7 +151,7 @@ const ShareSongModal = ({ isOpen, onClose, song }: ShareSongModalProps) => {
       }
 
       onClose();
-    } catch (error) {
+    } catch {
       toast.error(
         `Failed to ${
           shareMode === "new" ? "create thread" : "post to thread"
@@ -276,7 +279,7 @@ const ShareSongModal = ({ isOpen, onClose, song }: ShareSongModalProps) => {
                       name="shareMode"
                       value="new"
                       checked={shareMode === "new"}
-                      onChange={(e) => setShareMode("new")}
+                      onChange={() => setShareMode("new")}
                       className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                     />
                     <label
@@ -293,7 +296,7 @@ const ShareSongModal = ({ isOpen, onClose, song }: ShareSongModalProps) => {
                       name="shareMode"
                       value="existing"
                       checked={shareMode === "existing"}
-                      onChange={(e) => setShareMode("existing")}
+                      onChange={() => setShareMode("existing")}
                       className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                     />
                     <label

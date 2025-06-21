@@ -39,6 +39,7 @@ export const getBandChatById = async (
   try {
     const response = await httpClient.get(`/BandChat/${chatId}`);
     return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.response?.status === 404) {
       return null;
@@ -53,6 +54,7 @@ export const checkBandChat = async (
   try {
     const response = await httpClient.get(`/BandChat/check/${bandId}`);
     return response.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (error.response?.status === 404) {
       return null;

@@ -13,7 +13,6 @@ import {
 } from "../shadcn/dialog";
 import { Textarea } from "../shadcn/textarea";
 import { DatePicker } from "../date-picker";
-import { format } from "date-fns";
 import useEvents from "@/hooks/query/useEvents";
 
 interface AddEventDialogProps {
@@ -24,7 +23,7 @@ const AddEventDialog = ({ bandId }: AddEventDialogProps) => {
   const { addEvent } = useEvents(bandId || "");
 
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({
+  const [form, setForm] = useState({
     bandId: bandId,
     title: "",
     description: "",
@@ -40,6 +39,7 @@ const AddEventDialog = ({ bandId }: AddEventDialogProps) => {
     ticketUrl: "",
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [locations, setLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -52,13 +52,9 @@ const AddEventDialog = ({ bandId }: AddEventDialogProps) => {
 
   const [time, setTime] = useState<string>("10:00");
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleLocationSelect = (location: any) => {
     const { display_name, lat, lon } = location;
-    const addressParts = display_name.split(", ");
-
-    const venue = addressParts[0] || "";
-    const city = addressParts[1] || "";
-    const country = addressParts[addressParts.length - 1] || "";
 
     setForm({
       ...form,
@@ -96,6 +92,7 @@ const AddEventDialog = ({ bandId }: AddEventDialogProps) => {
     }, 800);
 
     return () => clearTimeout(delayDebounce);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.venue, form.city, form.country]);
 
   const handleSubmit = async () => {

@@ -36,7 +36,7 @@ const ChatInterface = ({ chat }: ChatInterfaceProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const chatUser =
-    auth.username == chat?.user1Name ? chat?.user2Name : chat?.user1Name!;
+    auth.username == chat?.user1Name ? chat?.user2Name : chat?.user1Name;
   const chatUserInitial = chatUser?.charAt(0).toUpperCase();
 
   const chatUserAvatar =

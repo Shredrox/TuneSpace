@@ -1,4 +1,3 @@
-import Loading from "@/components/fallback/loading";
 import { SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import { cookies } from "next/headers";
 import httpClient from "@/services/http-client";

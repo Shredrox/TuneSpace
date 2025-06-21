@@ -29,7 +29,7 @@ const useBandData = (userId: string) => {
     error: bandForumThreadsError,
   } = useQuery({
     queryKey: ["bandForumThreads", band?.id],
-    queryFn: () => fetchBandThreads(band?.id!),
+    queryFn: () => fetchBandThreads(band?.id || ""),
     enabled: !!band && !!band?.id,
   });
 
