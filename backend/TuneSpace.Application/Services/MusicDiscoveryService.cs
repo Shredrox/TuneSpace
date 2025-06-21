@@ -886,7 +886,7 @@ internal class MusicDiscoveryService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get Bandcamp artists by location: {Location}", location);
+            _logger.LogError(ex, "Failed to get Bandcamp artists by location");
             return [];
         }
     }

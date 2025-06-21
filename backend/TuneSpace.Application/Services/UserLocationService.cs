@@ -41,9 +41,8 @@ internal class UserLocationService(
             _logger.LogWarning("IP geolocation returned unsuccessful status or empty country");
             return GetDefaultLocation();
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Error detecting location by IP: {IpAddress}", ipAddress);
             return GetDefaultLocation();
         }
     }
@@ -84,7 +83,7 @@ internal class UserLocationService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting location from coordinates: {Latitude}, {Longitude}", latitude, longitude);
+            _logger.LogError(ex, "Error getting location from coordinates.");
             return GetDefaultLocation();
         }
     }
