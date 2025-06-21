@@ -6,6 +6,8 @@ import type {
   EnhancedRecommendationsResponse,
   RecommendationFeedbackResponse,
   BatchRecommendationFeedbackResponse,
+  UserLocation,
+  UserPreferences,
 } from "@/interfaces/music-discovery";
 
 const baseUrl = `${BASE_URL}/MusicDiscovery`;
@@ -71,4 +73,86 @@ export const trackBatchRecommendationFeedback = async (
     batchFeedback
   );
   return response.data;
+};
+
+export const getRecommendationsByPreferences = async (
+  preferences: UserPreferences
+): Promise<any> => {
+  const response = await httpClient.post(
+    `${baseUrl}/recommendations/preferences`,
+    preferences
+  );
+  return response.data;
+};
+
+export const getEnhancedRecommendationsByPreferences = async (
+  preferences: UserPreferences
+): Promise<EnhancedRecommendationsResponse> => {
+  const response = await httpClient.post(
+    `${baseUrl}/recommendations/enhanced/preferences`,
+    preferences
+  );
+  return response.data;
+};
+
+export const getCurrentLocation = async (): Promise<{
+  latitude: number;
+  longitude: number;
+} | null> => {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.warn("Geolocation error:", error);
+        resolve(null);
+      },
+      {
+        timeout: 10000,
+        maximumAge: 300000,
+        enableHighAccuracy: false,
+      }
+    );
+  });
+};
+
+export const getLocationFromCoordinates = async (
+  latitude: number,
+  longitude: number
+): Promise<UserLocation | null> => {
+  try {
+    const response = await httpClient.get(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
+    );
+
+    const data = response.data;
+
+    if (data.address) {
+      return {
+        country: data.address.country || "Unknown",
+        city:
+          data.address.city ||
+          data.address.town ||
+          data.address.village ||
+          "Unknown",
+        latitude,
+        longitude,
+        detectionMethod: "coordinates",
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.warn("Reverse geocoding error:", error);
+    return null;
+  }
 };

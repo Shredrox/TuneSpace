@@ -18,7 +18,7 @@ namespace TuneSpace.Application.Services;
 /// 1. User Data Collection - Gathers Spotify listening history and preferences
 /// 2. Genre Analysis - Analyzes and enriches genres based on listening patterns
 /// 3. Recommendation Sources - Fetches recommendations from various sources in parallel:
-///    - Local bands (MusicBrainz)
+///    - Local bands (MusicBrainz + Bandcamp)
 ///    - Registered bands (internal database)
 ///    - Underground/new release artists (Spotify search)
 ///    - AI recommendations (Enhanced AI or RAG)
@@ -36,7 +36,7 @@ internal class MusicDiscoveryService(
     IServiceProvider serviceProvider,
     ILogger<MusicDiscoveryService> logger) : IMusicDiscoveryService
 {
-    private static readonly ConcurrentDictionary<string, DateTime> PreviouslyRecommendedBands = new();
+    private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, DateTime>> UserRecommendationHistory = new();
     private readonly ISpotifyService _spotifyService = spotifyService;
     private readonly IArtistDiscoveryService _artistDiscoveryService = artistDiscoveryService;
     private readonly IDataEnrichmentService _dataEnrichmentService = dataEnrichmentService;
@@ -45,12 +45,12 @@ internal class MusicDiscoveryService(
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly ILogger<MusicDiscoveryService> _logger = logger;
 
-    async Task<List<BandModel>> IMusicDiscoveryService.GetBandRecommendationsAsync(string spotifyAccessToken, string userId, List<string> genres, string location)
+    async Task<List<BandModel>> IMusicDiscoveryService.GetBandRecommendationsAsync(string? spotifyAccessToken, string userId, List<string> genres, string location)
     {
         return await GetBandRecommendationsInternalAsync(spotifyAccessToken, userId, genres, location, useEnhancedAI: false);
     }
 
-    async Task<List<BandModel>> IMusicDiscoveryService.GetEnhancedBandRecommendationsAsync(string spotifyAccessToken, string userId, List<string> genres, string location)
+    async Task<List<BandModel>> IMusicDiscoveryService.GetEnhancedBandRecommendationsAsync(string? spotifyAccessToken, string userId, List<string> genres, string location)
     {
         return await GetBandRecommendationsInternalAsync(spotifyAccessToken, userId, genres, location, useEnhancedAI: true);
     }
@@ -66,22 +66,25 @@ internal class MusicDiscoveryService(
     /// 5. Apply adaptive scoring algorithms with confidence boosting
     /// 6. Apply final processing (diversity, deduplication, cooldown management)
     /// </summary>
-    private async Task<List<BandModel>> GetBandRecommendationsInternalAsync(string spotifyAccessToken, string userId, List<string> genres, string location, bool useEnhancedAI)
+    private async Task<List<BandModel>> GetBandRecommendationsInternalAsync(string? spotifyAccessToken, string userId, List<string> genres, string location, bool useEnhancedAI)
     {
         var userData = await CollectUserDataAsync(spotifyAccessToken);
 
         var enrichedGenres = await AnalyzeAndEnrichGenresAsync(spotifyAccessToken, userData, genres);
 
         var recommendationSources = await GatherRecommendationSourcesAsync(
-            spotifyAccessToken, userId, enrichedGenres, location, useEnhancedAI, userData);
+            spotifyAccessToken, userId, enrichedGenres, location, useEnhancedAI, userData
+        );
 
         var processedRecommendations = await ProcessAndEnrichRecommendationsAsync(
-            recommendationSources, userData.TopArtists, enrichedGenres);
+            recommendationSources, userData.TopArtists, enrichedGenres
+        );
 
         var scoredRecommendations = await ScoreAndRankRecommendationsAsync(
-            processedRecommendations, enrichedGenres, userId, location, userData.TopArtists, useEnhancedAI);
+            processedRecommendations, enrichedGenres, userId, location, userData.TopArtists, useEnhancedAI
+        );
 
-        var finalRecommendations = await ApplyFinalProcessingAsync(scoredRecommendations, userData.KnownArtistNames);
+        var finalRecommendations = await ApplyFinalProcessingAsync(scoredRecommendations, userId);
 
         return finalRecommendations;
     }
@@ -136,7 +139,7 @@ internal class MusicDiscoveryService(
             {
                 var feedback = new RecommendationFeedback
                 {
-                    UserId = userId,
+                    UserId = Guid.Parse(userId),
                     BandName = artistName,
                     FeedbackType = ConvertInteractionTypeToFeedbackType(interactionType),
                     ExplicitRating = rating,
@@ -168,7 +171,7 @@ internal class MusicDiscoveryService(
                 {
                     var feedback = new RecommendationFeedback
                     {
-                        UserId = userId,
+                        UserId = Guid.Parse(userId),
                         BandName = artistName,
                         FeedbackType = ConvertInteractionTypeToFeedbackType(interactionType),
                         ExplicitRating = rating,
@@ -225,39 +228,62 @@ internal class MusicDiscoveryService(
         List<BandModel> CollaborativeRecommendations);
 
     /// <summary>
-    /// Step 1: Collect user data from Spotify
+    /// Step 1: Collect user data from Spotify or use mock data for manual preferences
     /// </summary>
-    private async Task<UserData> CollectUserDataAsync(string spotifyAccessToken)
+    private async Task<UserData> CollectUserDataAsync(string? spotifyAccessToken)
     {
-        var recentlyPlayedTracksTask = _spotifyService.GetUserRecentlyPlayedTracksAsync(spotifyAccessToken);
-        var followedArtistsTask = _spotifyService.GetUserFollowedArtistsAsync(spotifyAccessToken);
-        var topArtistsTask = _spotifyService.GetUserTopArtistsAsync(spotifyAccessToken);
-
-        await Task.WhenAll(recentlyPlayedTracksTask, followedArtistsTask, topArtistsTask);
-
-        var recentlyPlayedTracks = await recentlyPlayedTracksTask;
-        var followedArtists = await followedArtistsTask;
-        var topArtists = await topArtistsTask;
-
-        var knownArtistNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var artist in followedArtists)
+        if (string.IsNullOrEmpty(spotifyAccessToken))
         {
-            knownArtistNames.Add(artist.Name);
+            return new UserData(
+                RecentlyPlayedTracks: [],
+                FollowedArtists: [],
+                TopArtists: [],
+                KnownArtistNames: []
+            );
         }
 
-        foreach (var artist in topArtists)
+        try
         {
-            knownArtistNames.Add(artist.Name);
-        }
+            var recentlyPlayedTracksTask = _spotifyService.GetUserRecentlyPlayedTracksAsync(spotifyAccessToken);
+            var followedArtistsTask = _spotifyService.GetUserFollowedArtistsAsync(spotifyAccessToken);
+            var topArtistsTask = _spotifyService.GetUserTopArtistsAsync(spotifyAccessToken);
 
-        return new UserData(recentlyPlayedTracks, followedArtists, topArtists, knownArtistNames);
+            await Task.WhenAll(recentlyPlayedTracksTask, followedArtistsTask, topArtistsTask);
+
+            var recentlyPlayedTracks = await recentlyPlayedTracksTask;
+            var followedArtists = await followedArtistsTask;
+            var topArtists = await topArtistsTask;
+
+            var knownArtistNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var artist in followedArtists)
+            {
+                knownArtistNames.Add(artist.Name);
+            }
+
+            foreach (var artist in topArtists)
+            {
+                knownArtistNames.Add(artist.Name);
+            }
+
+            return new UserData(recentlyPlayedTracks, followedArtists, topArtists, knownArtistNames);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to collect Spotify user data, using mock data");
+            return new UserData(
+                RecentlyPlayedTracks: [],
+                FollowedArtists: [],
+                TopArtists: [],
+                KnownArtistNames: []
+            );
+        }
     }
 
     /// <summary>
-    /// Step 2: Analyze and enrich genres based on user's listening history
+    /// Step 2: Analyze and enrich genres based on user's listening history or provided genres
     /// </summary>
-    private async Task<List<string>> AnalyzeAndEnrichGenresAsync(string spotifyAccessToken, UserData userData, List<string> baseGenres)
+    private async Task<List<string>> AnalyzeAndEnrichGenresAsync(string? spotifyAccessToken, UserData userData, List<string> baseGenres)
     {
         var followedArtistsGenres = userData.FollowedArtists
             .SelectMany(artist => artist.Genres ?? [])
@@ -270,55 +296,113 @@ internal class MusicDiscoveryService(
             .Distinct()
             .ToList();
 
-        var recentArtistsWithGenres = await _artistDiscoveryService.GetArtistDetailsInBatchesAsync(spotifyAccessToken, recentlyPlayedArtistIds);
+        List<string>? recentlyPlayedGenres = null;
 
-        var recentlyPlayedGenres = recentArtistsWithGenres?
-            .SelectMany(artist => artist.Genres ?? [])
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        if (!string.IsNullOrEmpty(spotifyAccessToken) && recentlyPlayedArtistIds.Count > 0)
+        {
+            try
+            {
+                var recentArtistsWithGenres = await _artistDiscoveryService.GetArtistDetailsInBatchesAsync(spotifyAccessToken, recentlyPlayedArtistIds);
+
+                recentlyPlayedGenres = recentArtistsWithGenres?
+                    .SelectMany(artist => artist.Genres ?? [])
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to get recently played genres, using provided genres only");
+            }
+        }
 
         var combinedGenres = new List<string>();
+        combinedGenres.AddRange(baseGenres);
+        combinedGenres.AddRange(followedArtistsGenres);
+
         if (recentlyPlayedGenres != null)
         {
             combinedGenres.AddRange(recentlyPlayedGenres);
         }
-        combinedGenres.AddRange(followedArtistsGenres.Where(g => !combinedGenres.Contains(g, StringComparer.OrdinalIgnoreCase)));
 
-        return combinedGenres.Count > 0 ? combinedGenres : baseGenres;
+        return [.. combinedGenres
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(20)];
     }
 
     /// <summary>
     /// Step 3: Gather recommendations from all sources in parallel
     /// </summary>
-    private async Task<RecommendationSources> GatherRecommendationSourcesAsync(string spotifyAccessToken, string userId, List<string> genres, string location, bool useEnhancedAI, UserData userData)
+    private async Task<RecommendationSources> GatherRecommendationSourcesAsync(string? spotifyAccessToken, string userId, List<string> genres, string location, bool useEnhancedAI, UserData userData)
     {
-        var undergroundArtistsTask = _artistDiscoveryService.FindArtistsByQueryAsync(
-            spotifyAccessToken, genres, "{genre}", MusicDiscoveryConstants.UndergroundArtistsToFetch);
+        // Check if user has low recommendation history and needs more variety
+        var userHistory = UserRecommendationHistory.GetOrAdd(userId, _ => new ConcurrentDictionary<string, DateTime>());
+        var recentRecommendationsCount = userHistory.Count(kvp => (DateTime.UtcNow - kvp.Value).TotalDays <= 7);
+        var needMoreVariety = recentRecommendationsCount > (MusicDiscoveryConstants.MaxRecommendations * 2);
 
-        var newReleasesArtistsTask = _artistDiscoveryService.FindHipsterAndNewArtistsAsync(
-            spotifyAccessToken, "{genre}", MusicDiscoveryConstants.UndergroundArtistsToFetch / 2);
+        // Increase limits if we need more variety
+        var localBandsLimit = needMoreVariety ? 30 : 20;
+        var undergroundLimit = needMoreVariety ? 30 : MusicDiscoveryConstants.UndergroundArtistsToFetch;
+        var aiLimit = needMoreVariety ? 25 : 15;
+        var collaborativeLimit = needMoreVariety ? 30 : 20;
 
         var localBandsTask = GetLocalBandsAsync(location, genres);
         var registeredBandsTask = GetRegisteredBandsAsync(genres, location);
         var aiRecommendationsTask = GetAIRecommendationsAsync(spotifyAccessToken, userId, userData.TopArtists, genres, location, useEnhancedAI);
-        var collaborativeRecommendationsTask = GetCollaborativeRecommendationsAsync(userId, spotifyAccessToken);
 
-        await Task.WhenAll(localBandsTask, registeredBandsTask, undergroundArtistsTask, newReleasesArtistsTask, aiRecommendationsTask, collaborativeRecommendationsTask);
+        Task<List<BandModel>> undergroundArtistsTask;
+        Task<List<BandModel>> hipsterAndNewReleasesTask;
+        Task<List<BandModel>> collaborativeRecommendationsTask;
+        Task<List<BandModel>> additionalGenreVariationsTask;
+
+        if (!string.IsNullOrEmpty(spotifyAccessToken))
+        {
+            undergroundArtistsTask = _artistDiscoveryService.FindArtistsByQueryAsync(spotifyAccessToken, genres, "{genre}", undergroundLimit);
+            hipsterAndNewReleasesTask = _artistDiscoveryService.FindHipsterAndNewArtistsAsync(spotifyAccessToken, genres, undergroundLimit);
+            collaborativeRecommendationsTask = GetCollaborativeRecommendationsAsync(userId, spotifyAccessToken);
+
+            additionalGenreVariationsTask = GetAdditionalVarietyAsync(spotifyAccessToken, genres, needMoreVariety ? 20 : 10);
+        }
+        else
+        {
+            undergroundArtistsTask = Task.FromResult(new List<BandModel>());
+            hipsterAndNewReleasesTask = Task.FromResult(new List<BandModel>());
+            collaborativeRecommendationsTask = Task.FromResult(new List<BandModel>());
+            additionalGenreVariationsTask = Task.FromResult(new List<BandModel>());
+        }
+
+        await Task.WhenAll(
+            localBandsTask,
+            registeredBandsTask,
+            undergroundArtistsTask,
+            hipsterAndNewReleasesTask,
+            aiRecommendationsTask,
+            collaborativeRecommendationsTask,
+            additionalGenreVariationsTask
+        );
 
         var localBands = await localBandsTask;
         var registeredBands = await registeredBandsTask;
         var undergroundArtists = await undergroundArtistsTask;
-        var newReleaseArtists = await newReleasesArtistsTask;
+        var newReleaseArtists = await hipsterAndNewReleasesTask;
         var aiResult = await aiRecommendationsTask;
         var collaborativeRecommendations = await collaborativeRecommendationsTask;
+        var additionalVariations = await additionalGenreVariationsTask;
 
-        undergroundArtists.AddRange(newReleaseArtists);
+        var allUndergroundArtists = new List<BandModel>();
+        allUndergroundArtists.AddRange(undergroundArtists);
+        allUndergroundArtists.AddRange(newReleaseArtists);
+        allUndergroundArtists.AddRange(additionalVariations);
 
-        return new RecommendationSources(localBands, registeredBands, undergroundArtists, newReleaseArtists, aiResult, collaborativeRecommendations);
+        var deduplicatedUndergroundArtists = allUndergroundArtists
+            .GroupBy(b => b.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .ToList();
+
+        return new RecommendationSources(localBands, registeredBands, deduplicatedUndergroundArtists, [], aiResult, collaborativeRecommendations);
     }
 
     /// <summary>
-    /// Helper method to get local bands
+    /// Helper method to get local bands from both MusicBrainz and Bandcamp
     /// </summary>
     private async Task<List<BandModel>> GetLocalBandsAsync(string location, List<string> genres)
     {
@@ -326,7 +410,25 @@ internal class MusicDiscoveryService(
         {
             using var scope = _serviceProvider.CreateScope();
             var musicBrainzClient = scope.ServiceProvider.GetRequiredService<IMusicBrainzClient>();
-            return await musicBrainzClient.GetBandsByLocationAsync(location, 20, genres);
+            var bandcampClient = scope.ServiceProvider.GetRequiredService<IBandcampClient>();
+
+            var musicBrainzTask = musicBrainzClient.GetBandsByLocationAsync(location, 15, genres);
+            var bandcampTask = GetBandcampArtistsByLocationAsync(bandcampClient, location, genres, 10);
+
+            await Task.WhenAll(musicBrainzTask, bandcampTask);
+
+            var musicBrainzBands = await musicBrainzTask;
+            var bandcampBands = await bandcampTask;
+
+            var allBands = new List<BandModel>();
+            allBands.AddRange(musicBrainzBands);
+            allBands.AddRange(bandcampBands);
+
+            return allBands
+                .GroupBy(b => b.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .Take(20)
+                .ToList();
         });
     }
 
@@ -346,8 +448,7 @@ internal class MusicDiscoveryService(
     /// <summary>
     /// Helper method to get AI recommendations
     /// </summary>
-    private async Task<(List<BandModel>, double, string)> GetAIRecommendationsAsync(
-        string spotifyAccessToken, string userId, List<SpotifyArtistDTO> topArtists, List<string> genres, string location, bool useEnhancedAI)
+    private async Task<(List<BandModel>, double, string)> GetAIRecommendationsAsync(string? spotifyAccessToken, string userId, List<SpotifyArtistDTO> topArtists, List<string> genres, string location, bool useEnhancedAI)
     {
         return await Task.Run(async () =>
         {
@@ -357,17 +458,19 @@ internal class MusicDiscoveryService(
                 var aiRecommendationService = scope.ServiceProvider.GetRequiredService<IAIRecommendationService>();
                 var topArtistNames = topArtists.Take(10).Select(a => a.Name).ToList();
 
+                var effectiveSpotifyToken = spotifyAccessToken ?? "no_spotify_access";
+
                 if (useEnhancedAI)
                 {
-                    var enhancedResult = await aiRecommendationService.GetEnhancedRecommendationsWithConfidenceAsync(
-                        spotifyAccessToken, userId, topArtistNames, genres, location, 15);
+                    var enhancedResult = await aiRecommendationService.GetEnhancedRecommendationsWithConfidenceAsync(effectiveSpotifyToken, userId, topArtistNames, genres, location, 15);
 
                     var bandModels = enhancedResult.Recommendations.Select(rec => new BandModel
                     {
                         Id = "",
                         Name = rec.ArtistName,
                         RelevanceScore = rec.ConfidenceScore,
-                        DataSource = $"Enhanced AI (Confidence: {rec.ConfidenceScore:F2})",
+                        DataSource = $"Enhanced AI (Confidence: {rec.ConfidenceScore:F2})" +
+                                   (string.IsNullOrEmpty(spotifyAccessToken) ? " - Manual Preferences" : ""),
                         Description = rec.Reasoning,
                         Genres = rec.MatchingGenres,
                         ExternalUrl = rec.ExternalUrl,
@@ -382,23 +485,48 @@ internal class MusicDiscoveryService(
                 }
                 else
                 {
-                    var ragRecs = await aiRecommendationService.GetRAGEnhancedRecommendationsAsync(
-                        spotifyAccessToken, userId, topArtistNames, genres, location, 15);
+                    var ragRecs = await aiRecommendationService.GetRAGEnhancedRecommendationsAsync(effectiveSpotifyToken, userId, topArtistNames, genres, location, 15);
+
+                    if (string.IsNullOrEmpty(spotifyAccessToken))
+                    {
+                        foreach (var band in ragRecs)
+                        {
+                            band.DataSource = (band.DataSource ?? "RAG Enhanced") + " - Manual Preferences";
+                        }
+                    }
 
                     return (ragRecs, 0.7, "RAG Enhanced Recommendations");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"AI recommendations failed for user {userId}, falling back to basic RAG: {ex.Message}");
+                _logger.LogError(ex, "AI recommendation service failed");
 
-                using var scope = _serviceProvider.CreateScope();
-                var aiRecommendationService = scope.ServiceProvider.GetRequiredService<IAIRecommendationService>();
-                var topArtistNames = topArtists.Take(10).Select(a => a.Name).ToList();
-                var fallbackRecs = await aiRecommendationService.GetRAGEnhancedRecommendationsAsync(
-                    spotifyAccessToken, userId, topArtistNames, genres, location, 15);
+                try
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var aiRecommendationService = scope.ServiceProvider.GetRequiredService<IAIRecommendationService>();
+                    var topArtistNames = topArtists.Take(10).Select(a => a.Name).ToList();
+                    var effectiveSpotifyToken = spotifyAccessToken ?? "no_spotify_access";
 
-                return (fallbackRecs, 0.5, "Fallback recommendations due to AI service unavailability");
+                    var fallbackRecs = await aiRecommendationService.GetRAGEnhancedRecommendationsAsync(effectiveSpotifyToken, userId, topArtistNames, genres, location, 15);
+
+                    if (string.IsNullOrEmpty(spotifyAccessToken))
+                    {
+                        foreach (var band in fallbackRecs)
+                        {
+                            band.DataSource = (band.DataSource ?? "Fallback RAG") + " - Manual Preferences";
+                        }
+                    }
+
+                    return (fallbackRecs, 0.5, "Fallback recommendations due to AI service unavailability");
+                }
+                catch (Exception fallbackEx)
+                {
+                    _logger.LogError(fallbackEx, "Fallback AI recommendation service also failed");
+
+                    return ([], 0.0, "AI recommendations unavailable");
+                }
             }
         });
     }
@@ -406,30 +534,35 @@ internal class MusicDiscoveryService(
     /// <summary>
     /// Helper method to get collaborative filtering recommendations
     /// </summary>
-    private async Task<List<BandModel>> GetCollaborativeRecommendationsAsync(string userId, string spotifyAccessToken)
+    private async Task<List<BandModel>> GetCollaborativeRecommendationsAsync(string userId, string? spotifyAccessToken)
     {
         return await Task.Run(async () =>
         {
             try
             {
-                await _collaborativeFilteringService.UpdateUserListeningBehaviorAsync(userId, spotifyAccessToken);
-                var collabRecs = await _collaborativeFilteringService.GetCollaborativeRecommendationsAsync(userId, 20);
-
-                return collabRecs.Select(rec => new BandModel
+                if (!string.IsNullOrEmpty(spotifyAccessToken))
                 {
-                    Id = rec.ArtistId,
-                    Name = rec.ArtistName,
-                    RelevanceScore = Math.Min(1.0, rec.Score),
-                    DataSource = "Collaborative Filtering",
-                    Description = rec.ReasoningExplanation,
-                    Genres = rec.CommonGenres,
-                    ExternalUrls = new Dictionary<string, string>
+                    await _collaborativeFilteringService.UpdateUserListeningBehaviorAsync(userId, spotifyAccessToken);
+                    var collabRecs = await _collaborativeFilteringService.GetCollaborativeRecommendationsAsync(userId, 20);
+
+                    return collabRecs.Select(rec => new BandModel
                     {
-                        { "spotify", $"https://open.spotify.com/artist/{rec.ArtistId}" }
-                    },
-                    SimilarToArtistName = rec.RecommendedBySimilarUsers.Count > 0 ?
-                        $"Recommended by {rec.RecommendedBySimilarUsers.Count} similar users" : ""
-                }).ToList();
+                        Id = rec.ArtistId,
+                        Name = rec.ArtistName,
+                        RelevanceScore = Math.Min(1.0, rec.Score),
+                        DataSource = "Collaborative Filtering",
+                        Description = rec.ReasoningExplanation,
+                        Genres = rec.CommonGenres,
+                        ExternalUrls = new Dictionary<string, string>
+                        {
+                            { "spotify", $"https://open.spotify.com/artist/{rec.ArtistId}" }
+                        },
+                        SimilarToArtistName = rec.RecommendedBySimilarUsers.Count > 0 ?
+                            $"Recommended by {rec.RecommendedBySimilarUsers.Count} similar users" : ""
+                    }).ToList();
+                }
+
+                return [];
             }
             catch
             {
@@ -513,24 +646,58 @@ internal class MusicDiscoveryService(
         List<SpotifyArtistDTO> topArtists, bool useEnhancedAI)
     {
         var recommendedBands = new List<BandModel>();
+        var seenBandNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var localScoredBands = await ScoreBandsAdaptivelyAsync(processed.LocalBands, genres, userId, location, topArtists, isRegistered: false);
         var similarScoredBands = await ScoreBandsAdaptivelyAsync(processed.SimilarBands, genres, userId, location, topArtists, isRegistered: false);
         var undergroundScoredBands = await ScoreBandsAdaptivelyAsync(processed.UndergroundArtists, genres, userId, location, topArtists, isRegistered: false, isFromSearch: true);
         var registeredScoredBands = await ScoreBandsAdaptivelyAsync(processed.RegisteredBands, genres, userId, location, topArtists, isRegistered: true);
 
-        recommendedBands.AddRange(localScoredBands);
-        recommendedBands.AddRange(similarScoredBands);
-        recommendedBands.AddRange(undergroundScoredBands);
-        recommendedBands.AddRange(registeredScoredBands);
+        AddUniqueRecommendations(recommendedBands, seenBandNames, localScoredBands);
+        AddUniqueRecommendations(recommendedBands, seenBandNames, similarScoredBands);
+        AddUniqueRecommendations(recommendedBands, seenBandNames, undergroundScoredBands);
+        AddUniqueRecommendations(recommendedBands, seenBandNames, registeredScoredBands);
 
         var aiScoredBands = await ApplyAIScoringAsync(processed.AIResult, genres, userId, location, topArtists, useEnhancedAI);
-        recommendedBands.AddRange(aiScoredBands);
+        AddUniqueRecommendations(recommendedBands, seenBandNames, aiScoredBands);
 
         var collaborativeScoredBands = ApplyCollaborativeScoring(processed.CollaborativeRecommendations, genres, location, topArtists);
-        recommendedBands.AddRange(collaborativeScoredBands);
+        AddUniqueRecommendations(recommendedBands, seenBandNames, collaborativeScoredBands);
 
         return recommendedBands;
+    }
+
+    /// <summary>
+    /// Helper method to add unique recommendations, avoiding duplicates by name
+    /// </summary>
+    private static void AddUniqueRecommendations(List<BandModel> recommendedBands, HashSet<string> seenBandNames, List<BandModel> newBands)
+    {
+        foreach (var band in newBands)
+        {
+            if (!seenBandNames.Contains(band.Name))
+            {
+                seenBandNames.Add(band.Name);
+                recommendedBands.Add(band);
+            }
+            else
+            {
+                var existingBand = recommendedBands.FirstOrDefault(b => string.Equals(b.Name, band.Name, StringComparison.OrdinalIgnoreCase));
+                if (existingBand != null && band.RelevanceScore > existingBand.RelevanceScore)
+                {
+                    existingBand.RelevanceScore = band.RelevanceScore;
+
+                    if (!existingBand.DataSource?.Contains(band.DataSource ?? "") == true)
+                    {
+                        existingBand.DataSource = $"{existingBand.DataSource}, {band.DataSource}";
+                    }
+
+                    if (string.IsNullOrEmpty(existingBand.Description) && !string.IsNullOrEmpty(band.Description))
+                    {
+                        existingBand.Description = band.Description;
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -608,28 +775,216 @@ internal class MusicDiscoveryService(
     /// <summary>
     /// Step 6: Apply final processing (diversity, deduplication, cooldown)
     /// </summary>
-    private Task<List<BandModel>> ApplyFinalProcessingAsync(List<BandModel> scoredRecommendations, HashSet<string> knownArtistNames)
+    private Task<List<BandModel>> ApplyFinalProcessingAsync(List<BandModel> scoredRecommendations, string userId)
     {
+        var deduplicatedRecommendations = scoredRecommendations
+            .GroupBy(b => b.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.OrderByDescending(b => b.RelevanceScore).First())
+            .ToList();
+
+        var userHistory = UserRecommendationHistory.GetOrAdd(userId, _ => new ConcurrentDictionary<string, DateTime>());
+
         var now = DateTime.UtcNow;
-        var keysToRemove = PreviouslyRecommendedBands
-            .Where(kvp => (now - kvp.Value).TotalDays > MusicDiscoveryConstants.RecommendationCooldownDays)
+
+        var keysToRemove = userHistory
+            .Where(kvp => (now - kvp.Value).TotalDays > 7)
             .Select(kvp => kvp.Key)
             .ToList();
 
         foreach (var key in keysToRemove)
         {
-            PreviouslyRecommendedBands.TryRemove(key, out _);
+            userHistory.TryRemove(key, out _);
         }
 
-        var finalRecommendations = _scoringService.ApplyDiversityAndExploration(scoredRecommendations, PreviouslyRecommendedBands);
-
-        finalRecommendations = [.. finalRecommendations.Where(band => !knownArtistNames.Contains(band.Name))];
-
-        foreach (var band in finalRecommendations)
+        var globalHistory = new ConcurrentDictionary<string, DateTime>();
+        foreach (var entry in userHistory)
         {
-            PreviouslyRecommendedBands[band.Name] = now;
+            globalHistory[entry.Key] = entry.Value;
         }
 
-        return Task.FromResult(finalRecommendations);
+        var diverseRecommendations = _scoringService.ApplyDiversityAndExploration(deduplicatedRecommendations, globalHistory);
+
+        diverseRecommendations = ApplyRotationStrategy(diverseRecommendations, userId);
+
+        if (diverseRecommendations.Count < MusicDiscoveryConstants.MaxRecommendations / 2)
+        {
+            var lenientKeysToRemove = userHistory
+                .Where(kvp => (now - kvp.Value).TotalDays > 3)
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            foreach (var key in lenientKeysToRemove)
+            {
+                userHistory.TryRemove(key, out _);
+            }
+
+            globalHistory.Clear();
+            foreach (var entry in userHistory)
+            {
+                globalHistory[entry.Key] = entry.Value;
+            }
+
+            diverseRecommendations = _scoringService.ApplyDiversityAndExploration(deduplicatedRecommendations, globalHistory);
+
+            diverseRecommendations = ApplyRotationStrategy(diverseRecommendations, userId);
+        }
+
+        if (diverseRecommendations.Count < MusicDiscoveryConstants.MaxRecommendations / 3)
+        {
+            var allRecommendations = _scoringService.ApplyDiversityAndExploration(deduplicatedRecommendations, new ConcurrentDictionary<string, DateTime>());
+            diverseRecommendations = [.. allRecommendations.Take(MusicDiscoveryConstants.MaxRecommendations)];
+        }
+
+        foreach (var band in diverseRecommendations)
+        {
+            userHistory[band.Name] = now;
+        }
+
+        CleanupOldUserHistories();
+
+        return Task.FromResult(diverseRecommendations);
+    }
+
+    /// <summary>
+    /// Clean up old user histories to prevent memory leaks
+    /// </summary>
+    private static void CleanupOldUserHistories()
+    {
+        var now = DateTime.UtcNow;
+        var usersToCleanup = new List<string>();
+
+        foreach (var userEntry in UserRecommendationHistory)
+        {
+            if (userEntry.Value.All(historyEntry => (now - historyEntry.Value).TotalDays > 30))
+            {
+                usersToCleanup.Add(userEntry.Key);
+            }
+        }
+
+        foreach (var userId in usersToCleanup)
+        {
+            UserRecommendationHistory.TryRemove(userId, out _);
+        }
+    }
+
+    /// <summary>
+    /// Helper method to get Bandcamp artists by location and convert them to BandModel
+    /// </summary>
+    private async Task<List<BandModel>> GetBandcampArtistsByLocationAsync(IBandcampClient bandcampClient, string location, List<string> genres, int limit)
+    {
+        try
+        {
+            var bandcampArtists = await bandcampClient.DiscoverArtistsByGenresAndLocationAsync(genres, location, "new", limit);
+
+            if (bandcampArtists.Count < limit)
+            {
+                var locationOnlyArtists = await bandcampClient.DiscoverArtistsByLocationAsync(location, limit - bandcampArtists.Count);
+                bandcampArtists.AddRange(locationOnlyArtists);
+            }
+
+            return [.. bandcampArtists.Select(ConvertBandcampToBandModel)];
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get Bandcamp artists by location: {Location}", location);
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Convert BandcampArtistModel to BandModel
+    /// </summary>
+    private static BandModel ConvertBandcampToBandModel(BandcampArtistModel bandcampArtist)
+    {
+        return new BandModel
+        {
+            Name = bandcampArtist.Name,
+            Genres = bandcampArtist.Genres,
+            Location = bandcampArtist.Location ?? "",
+            Description = bandcampArtist.Description ?? "",
+            ImageUrl = bandcampArtist.ImageUrl ?? "",
+            ExternalUrl = bandcampArtist.BandcampUrl,
+            ExternalUrls = new Dictionary<string, string> { { "bandcamp", bandcampArtist.BandcampUrl } },
+            Followers = bandcampArtist.Followers ?? 0,
+            DataSource = "Bandcamp",
+            RelevanceScore = 0.0
+        };
+    }
+
+    /// <summary>
+    /// Get additional recommendations when user needs more variety
+    /// Uses broader search terms and related genres
+    /// </summary>
+    private async Task<List<BandModel>> GetAdditionalVarietyAsync(string spotifyAccessToken, List<string> baseGenres, int limit)
+    {
+        try
+        {
+            var additionalRecommendations = new List<BandModel>();
+
+            var expandedGenres = new List<string>(baseGenres);
+
+            foreach (var genre in baseGenres.Take(3))
+            {
+                if (genre.Contains("rock", StringComparison.OrdinalIgnoreCase))
+                {
+                    expandedGenres.AddRange(["alternative rock", "indie rock", "progressive rock"]);
+                }
+                else if (genre.Contains("metal", StringComparison.OrdinalIgnoreCase))
+                {
+                    expandedGenres.AddRange(["heavy metal", "thrash metal", "doom metal"]);
+                }
+                else if (genre.Contains("electronic", StringComparison.OrdinalIgnoreCase))
+                {
+                    expandedGenres.AddRange(["synthwave", "ambient", "experimental electronic"]);
+                }
+                else if (genre.Contains("pop", StringComparison.OrdinalIgnoreCase))
+                {
+                    expandedGenres.AddRange(["indie pop", "dream pop", "electropop"]);
+                }
+                else if (genre.Contains("jazz", StringComparison.OrdinalIgnoreCase))
+                {
+                    expandedGenres.AddRange(["fusion", "bebop", "contemporary jazz"]);
+                }
+            }
+
+            var queryResults = await _artistDiscoveryService.FindArtistsByQueryAsync(spotifyAccessToken, [.. expandedGenres.Distinct().Take(5)], "{genre}", limit / 2);
+            additionalRecommendations.AddRange(queryResults);
+
+            return [.. additionalRecommendations.DistinctBy(b => b.Name).Take(limit)];
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get additional variety recommendations");
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Implements a rotation system to ensure variety over time
+    /// </summary>
+    private static List<BandModel> ApplyRotationStrategy(List<BandModel> recommendations, string userId)
+    {
+        var userHistory = UserRecommendationHistory.GetOrAdd(userId, _ => new ConcurrentDictionary<string, DateTime>());
+        var now = DateTime.UtcNow;
+
+        var groupedRecommendations = recommendations.GroupBy(r => r.DataSource ?? "Unknown").ToList();
+        var rotatedRecommendations = new List<BandModel>();
+
+        var maxPerSource = Math.Max(1, MusicDiscoveryConstants.MaxRecommendations / Math.Max(1, groupedRecommendations.Count));
+
+        foreach (var group in groupedRecommendations)
+        {
+            var sortedGroup = group
+                .OrderByDescending(r => r.RelevanceScore)
+                .ThenBy(r => userHistory.TryGetValue(r.Name, out DateTime value) ? value : DateTime.MinValue)
+                .Take(maxPerSource + 2)
+                .ToList();
+
+            rotatedRecommendations.AddRange(sortedGroup);
+        }
+
+        return [.. rotatedRecommendations
+            .OrderByDescending(r => r.RelevanceScore)
+            .Take(MusicDiscoveryConstants.MaxRecommendations)];
     }
 }

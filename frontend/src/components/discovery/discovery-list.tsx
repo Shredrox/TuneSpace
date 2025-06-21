@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { BASE_URL, ENDPOINTS, SPOTIFY_ENDPOINTS } from "@/utils/constants";
 import Loading from "../fallback/loading";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import httpClient from "@/services/http-client";
 import { useRouter } from "next/navigation";
 import {
@@ -33,9 +33,12 @@ import {
 } from "../shadcn/tooltip";
 import ExternalArtistModal from "./external-artist-modal";
 import ShareArtistModal from "./share-artist-modal";
+import PreferencesModal from "./preferences-modal";
 import useSpotifyErrorHandler from "@/hooks/error/useSpotifyErrorHandler";
 import useAuth from "@/hooks/auth/useAuth";
 import useAuthInitialization from "@/hooks/auth/useAuthInitialization";
+import { getRecommendationsByPreferences } from "@/services/music-discovery-service";
+import { UserPreferences } from "@/interfaces/music-discovery";
 
 interface DiscoveryArtist {
   id?: string;
@@ -56,7 +59,7 @@ interface DiscoveryArtist {
 const fetchDiscover = async (
   genreSet: Set<string>,
   useLocation: boolean,
-  location: string = "Bulgaria"
+  location: string = "BG"
 ) => {
   const genresParam = Array.from(genreSet).join(",");
   let url = `${ENDPOINTS.RECOMMENDATIONS}?genres=${encodeURIComponent(
@@ -64,7 +67,7 @@ const fetchDiscover = async (
   )}`;
 
   if (useLocation) {
-    url += `&location=${encodeURIComponent(location)}`;
+    url += `&location=${encodeURIComponent(location ?? "")}`;
   }
 
   const response = await httpClient.get(url);
@@ -72,6 +75,7 @@ const fetchDiscover = async (
 };
 
 const DiscoveryList = () => {
+  const { isAuthenticated, isLoggingOut, auth } = useAuth();
   const [useLocation, setUseLocation] = useState(true);
   const [isExternalModalOpen, setIsExternalModalOpen] = useState(false);
   const [selectedExternalArtist, setSelectedExternalArtist] =
@@ -79,13 +83,43 @@ const DiscoveryList = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedArtistToShare, setSelectedArtistToShare] =
     useState<DiscoveryArtist | null>(null);
+  const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
+  const [useManualPreferences, setUseManualPreferences] = useState(() => {
+    return !isAuthenticated || !auth?.isExternalProvider;
+  });
+  const [currentPreferences, setCurrentPreferences] =
+    useState<UserPreferences | null>(() => {
+      if (typeof window !== "undefined") {
+        const savedPreferences = localStorage.getItem(
+          "tuneSpaceManualPreferences"
+        );
+        return savedPreferences ? JSON.parse(savedPreferences) : null;
+      }
+      return null;
+    });
   const router = useRouter();
-
   const { handleSpotifyError, parseSpotifyErrorSilent } =
     useSpotifyErrorHandler();
-
-  const { isAuthenticated, isLoggingOut } = useAuth();
   const { isInitializing } = useAuthInitialization();
+
+  useEffect(() => {
+    const hasSavedPreferences =
+      typeof window !== "undefined" &&
+      localStorage.getItem("tuneSpaceManualPreferences") !== null;
+
+    const shouldUseManual =
+      !isAuthenticated || !auth?.isExternalProvider || hasSavedPreferences;
+    setUseManualPreferences(shouldUseManual);
+  }, [isAuthenticated, auth?.isExternalProvider]);
+
+  useEffect(() => {
+    if (!isAuthenticated && isLoggingOut) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("tuneSpaceManualPreferences");
+      }
+      setCurrentPreferences(null);
+    }
+  }, [isAuthenticated, isLoggingOut]);
 
   const getGenreColor = (genres: string[]) => {
     const primaryGenre = genres[0]?.toLowerCase() || "";
@@ -136,18 +170,57 @@ const DiscoveryList = () => {
     setIsShareModalOpen(true);
   };
 
+  const handlePreferencesSubmit = async (preferences: UserPreferences) => {
+    setCurrentPreferences(preferences);
+    setUseManualPreferences(true);
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        "tuneSpaceManualPreferences",
+        JSON.stringify(preferences)
+      );
+    }
+
+    setIsPreferencesModalOpen(false);
+    refetch();
+  };
+  const handleUseSpotify = () => {
+    setUseManualPreferences(false);
+    setCurrentPreferences(null);
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("tuneSpaceManualPreferences");
+    }
+
+    refetch();
+  };
+
   const {
     data: discovery,
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["discoveryBands", useLocation],
-    queryFn: () => {
-      const genreSet = new Set(["metal", "rock"]);
-      return fetchDiscover(genreSet, useLocation);
+    queryKey: [
+      "discoveryBands",
+      useLocation,
+      useManualPreferences,
+      currentPreferences,
+    ],
+    queryFn: async () => {
+      if (useManualPreferences && currentPreferences) {
+        const response = await getRecommendationsByPreferences(
+          currentPreferences
+        );
+        return response.recommendations || response;
+      } else {
+        const genreSet = new Set(["metal", "rock"]);
+        return fetchDiscover(genreSet, useLocation);
+      }
     },
-    enabled: !isInitializing && isAuthenticated && !isLoggingOut,
+    enabled:
+      !isInitializing &&
+      (!useManualPreferences ? isAuthenticated && !isLoggingOut : true),
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       const spotifyError = parseSpotifyErrorSilent(error);
@@ -179,7 +252,11 @@ const DiscoveryList = () => {
     );
   }
 
-  if (!isAuthenticated && !isLoggingOut) {
+  if (
+    (!isAuthenticated || !auth?.isExternalProvider) &&
+    !currentPreferences &&
+    !isLoggingOut
+  ) {
     return (
       <div className="p-8 bg-secondary/20 rounded-2xl text-center my-6 border border-border/50">
         <div className="flex flex-col items-center gap-4">
@@ -188,17 +265,33 @@ const DiscoveryList = () => {
           </div>
           <div className="text-center max-w-md">
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              Authentication Required
+              Get Music Recommendations
             </h3>
             <p className="text-muted-foreground text-sm mb-4">
-              Sign in to discover new artists based on your musical preferences
-              and listening history.
+              {!isAuthenticated
+                ? "Choose how you'd like to discover new music. Sign in with Spotify for personalized recommendations based on your listening history, or set your preferences manually."
+                : "To get personalized recommendations, you can connect Spotify for automatic preferences or set them up manually."}
             </p>
-            <Button onClick={() => (window.location.href = "/login")}>
-              Sign In
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => (window.location.href = "/login")}>
+                {!isAuthenticated ? "Sign In with Spotify" : "Connect Spotify"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsPreferencesModalOpen(true)}
+              >
+                Set Preferences Manually
+              </Button>
+            </div>
           </div>
         </div>
+        <PreferencesModal
+          isOpen={isPreferencesModalOpen}
+          onClose={() => setIsPreferencesModalOpen(false)}
+          onSubmit={handlePreferencesSubmit}
+          isLoading={isLoading}
+          initialPreferences={currentPreferences}
+        />
       </div>
     );
   }
@@ -260,31 +353,40 @@ const DiscoveryList = () => {
             <div className="font-semibold mb-1">
               {spotifyError.type === "UNAUTHORIZED" ||
               spotifyError.type === "NOT_CONNECTED"
-                ? "Spotify Authentication Required"
+                ? "Spotify Connection Issue"
                 : "Unable to load recommendations"}
             </div>
             <div className="text-sm text-muted-foreground">
               {spotifyError.type === "UNAUTHORIZED" ||
               spotifyError.type === "NOT_CONNECTED"
-                ? "Connect your Spotify account to discover new artists based on your music taste"
+                ? "You can connect your Spotify account for personalized recommendations, or set your preferences manually."
                 : spotifyError.message}
             </div>
           </div>
-          <div className="flex gap-2 mt-2">
+          <div className="flex flex-col sm:flex-row gap-2 mt-2">
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               <TrendingUp className="w-4 h-4 mr-2" />
               Try Again
             </Button>
             {(spotifyError.type === "UNAUTHORIZED" ||
               spotifyError.type === "NOT_CONNECTED") && (
-              <Button
-                size="sm"
-                onClick={() =>
-                  router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.CONNECT}`)
-                }
-              >
-                Connect Spotify
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    router.push(`${BASE_URL}/${SPOTIFY_ENDPOINTS.CONNECT}`)
+                  }
+                >
+                  Connect Spotify
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsPreferencesModalOpen(true)}
+                >
+                  Set Preferences Manually
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -304,11 +406,13 @@ const DiscoveryList = () => {
               <div>
                 <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60">
                   Discover New Artists
-                </h2>
-                <p className="text-muted-foreground mt-1">
-                  Explore fresh sounds and hidden gems based on your musical
-                  preferences
-                </p>
+                </h2>{" "}
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-muted-foreground">
+                    Explore fresh sounds and hidden gems based on your musical
+                    preferences
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -320,7 +424,7 @@ const DiscoveryList = () => {
                   <span>{discovery.length} artists</span>
                 </div>
               </div>
-            )}
+            )}{" "}
             <Button
               onClick={() => refetch()}
               variant="outline"
@@ -333,7 +437,40 @@ const DiscoveryList = () => {
               />
               <span className="hidden sm:inline">Refresh</span>
             </Button>
-
+            {useManualPreferences && currentPreferences && (
+              <Button
+                onClick={() => setIsPreferencesModalOpen(true)}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 bg-card hover:bg-accent transition-colors"
+              >
+                <Music className="w-4 h-4" />
+                <span className="hidden sm:inline">Update Preferences</span>
+              </Button>
+            )}
+            {isAuthenticated && (
+              <div className="flex items-center gap-2 bg-card p-2 rounded-xl shadow-sm border border-border/40">
+                <span className="text-sm text-muted-foreground">Mode:</span>
+                <div className="flex gap-1">
+                  <Button
+                    onClick={handleUseSpotify}
+                    variant={!useManualPreferences ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs h-7"
+                  >
+                    Spotify
+                  </Button>
+                  <Button
+                    onClick={() => setIsPreferencesModalOpen(true)}
+                    variant={useManualPreferences ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs h-7"
+                  >
+                    Manual
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-2 bg-card p-2 rounded-xl shadow-sm border border-border/40">
               <span className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
@@ -705,7 +842,14 @@ const DiscoveryList = () => {
           }}
           artist={selectedArtistToShare}
         />
-      )}
+      )}{" "}
+      <PreferencesModal
+        isOpen={isPreferencesModalOpen}
+        onClose={() => setIsPreferencesModalOpen(false)}
+        onSubmit={handlePreferencesSubmit}
+        isLoading={isLoading}
+        initialPreferences={currentPreferences}
+      />
     </div>
   );
 };
