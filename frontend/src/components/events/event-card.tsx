@@ -18,7 +18,6 @@ interface EventCardProps {
 }
 
 const EventCard = ({ event, isSelected, variant = "full" }: EventCardProps) => {
-  console.log(event);
   return (
     <Card
       className={`w-full transition-all duration-300 hover:shadow-md 
