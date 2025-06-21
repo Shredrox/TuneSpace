@@ -113,6 +113,7 @@ public interface ISpotifyService
     /// <param name="query">Search query</param>
     /// <param name="types">Comma-separated list of item types to search for (album,artist)</param>
     /// <param name="limit">Maximum number of results to return per type</param>
+    /// <param name="offset">Offset for pagination, specifying the starting point of results</param>
     /// <returns>Search results matching the query with artist and/or album data</returns>
-    Task<SpotifySearchResponse> SearchAsync(string token, string query, string types, int limit);
+    Task<SpotifySearchResponse> SearchAsync(string token, string query, string types, int limit, int offset = 0);
 }

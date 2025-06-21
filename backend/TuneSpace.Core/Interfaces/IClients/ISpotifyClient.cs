@@ -82,8 +82,9 @@ public interface ISpotifyClient
     /// <param name="query">The search query string.</param>
     /// <param name="types">Comma-separated list of item types to search for (e.g., "artist,track").</param>
     /// <param name="limit">Maximum number of results to return per type.</param>
+    /// <param name="offset">Offset for pagination, specifying the starting point of results.</param>
     /// <returns>HTTP response containing search results across specified types.</returns>
-    Task<HttpResponseMessage> Search(string token, string query, string types, int limit);
+    Task<HttpResponseMessage> Search(string token, string query, string types, int limit, int offset = 0);
 
     /// <summary>
     /// Refreshes an expired access token using a refresh token.

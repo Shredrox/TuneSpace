@@ -95,13 +95,18 @@ internal class SpotifyClient(HttpClient httpClient) : ISpotifyClient
         return await _httpClient.PostAsync(AuthUrl, parameters);
     }
 
-    async Task<HttpResponseMessage> ISpotifyClient.Search(string token, string query, string types, int limit)
+    async Task<HttpResponseMessage> ISpotifyClient.Search(string token, string query, string types, int limit, int offset)
     {
         var requestUrl = $"search?q={Uri.EscapeDataString(query)}&type={types}";
 
         if (limit > 0)
         {
             requestUrl += $"&limit={limit}";
+        }
+
+        if (offset > 0)
+        {
+            requestUrl += $"&offset={offset}";
         }
 
         var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);

@@ -490,11 +490,11 @@ internal class SpotifyService(
         }
     }
 
-    async Task<SpotifySearchResponse> ISpotifyService.SearchAsync(string token, string query, string types, int limit)
+    async Task<SpotifySearchResponse> ISpotifyService.SearchAsync(string token, string query, string types, int limit, int offset)
     {
         try
         {
-            var response = await _spotifyClient.Search(token, query, types, limit);
+            var response = await _spotifyClient.Search(token, query, types, limit, offset);
 
             if (!response.IsSuccessStatusCode)
             {
