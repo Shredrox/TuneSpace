@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Requests.Chat;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IServices;
@@ -90,7 +91,7 @@ public class ChatController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in CreateChat for users {User1}, {User2}", request.User1Name, request.User2Name);
+            _logger.LogError(ex, "Error in CreateChat for users {User1}, {User2}", LoggingExtensions.SanitizeForLogging(request.User1Name), LoggingExtensions.SanitizeForLogging(request.User2Name));
             return StatusCode(500, "An error occurred while creating chat.");
         }
     }
@@ -108,7 +109,7 @@ public class ChatController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in SendPrivateMessage from {Sender} to {Receiver}", request.Sender, request.Receiver);
+            _logger.LogError(ex, "Error in SendPrivateMessage from {Sender} to {Receiver}", LoggingExtensions.SanitizeForLogging(request.Sender), LoggingExtensions.SanitizeForLogging(request.Receiver));
             return StatusCode(500, "An error occurred while sending message.");
         }
     }

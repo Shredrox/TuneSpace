@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TuneSpace.Api.DTOs;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Merchandise;
 using TuneSpace.Core.Interfaces.IServices;
@@ -42,7 +43,7 @@ public class MerchandiseController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching merchandise with ID: {MerchandiseId}", merchandiseId);
+            _logger.LogError(e, "Error fetching merchandise with ID: {MerchandiseId}", LoggingExtensions.SanitizeForLogging(merchandiseId));
             return BadRequest();
         }
     }
@@ -67,7 +68,7 @@ public class MerchandiseController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching merchandise for band with ID: {BandId}", bandId);
+            _logger.LogError(e, "Error fetching merchandise for band with ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -98,7 +99,7 @@ public class MerchandiseController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching merchandise image for ID: {MerchandiseId}", merchandiseId);
+            _logger.LogError(e, "Error fetching merchandise image for ID: {MerchandiseId}", LoggingExtensions.SanitizeForLogging(merchandiseId));
             return BadRequest();
         }
     }
@@ -179,7 +180,7 @@ public class MerchandiseController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error deleting merchandise with ID: {MerchandiseId}", merchandiseId);
+            _logger.LogError(e, "Error deleting merchandise with ID: {MerchandiseId}", LoggingExtensions.SanitizeForLogging(merchandiseId));
             return BadRequest();
         }
     }

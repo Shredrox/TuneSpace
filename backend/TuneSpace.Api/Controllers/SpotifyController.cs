@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Responses.Spotify;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
@@ -191,7 +192,7 @@ public class SpotifyController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching artist with ID: {ArtistId}", artistId);
+            _logger.LogError(e, "Error fetching artist with ID: {ArtistId}", LoggingExtensions.SanitizeForLogging(artistId));
             return BadRequest("Error fetching artist");
         }
     }
@@ -213,7 +214,7 @@ public class SpotifyController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching artists with IDs: {ArtistIds}", artistIds);
+            _logger.LogError(e, "Error fetching artists with IDs: {ArtistIds}", LoggingExtensions.SanitizeForLogging(artistIds));
             return BadRequest("Error fetching artists");
         }
 
@@ -294,7 +295,7 @@ public class SpotifyController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching songs by search term: {SearchTerm}", searchTerm);
+            _logger.LogError(e, "Error fetching songs by search term: {SearchTerm}", LoggingExtensions.SanitizeForLogging(searchTerm));
             return BadRequest("Error fetching songs");
         }
     }
@@ -321,7 +322,7 @@ public class SpotifyController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error searching for artists with term: {SearchTerm}", searchTerm);
+            _logger.LogError(e, "Error searching for artists with term: {SearchTerm}", LoggingExtensions.SanitizeForLogging(searchTerm));
             return BadRequest("Error searching for artists");
         }
     }

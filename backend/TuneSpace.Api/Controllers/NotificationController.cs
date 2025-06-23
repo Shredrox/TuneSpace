@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Requests.Notification;
 using TuneSpace.Core.Interfaces.IClients;
 using TuneSpace.Core.Interfaces.IServices;
@@ -50,7 +51,7 @@ public class NotificationController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error sending notification to {RecipientName}", request?.RecipientName);
+            _logger.LogError(ex, "Error sending notification to {RecipientName}", LoggingExtensions.SanitizeForLogging(request?.RecipientName));
             return StatusCode(500, "An error occurred while sending the notification.");
         }
     }
