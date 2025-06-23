@@ -33,9 +33,17 @@ const YouTubeEmbedDialog = ({
     setVideoId(id);
   };
 
+  const sanitizeVideoId = (id: string): string => {
+    const sanitized = id.replace(/[^a-zA-Z0-9_-]/g, "");
+    return sanitized.length === 11 ? sanitized : "";
+  };
+
   const handleYouTubeEmbedSubmit = async () => {
     if (videoId) {
-      await handleYouTubeEmbedIdUpdate(videoId);
+      const sanitizedId = sanitizeVideoId(videoId);
+      if (sanitizedId) {
+        await handleYouTubeEmbedIdUpdate(sanitizedId);
+      }
     }
   };
 
@@ -69,7 +77,9 @@ const YouTubeEmbedDialog = ({
             <div className="mt-4">
               <iframe
                 className="w-full aspect-video"
-                src={`https://www.youtube.com/embed/${videoId}`}
+                src={`https://www.youtube.com/embed/${encodeURIComponent(
+                  sanitizeVideoId(videoId)
+                )}`}
                 title="YouTube video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
