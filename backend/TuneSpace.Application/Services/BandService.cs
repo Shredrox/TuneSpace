@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Band;
 using TuneSpace.Core.DTOs.Responses.Band;
 using TuneSpace.Core.DTOs.Responses.User;
@@ -178,7 +179,7 @@ internal class BandService(
     {
         try
         {
-            _logger.LogInformation("Creating new band with name: {BandName}", request.Name);
+            _logger.LogInformation("Creating new band with name: {BandName}", Helpers.SanitizeForLogging(request.Name));
 
             var user = await _userRepository.GetUserByIdAsync(request.UserId);
             if (user == null)
@@ -206,7 +207,7 @@ internal class BandService(
             };
 
             await _bandRepository.InsertBandAsync(band);
-            _logger.LogInformation("Band {BandName} created successfully with ID {BandId}", band.Name, band.Id);
+            _logger.LogInformation("Band {BandName} created successfully with ID {BandId}", Helpers.SanitizeForLogging(band.Name), band.Id);
 
             return new BandResponse(
                 band.Id.ToString(),
@@ -228,7 +229,7 @@ internal class BandService(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating band with name {BandName}", request.Name);
+            _logger.LogError(ex, "Error creating band with name {BandName}", Helpers.SanitizeForLogging(request.Name));
             throw;
         }
     }

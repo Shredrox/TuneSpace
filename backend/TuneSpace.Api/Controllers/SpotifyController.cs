@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Responses.Spotify;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IServices;
+using TuneSpace.Infrastructure.Options;
 
 namespace TuneSpace.Api.Controllers;
 
@@ -11,11 +13,13 @@ namespace TuneSpace.Api.Controllers;
 public class SpotifyController(
     ISpotifyService spotifyService,
     ILogger<SpotifyController> logger,
-    IUrlBuilderService urlBuilderService) : ControllerBase
+    IUrlBuilderService urlBuilderService,
+    IOptions<SecurityOptions> securityOptions) : ControllerBase
 {
     private readonly ISpotifyService _spotifyService = spotifyService;
     private readonly ILogger<SpotifyController> _logger = logger;
     private readonly IUrlBuilderService _urlBuilderService = urlBuilderService;
+    private readonly SecurityOptions _securityOptions = securityOptions.Value;
 
     [HttpGet("login")]
     public IActionResult SpotifyLogin()
@@ -79,6 +83,12 @@ public class SpotifyController(
                 "connect" => _urlBuilderService.BuildSpotifyConnectCallbackUrl(code, state),
                 _ => _urlBuilderService.BuildSpotifyLoginCallbackUrl(code, state)
             };
+
+            if (!IsValidRedirectUrl(redirectUrl))
+            {
+                _logger.LogWarning("Invalid redirect URL detected: {RedirectUrl}", LoggingExtensions.SanitizeForLogging(redirectUrl));
+                return BadRequest("Invalid redirect URL");
+            }
 
             return Redirect(redirectUrl);
         }
@@ -430,6 +440,26 @@ public class SpotifyController(
                 isConnected = false,
                 error = "Spotify connection expired. Please reconnect."
             });
+        }
+    }
+
+    private bool IsValidRedirectUrl(string redirectUrl)
+    {
+        if (string.IsNullOrEmpty(redirectUrl))
+            return false;
+
+        try
+        {
+            var uri = new Uri(redirectUrl, UriKind.Absolute);
+
+            var allowedHosts = _securityOptions.AllowedRedirectHosts;
+
+            return allowedHosts.Any(host =>
+                string.Equals(uri.Host, host, StringComparison.OrdinalIgnoreCase));
+        }
+        catch (UriFormatException)
+        {
+            return false;
         }
     }
 }
