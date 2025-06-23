@@ -63,7 +63,7 @@ public class UserController(
         }
         catch (NotFoundException e)
         {
-            _logger.LogWarning(e, "No users found for search: {Search}", search);
+            _logger.LogWarning(e, "No users found for search: {Search}", LoggingExtensions.SanitizeForLogging(search));
             return NotFound(new List<UserSearchResultResponse>());
         }
     }
