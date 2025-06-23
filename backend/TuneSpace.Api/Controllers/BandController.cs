@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TuneSpace.Api.DTOs;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Band;
 using TuneSpace.Core.DTOs.Responses.User;
@@ -40,7 +41,7 @@ public class BandController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching band with ID: {BandId}", bandId);
+            _logger.LogError(e, "Error fetching band with ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -66,7 +67,7 @@ public class BandController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching band for user with ID: {UserId}", userId);
+            _logger.LogError(e, "Error fetching band for user with ID: {UserId}", LoggingExtensions.SanitizeForLogging(userId));
             return BadRequest();
         }
     }
@@ -98,7 +99,7 @@ public class BandController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching band image for ID: {BandId}", bandId);
+            _logger.LogError(e, "Error fetching band image for ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -158,7 +159,7 @@ public class BandController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error adding member to band with ID: {BandId}", bandId);
+            _logger.LogError(e, "Error adding member to band with ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -212,7 +213,7 @@ public class BandController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error deleting band with ID: {BandId}", bandId);
+            _logger.LogError(e, "Error deleting band with ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -237,7 +238,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting followers for band {BandId}", bandId);
+            _logger.LogError(ex, "Error getting followers for band {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return StatusCode(500, "Internal server error");
         }
     }
@@ -262,7 +263,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting follower count for band {BandId}", bandId);
+            _logger.LogError(ex, "Error getting follower count for band {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return StatusCode(500, "Internal server error");
         }
     }
@@ -294,7 +295,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if user {UserId} is following band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error checking if user {UserId} is following band {BandId}", userId, LoggingExtensions.SanitizeForLogging(bandId));
             return StatusCode(500, "Internal server error");
         }
     }
@@ -333,7 +334,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when user {UserId} attempting to follow band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error when user {UserId} attempting to follow band {BandId}", userId, LoggingExtensions.SanitizeForLogging(bandId));
             return StatusCode(500, "Internal server error");
         }
     }
@@ -372,7 +373,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when user {UserId} attempting to unfollow band {BandId}", userId, bandId);
+            _logger.LogError(ex, "Error when user {UserId} attempting to unfollow band {BandId}", userId, LoggingExtensions.SanitizeForLogging(bandId));
             return StatusCode(500, "Internal server error");
         }
     }
@@ -398,7 +399,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting followed bands for user {UserId}", userId);
+            _logger.LogError(ex, "Error getting followed bands for user {UserId}", LoggingExtensions.SanitizeForLogging(userId));
             return StatusCode(500, "Internal server error");
         }
     }
@@ -424,7 +425,7 @@ public class BandController(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting followed bands count for user {UserId}", userId);
+            _logger.LogError(ex, "Error getting followed bands count for user {UserId}", LoggingExtensions.SanitizeForLogging(userId));
             return StatusCode(500, "Internal server error");
         }
     }

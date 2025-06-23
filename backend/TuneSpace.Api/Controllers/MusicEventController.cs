@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TuneSpace.Api.Extensions;
 using TuneSpace.Core.DTOs.Requests.MusicEvent;
 using TuneSpace.Core.Interfaces.IServices;
 
@@ -50,7 +51,7 @@ public class MusicEventController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching events for band with ID: {BandId}", bandId);
+            _logger.LogError(e, "Error fetching events for band with ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -81,7 +82,7 @@ public class MusicEventController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching event with ID: {EventId}", eventId);
+            _logger.LogError(e, "Error fetching event with ID: {EventId}", LoggingExtensions.SanitizeForLogging(eventId));
             return BadRequest();
         }
     }
@@ -106,7 +107,7 @@ public class MusicEventController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error fetching upcoming events for band with ID: {BandId}", bandId);
+            _logger.LogError(e, "Error fetching upcoming events for band with ID: {BandId}", LoggingExtensions.SanitizeForLogging(bandId));
             return BadRequest();
         }
     }
@@ -167,7 +168,7 @@ public class MusicEventController(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error deleting event with ID: {EventId}", eventId);
+            _logger.LogError(e, "Error deleting event with ID: {EventId}", LoggingExtensions.SanitizeForLogging(eventId));
             return BadRequest();
         }
     }

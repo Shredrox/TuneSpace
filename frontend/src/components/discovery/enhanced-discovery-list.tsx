@@ -94,7 +94,23 @@ const EnhancedDiscoveryList: React.FC<EnhancedDiscoveryListProps> = ({
   };
 
   const isSpotifyUrl = (url: string) => {
-    return url?.includes("spotify.com") || url?.includes("open.spotify.com");
+    if (!url) {
+      return false;
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname.toLowerCase();
+
+      return (
+        hostname === "spotify.com" ||
+        hostname === "open.spotify.com" ||
+        hostname === "www.spotify.com" ||
+        hostname.endsWith(".spotify.com")
+      );
+    } catch {
+      return false;
+    }
   };
 
   const getExternalLinkInfo = (url: string) => {
