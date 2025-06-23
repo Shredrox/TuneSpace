@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.MusicEvent;
 using TuneSpace.Core.DTOs.Responses.MusicEvent;
 using TuneSpace.Core.Entities;
@@ -195,7 +196,7 @@ internal class MusicEventService(
 
             await _musicEventRepository.InsertMusicEventAsync(musicEvent);
             _logger.LogInformation("Event {EventTitle} created successfully with ID {EventId} for band {BandId}",
-                musicEvent.Title, musicEvent.Id, musicEvent.BandId);
+                Helpers.SanitizeForLogging(musicEvent.Title), musicEvent.Id, musicEvent.BandId);
 
             return musicEvent;
         }

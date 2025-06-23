@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TuneSpace.Application.Common;
 using TuneSpace.Core.DTOs.Requests.Merchandise;
 using TuneSpace.Core.DTOs.Responses.Merchandise;
 using TuneSpace.Core.Entities;
@@ -96,7 +97,7 @@ internal class MerchandiseService(
             };
 
             await _merchandiseRepository.InsertMerchandiseAsync(merchandise);
-            _logger.LogInformation("Merchandise {MerchandiseName} created successfully with ID {MerchandiseId}", merchandise.Name, merchandise.Id);
+            _logger.LogInformation("Merchandise {MerchandiseName} created successfully with ID {MerchandiseId}", Helpers.SanitizeForLogging(merchandise.Name), merchandise.Id);
             return merchandise;
         }
         catch (Exception ex)

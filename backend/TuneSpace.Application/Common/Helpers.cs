@@ -65,4 +65,21 @@ public static class Helpers
 
         return (startTime, endTime, periodName);
     }
+
+    public static string SanitizeForLogging(string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return string.Empty;
+        }
+
+        return input
+            .Replace(Environment.NewLine, "")
+            .Replace("\n", "")
+            .Replace("\r", "")
+            .Replace("\t", "")
+            .Replace("\b", "")
+            .Replace("\f", "")
+            .Replace("\v", "");
+    }
 }

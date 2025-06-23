@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using TuneSpace.Application.Common;
 using TuneSpace.Core.Entities;
 using TuneSpace.Core.Exceptions;
 using TuneSpace.Core.Interfaces.IRepositories;
@@ -42,7 +43,7 @@ internal class UserService(
 
         if (users == null || users.Count == 0)
         {
-            _logger.LogWarning("No users found for search: {Search}", name);
+            _logger.LogWarning("No users found for search: {Search}", Helpers.SanitizeForLogging(name));
             return [];
         }
 

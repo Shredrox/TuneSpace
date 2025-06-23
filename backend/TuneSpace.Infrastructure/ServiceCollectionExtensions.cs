@@ -338,6 +338,7 @@ public static class ServiceCollectionExtensions
         services.Configure<DatabaseOptions>(configuration.GetSection("ConnectionStrings"));
         services.Configure<SpotifyOptions>(configuration.GetSection("Spotify"));
         services.Configure<LastFmOptions>(configuration.GetSection("LastFm"));
+        services.Configure<SecurityOptions>(configuration.GetSection("Security"));
 
         return services;
     }
