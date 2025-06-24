@@ -18,7 +18,7 @@ env:
   BUILD_CONFIGURATION: "Release"
   PUBLISH_PATH: "./backend/publish"
   Jwt__Secret: ${{ secrets.JWT_SECRET }}
-  ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=tunespace_test;Username=postgres;Password=postgres"
+  ConnectionStrings__DefaultConnection: ${{ secrets.DEFAULT_CONNECTION_STRING }}
 
 jobs:
   build-and-test:
@@ -61,13 +61,13 @@ jobs:
       - name: Apply EF Core Migrations
         run: dotnet ef database update --project ./backend/TuneSpace.Infrastructure/TuneSpace.Infrastructure.csproj --startup-project ./backend/TuneSpace.Api/TuneSpace.Api.csproj
         env:
-          ConnectionStrings__DefaultConnection: ${{ env.ConnectionStrings__DefaultConnection }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DEFAULT_CONNECTION_STRING }}
 
       - name: Run tests
         run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal
         env:
-          Jwt__Secret: ${{ env.Jwt__Secret }}
-          ConnectionStrings__DefaultConnection: ${{ env.ConnectionStrings__DefaultConnection }}
+          Jwt__Secret: ${{ secrets.JWT_SECRET }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DEFAULT_CONNECTION_STRING }}
 
   code-quality:
     name: Code Quality
