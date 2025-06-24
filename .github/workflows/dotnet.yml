@@ -48,6 +48,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef
+
       - name: Restore NuGet packages
         run: dotnet restore ${{ env.SOLUTION_PATH }}
 
