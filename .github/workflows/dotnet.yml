@@ -26,7 +26,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: ankane/pgvector
         env:
           POSTGRES_DB: tunespace_test
           POSTGRES_USER: postgres
