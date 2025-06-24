@@ -17,11 +17,28 @@ env:
   SOLUTION_PATH: "./backend/TuneSpace.sln"
   BUILD_CONFIGURATION: "Release"
   PUBLISH_PATH: "./backend/publish"
+  Jwt__Secret: ${{ secrets.JWT_SECRET }}
+  ConnectionStrings__DefaultConnection: ${{ secrets.DEFAULT_CONNECTION_STRING }}
 
 jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: ankane/pgvector
+        env:
+          POSTGRES_DB: tunespace_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -32,14 +49,25 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef
+
       - name: Restore NuGet packages
         run: dotnet restore ${{ env.SOLUTION_PATH }}
 
       - name: Build
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
+      - name: Apply EF Core Migrations
+        run: dotnet ef database update --project ./backend/TuneSpace.Infrastructure/TuneSpace.Infrastructure.csproj --startup-project ./backend/TuneSpace.Api/TuneSpace.Api.csproj
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.DEFAULT_CONNECTION_STRING }}
+
       - name: Run tests
         run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal
+        env:
+          Jwt__Secret: ${{ secrets.JWT_SECRET }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.DEFAULT_CONNECTION_STRING }}
 
   code-quality:
     name: Code Quality

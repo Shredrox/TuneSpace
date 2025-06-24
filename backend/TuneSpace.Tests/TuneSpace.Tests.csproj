@@ -11,6 +11,9 @@
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +22,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TuneSpace.Api\TuneSpace.Api.csproj" />
+    <ProjectReference Include="..\TuneSpace.Application\TuneSpace.Application.csproj" />
+    <ProjectReference Include="..\TuneSpace.Core\TuneSpace.Core.csproj" />
     <ProjectReference Include="..\TuneSpace.Infrastructure\TuneSpace.Infrastructure.csproj" />
   </ItemGroup>
 
