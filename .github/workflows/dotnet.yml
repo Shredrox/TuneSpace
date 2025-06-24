@@ -58,9 +58,7 @@ jobs:
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - name: Apply EF Core Migrations
-        run: dotnet ef database update \
-          --project ./backend/TuneSpace.Infrastructure/TuneSpace.Infrastructure.csproj \
-          --startup-project ./backend/TuneSpace.Api/TuneSpace.Api.csproj
+        run: dotnet ef database update --project ./backend/TuneSpace.Infrastructure/TuneSpace.Infrastructure.csproj --startup-project ./backend/TuneSpace.Api/TuneSpace.Api.csproj
         env:
           ConnectionStrings__DefaultConnection: ${{ env.ConnectionStrings__DefaultConnection }}
 
