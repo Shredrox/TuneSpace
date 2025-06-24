@@ -17,6 +17,7 @@ env:
   SOLUTION_PATH: "./backend/TuneSpace.sln"
   BUILD_CONFIGURATION: "Release"
   PUBLISH_PATH: "./backend/publish"
+  Jwt__Secret: ${{ secrets.JWT_SECRET }}
   ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=tunespace_test;Username=postgres;Password=postgres"
 
 jobs:
@@ -64,6 +65,9 @@ jobs:
 
       - name: Run tests
         run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal
+        env:
+          Jwt__Secret: ${{ env.Jwt__Secret }}
+          ConnectionStrings__DefaultConnection: ${{ env.ConnectionStrings__DefaultConnection }}
 
   code-quality:
     name: Code Quality
