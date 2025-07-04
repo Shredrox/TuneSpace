@@ -10,7 +10,7 @@ const ReactQueryProvider = ({ children }: { children: React.ReactNode }) => {
         defaultOptions: {
           queries: {
             refetchOnWindowFocus: false,
-            refetchOnMount: false,
+            refetchOnMount: true,
             staleTime: 600000,
           },
         },
