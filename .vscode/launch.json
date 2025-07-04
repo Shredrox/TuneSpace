@@ -5,10 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch TuneSpace Server",
+      "name": "Launch TuneSpace Server (Debug)",
       "type": "dotnet",
       "request": "launch",
       "projectPath": "${workspaceFolder}/backend/TuneSpace.Api/TuneSpace.Api.csproj"
+    },
+    {
+      "name": "Launch TuneSpace Server (Release)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/backend/TuneSpace.Api/TuneSpace.Api.csproj",
+      "preLaunchTask": "build-release"
     }
   ]
 }
