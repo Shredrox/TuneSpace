@@ -265,7 +265,7 @@ const HomeDashboard = () => {
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-2 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
                       {track.albumImageUrl ? (
                         <img
-                          src={track.albumImageUrl}
+                          src={track.albumImageUrl || ""}
                           alt={track.albumName}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
@@ -352,7 +352,7 @@ const HomeDashboard = () => {
                       <div className="relative aspect-square rounded-xl overflow-hidden mb-3 shadow-md group-hover:shadow-xl transition-all duration-300">
                         {artist.images && artist.images.length > 0 ? (
                           <img
-                            src={artist.images[0]?.url}
+                            src={artist.images[0]?.url || ""}
                             alt={artist.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
@@ -407,7 +407,7 @@ const HomeDashboard = () => {
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-2 shadow-sm group-hover:shadow-md transition-all duration-300">
                       {artist.images && artist.images.length > 0 ? (
                         <img
-                          src={artist.images[0]?.url}
+                          src={artist.images[0]?.url || ""}
                           alt={artist.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -459,7 +459,7 @@ const HomeDashboard = () => {
                       <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
                         {song.image ? (
                           <img
-                            src={song.image}
+                            src={song.image || ""}
                             alt={song.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -510,7 +510,7 @@ const HomeDashboard = () => {
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-2 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
                       {track.albumImageUrl ? (
                         <img
-                          src={track.albumImageUrl}
+                          src={track.albumImageUrl || ""}
                           alt={track.albumName}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
@@ -570,7 +570,7 @@ const HomeDashboard = () => {
                     <div className="w-12 h-12 rounded-md overflow-hidden">
                       {track.albumImageUrl ? (
                         <img
-                          src={track.albumImageUrl}
+                          src={track.albumImageUrl || ""}
                           alt={track.albumName}
                           className="w-full h-full object-cover"
                         />

@@ -199,6 +199,7 @@ const DiscoveryList = () => {
   const {
     data: discovery,
     isLoading,
+    isFetching,
     error,
     refetch,
   } = useQuery({
@@ -317,7 +318,7 @@ const DiscoveryList = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <div className="flex items-center justify-center p-12 min-h-[400px]">
         <div className="flex flex-col items-center gap-4">

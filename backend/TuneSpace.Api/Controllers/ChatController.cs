@@ -15,10 +15,12 @@ namespace TuneSpace.Api.Controllers;
 public class ChatController(
     IHubContext<SocketHub, ISocketClient> hubContext,
     IChatService chatService,
+    IUserService userService,
     ILogger<ChatController> logger) : ControllerBase
 {
     private readonly IHubContext<SocketHub, ISocketClient> _hubContext = hubContext;
     private readonly IChatService _chatService = chatService;
+    private readonly IUserService _userService = userService;
     private readonly ILogger<ChatController> _logger = logger;
 
     [HttpGet("get-messages/{chatId}")]
@@ -85,7 +87,11 @@ public class ChatController(
         {
             var chatResponse = await _chatService.CreateChatAsync(request);
 
-            await _hubContext.Clients.Group(request.User2Name).ChatCreated(chatResponse);
+            var receiverUser = await _userService.GetUserByNameAsync(request.User2Name);
+            if (receiverUser != null)
+            {
+                await _hubContext.Clients.Group(receiverUser.Id.ToString()).ChatCreated(chatResponse);
+            }
 
             return Ok();
         }
@@ -103,7 +109,11 @@ public class ChatController(
         {
             var messageResponse = await _chatService.CreateMessageAsync(request);
 
-            await _hubContext.Clients.Group(request.Receiver).ReceiveMessage(messageResponse);
+            var receiverUser = await _userService.GetUserByNameAsync(request.Receiver);
+            if (receiverUser != null)
+            {
+                await _hubContext.Clients.Group(receiverUser.Id.ToString()).ReceiveMessage(messageResponse);
+            }
 
             return Ok();
         }
