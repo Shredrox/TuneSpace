@@ -4,6 +4,7 @@ using TuneSpace.Api.Infrastructure;
 using TuneSpace.Api.Middleware;
 using TuneSpace.Application;
 using TuneSpace.Infrastructure;
+using TuneSpace.Infrastructure.Extensions;
 using TuneSpace.Infrastructure.Hubs;
 using TuneSpace.Infrastructure.Identity;
 using TuneSpace.Infrastructure.Seeding;
@@ -54,6 +55,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+
+await app.MigrateDatabaseAsync();
 
 using (var scope = app.Services.CreateScope())
 {
